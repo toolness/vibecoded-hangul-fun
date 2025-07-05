@@ -1,9 +1,11 @@
-import './App.css'
+import "./App.css";
 import _database from "./database.json";
-import type { DatabaseRow } from './database-spec';
+import type { DatabaseRow } from "./database-spec";
 
 // eslint-disable-next-line
-const DATABASE_ROWS: DatabaseRow[] = _database.filter(row => row.name && row.hangul);
+const DATABASE_ROWS: DatabaseRow[] = _database.filter(
+  (row) => row.name && row.hangul
+);
 
 function App() {
   // TODO:
@@ -17,7 +19,7 @@ function App() {
   //    Show a large text field in which the user can type their answer.
   //
   //    Below the text field should also be a button labeled "give up".
-  // 
+  //
   //    If the row has a URL associated with it, hyperlink the name to the URL,
   //    ensuring it opens in a new window if clicked on.
   //
@@ -30,11 +32,9 @@ function App() {
 
   return (
     <>
-      <div>
-        TODO: Replace this content.
-      </div>
+      <div>TODO: Replace this content.</div>
     </>
-  )
+  );
 }
 
-export default App
+export default App;

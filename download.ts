@@ -65,21 +65,21 @@ async function downloadDatabase(notion: Client, id: string): Promise<DatabaseRow
         let url = '';
         
         // Extract Name
-        if (properties.Name.type === 'title' && properties.Name.title.length > 0) {
+        if (properties.Name.type === 'title' && Array.isArray(properties.Name.title) && properties.Name.title.length > 0) {
             name = properties.Name.title[0].plain_text;
-        } else if (properties.Name.type === 'rich_text' && properties.Name.rich_text.length > 0) {
+        } else if (properties.Name.type === 'rich_text' && Array.isArray(properties.Name.rich_text) && properties.Name.rich_text.length > 0) {
             name = properties.Name.rich_text[0].plain_text;
         }
         
         // Extract Hangul
-        if (properties.Hangul.type === 'rich_text' && properties.Hangul.rich_text.length > 0) {
+        if (properties.Hangul.type === 'rich_text' && Array.isArray(properties.Hangul.rich_text) && properties.Hangul.rich_text.length > 0) {
             hangul = properties.Hangul.rich_text[0].plain_text;
-        } else if (properties.Hangul.type === 'title' && properties.Hangul.title.length > 0) {
+        } else if (properties.Hangul.type === 'title' && Array.isArray(properties.Hangul.title) && properties.Hangul.title.length > 0) {
             hangul = properties.Hangul.title[0].plain_text;
         }
         
         // Extract URL (optional)
-        if (properties.URL && properties.URL.type === 'url' && properties.URL.url) {
+        if (properties.URL && properties.URL.type === 'url' && typeof properties.URL.url === 'string') {
             url = properties.URL.url;
         }
         

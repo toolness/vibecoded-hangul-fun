@@ -2,6 +2,7 @@ import './App.css'
 import _database from "./database.json";
 import type { DatabaseRow } from './database-spec';
 
+// eslint-disable-next-line
 const DATABASE_ROWS: DatabaseRow[] = _database.filter(row => row.name && row.hangul);
 
 function App() {

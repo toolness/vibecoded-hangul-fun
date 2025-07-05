@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "download": "node --experimental-transform-types download.ts",
-    "typecheck": "tsc -b",
+    "typecheck": "tsc -b && npm run lint",
+    "test": "vitest",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
@@ -16,7 +17,8 @@
     "@types/node": "^24.0.10",
     "dotenv": "^17.0.1",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "vitest": "^3.2.4"
   },
   "devDependencies": {
     "@eslint/js": "^9.29.0",

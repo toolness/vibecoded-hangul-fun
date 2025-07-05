@@ -1,5 +1,5 @@
 import { Client } from "@notionhq/client";
-
+import { writeFileSync } from "fs";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -37,17 +37,60 @@ interface DatabaseRow {
 }
 
 async function downloadDatabase(notion: Client, id: string): Promise<DatabaseRow[]> {
-    // TODO:
-    // 
-    // 1. Use the Notion API to download the database specified by `id`.
-    //
-    // 2. Verify that it has the columns documented in the "Database schema" section of
-    //    README.md. If it doesn't, raise a friendly, helpful error.
-    //
-    // 3. Convert each column into a `DatabaseRow` object and return
-    //    the result.
+    const response = await notion.databases.query({
+        database_id: id,
+    });
 
-    return []
+    const rows: DatabaseRow[] = [];
+    
+    for (const page of response.results) {
+        if (!('properties' in page)) {
+            continue;
+        }
+        
+        const properties = page.properties;
+        
+        // Validate required properties exist
+        if (!properties.Name || !properties.Hangul) {
+            throw new Error(
+                "Database schema validation failed: Missing required columns.\n" +
+                "Required columns: Name (Text), Hangul (Text), URL (URL)\n" +
+                "Please ensure your Notion database has these columns with the exact names."
+            );
+        }
+        
+        // Extract values based on property types
+        let name = '';
+        let hangul = '';
+        let url = '';
+        
+        // Extract Name
+        if (properties.Name.type === 'title' && properties.Name.title.length > 0) {
+            name = properties.Name.title[0].plain_text;
+        } else if (properties.Name.type === 'rich_text' && properties.Name.rich_text.length > 0) {
+            name = properties.Name.rich_text[0].plain_text;
+        }
+        
+        // Extract Hangul
+        if (properties.Hangul.type === 'rich_text' && properties.Hangul.rich_text.length > 0) {
+            hangul = properties.Hangul.rich_text[0].plain_text;
+        } else if (properties.Hangul.type === 'title' && properties.Hangul.title.length > 0) {
+            hangul = properties.Hangul.title[0].plain_text;
+        }
+        
+        // Extract URL (optional)
+        if (properties.URL && properties.URL.type === 'url' && properties.URL.url) {
+            url = properties.URL.url;
+        }
+        
+        rows.push({
+            name,
+            hangul,
+            url
+        });
+    }
+    
+    return rows;
 }
 
 const run = async () => {
@@ -57,7 +100,7 @@ const run = async () => {
 
     const rows = await downloadDatabase(notion, NOTION_DB_ID);
     
-    // TODO: Write `rows` as JSON to `DB_JSON_FILENAME`.
+    writeFileSync(DB_JSON_FILENAME, JSON.stringify(rows, null, 2));
 
     console.log(`Wrote ${DB_JSON_FILENAME}.`);
 };

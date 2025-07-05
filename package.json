@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "download": "node --experimental-transform-types download.ts",
+    "typecheck": "tsc -b",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",

@@ -1,5 +1,5 @@
 import './App.css'
-import * as _database from "./database.json";
+import _database from "./database.json";
 import type { DatabaseRow } from './database-spec';
 
 const DATABASE_ROWS: DatabaseRow[] = _database.filter(row => row.name && row.hangul);

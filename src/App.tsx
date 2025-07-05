@@ -1,33 +1,37 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
+import * as _database from "./database.json";
+import type { DatabaseRow } from './database-spec';
+
+const DATABASE_ROWS: DatabaseRow[] = _database.filter(row => row.name && row.hangul);
 
 function App() {
-  const [count, setCount] = useState(0)
+  // TODO:
+  //
+  // 1. Pick a random database row from DATABASE_ROWS that we either haven't
+  //    shown the user, or that the user got wrong before.
+  //
+  // 2. Show the row's name (english/romanized text) and ask the user to
+  //    enter the Hangul representation.
+  //
+  //    Show a large text field in which the user can type their answer.
+  //
+  //    Below the text field should also be a button labeled "give up".
+  // 
+  //    If the row has a URL associated with it, hyperlink the name to the URL,
+  //    ensuring it opens in a new window if clicked on.
+  //
+  // 3. As the user types their response, let them know how many characters
+  //    they got right. Once they have all characters right, show
+  //    a "next" button that takes the user back to step 1.
+  //
+  // 4. If the user clicks "give up", show them the Hangul representation,
+  //    along with a "next" button that takes them back to step 1.
 
   return (
     <>
       <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+        TODO: Replace this content.
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
     </>
   )
 }

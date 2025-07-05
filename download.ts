@@ -1,6 +1,7 @@
 import { Client } from "@notionhq/client";
 import { writeFileSync } from "fs";
 import dotenv from "dotenv";
+import { type DatabaseRow } from "./src/database-spec";
 
 dotenv.config();
 
@@ -17,24 +18,6 @@ if (!NOTION_DB_ID) {
 }
 
 const DB_JSON_FILENAME = "src/database.json";
-
-/**
- * Represents a row describing an English/romanized word,
- * its Hangul equivalent, and any additional metadata.
- */
-interface DatabaseRow {
-    /** The English/romanized text. */
-    name: string
-
-    /** The Hangul equivalent of the English/romanized text. */
-    hangul: string
-
-    /**
-     * URL for where the user can learn more about the entity
-     * being described. It may be an empty string.
-     */
-    url: string
-}
 
 async function downloadDatabase(notion: Client, id: string): Promise<DatabaseRow[]> {
     const response = await notion.databases.query({

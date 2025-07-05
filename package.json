@@ -7,6 +7,7 @@
     "download": "node --experimental-transform-types download.ts",
     "typecheck": "tsc -b && npm run lint",
     "test": "vitest run",
+    "test:watch": "vitest watch",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",

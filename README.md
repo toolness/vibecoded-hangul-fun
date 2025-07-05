@@ -35,3 +35,10 @@ This will put the database JSON in `src/database.json`.
 
 If you make changes to the codebase, be sure to run `npm run typecheck`
 to ensure there are no type errors.
+
+### Tests
+
+You can run tests via `npm run test`.
+
+You can run the tests interactively, re-running them whenever you change
+files, with `npm run test:watch`.

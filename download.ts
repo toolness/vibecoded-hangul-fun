@@ -41,7 +41,8 @@ async function downloadDatabase(notion: Client, id: string): Promise<DatabaseRow
     // 
     // 1. Use the Notion API to download the database specified by `id`.
     //
-    // 2. Verify that it has the columns "Name", "Hangul", and "URL".
+    // 2. Verify that it has the columns documented in the "Database schema" section of
+    //    README.md. If it doesn't, raise a friendly, helpful error.
     //
     // 3. Convert each column into a `DatabaseRow` object and return
     //    the result.

@@ -4,12 +4,16 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "download": "node --experimental-transform-types download.ts",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@notionhq/client": "^4.0.0",
+    "@types/node": "^24.0.10",
+    "dotenv": "^17.0.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },

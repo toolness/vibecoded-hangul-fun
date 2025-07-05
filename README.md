@@ -16,10 +16,10 @@ NOTION_DB_ID=<Your Notion DB id>
 
 The Notion DB with the given ID must have the following fields:
 
-* `Name` - Text, contains the English/romanized word
-* `Hangul` - Text, contains the Hangul equivalent for the word
-* `URL` - URL, contains an optional link where the user can
-          learn more about the word being described.
+- `Name` - Text, contains the English/romanized word
+- `Hangul` - Text, contains the Hangul equivalent for the word
+- `URL` - URL, contains an optional link where the user can
+  learn more about the word being described.
 
 ### Downloading the database
 

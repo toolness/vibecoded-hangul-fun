@@ -12,7 +12,7 @@ vi.mock("./database.json", () => ({
     { name: "thank you", hangul: "감사합니다", url: "" },
     { name: "sorry", hangul: "죄송합니다", url: "" },
     { name: "yes", hangul: "네", url: "" },
-  ]
+  ],
 }));
 
 describe("App State Management", () => {
@@ -31,10 +31,10 @@ describe("App State Management", () => {
   test("tracks user input", async () => {
     const user = userEvent.setup();
     render(<App />);
-    
+
     const input = screen.getByTestId("hangul-input") as HTMLInputElement;
     await user.type(input, "한글");
-    
+
     expect(input.value).toBe("한글");
   });
 
@@ -46,12 +46,12 @@ describe("App State Management", () => {
   test("tracks answered questions", async () => {
     const user = userEvent.setup();
     render(<App />);
-    
+
     // Should have a way to check if questions are being tracked
     // This will be tested more thoroughly when we implement the full logic
     const giveUpButton = screen.getByText("Give up");
     await user.click(giveUpButton);
-    
+
     // After giving up, should show the answer and next button
     expect(screen.getByTestId("correct-answer")).toBeInTheDocument();
     expect(screen.getByText("Next")).toBeInTheDocument();
@@ -62,11 +62,11 @@ describe("Question Selection Logic", () => {
   test("selects a new question when clicking next", async () => {
     const user = userEvent.setup();
     render(<App />);
-    
+
     // Give up and click next
     await user.click(screen.getByText("Give up"));
     await user.click(screen.getByText("Next"));
-    
+
     // Should show a question (might be the same due to randomness, but structure should be there)
     expect(screen.getByTestId("question-name")).toBeInTheDocument();
     expect(screen.getByTestId("hangul-input")).toBeInTheDocument();
@@ -75,13 +75,13 @@ describe("Question Selection Logic", () => {
   test("prioritizes unanswered questions", async () => {
     const user = userEvent.setup();
     render(<App />);
-    
+
     // Mark several questions as answered by giving up and clicking next multiple times
     for (let i = 0; i < 3; i++) {
       await user.click(screen.getByText("Give up"));
       await user.click(screen.getByText("Next"));
     }
-    
+
     // The app should still be showing questions
     expect(screen.getByTestId("question-name")).toBeInTheDocument();
   });
@@ -89,17 +89,17 @@ describe("Question Selection Logic", () => {
   test("shows questions that were previously incorrect", async () => {
     const user = userEvent.setup();
     render(<App />);
-    
+
     // Type wrong answer and mark as incorrect
     const input = screen.getByTestId("hangul-input") as HTMLInputElement;
     await user.type(input, "wrong");
-    
+
     // Give up to see the answer
     await user.click(screen.getByText("Give up"));
-    
+
     // Go to next question
     await user.click(screen.getByText("Next"));
-    
+
     // Question should be available for selection again since it was incorrect
     expect(screen.getByTestId("question-name")).toBeInTheDocument();
   });
@@ -109,7 +109,7 @@ describe("URL Display", () => {
   test("displays name as link when URL is present", async () => {
     const user = userEvent.setup();
     render(<App />);
-    
+
     // Keep clicking next until we find the "goodbye" question which has a URL
     let foundLink = false;
     for (let i = 0; i < 10 && !foundLink; i++) {
@@ -129,7 +129,7 @@ describe("URL Display", () => {
 
   test("displays name as text when URL is not present", () => {
     render(<App />);
-    
+
     const element = screen.getByTestId("question-name");
     // If it's not a link, it should be a span
     if (element.tagName === "SPAN") {
@@ -142,7 +142,7 @@ describe("Real-time Character Validation", () => {
   test("shows character accuracy feedback", async () => {
     const user = userEvent.setup();
     render(<App />);
-    
+
     // Find a predictable question (let's try to get "yes" = "네")
     let found = false;
     for (let i = 0; i < 10 && !found; i++) {
@@ -154,22 +154,24 @@ describe("Real-time Character Validation", () => {
       await user.click(screen.getByText("Give up"));
       await user.click(screen.getByText("Next"));
     }
-    
+
     if (found) {
       const input = screen.getByTestId("hangul-input") as HTMLInputElement;
-      
+
       // Type one correct character
       await user.type(input, "네");
-      
+
       // Should show feedback that all characters are correct
-      expect(screen.getByTestId("character-feedback")).toHaveTextContent("1/1 characters correct");
+      expect(screen.getByTestId("character-feedback")).toHaveTextContent(
+        "1/1 characters correct"
+      );
     }
   });
 
   test("shows next button when answer is completely correct", async () => {
     const user = userEvent.setup();
     render(<App />);
-    
+
     // Find a predictable question
     let found = false;
     for (let i = 0; i < 10 && !found; i++) {
@@ -181,13 +183,13 @@ describe("Real-time Character Validation", () => {
       await user.click(screen.getByText("Give up"));
       await user.click(screen.getByText("Next"));
     }
-    
+
     if (found) {
       const input = screen.getByTestId("hangul-input") as HTMLInputElement;
-      
+
       // Type the complete correct answer
       await user.type(input, "네");
-      
+
       // Should show next button instead of give up button
       expect(screen.queryByText("Give up")).not.toBeInTheDocument();
       expect(screen.getByText("Next")).toBeInTheDocument();
@@ -197,7 +199,7 @@ describe("Real-time Character Validation", () => {
   test("tracks correct answers differently from incorrect ones", async () => {
     const user = userEvent.setup();
     render(<App />);
-    
+
     // Find a predictable question
     let found = false;
     for (let i = 0; i < 10 && !found; i++) {
@@ -209,16 +211,16 @@ describe("Real-time Character Validation", () => {
       await user.click(screen.getByText("Give up"));
       await user.click(screen.getByText("Next"));
     }
-    
+
     if (found) {
       const input = screen.getByTestId("hangul-input") as HTMLInputElement;
-      
+
       // Type the correct answer
       await user.type(input, "네");
-      
+
       // Click next
       await user.click(screen.getByText("Next"));
-      
+
       // Should have moved to next question
       expect(screen.getByTestId("question-name")).toBeInTheDocument();
     }
@@ -228,14 +230,14 @@ describe("Real-time Character Validation", () => {
 describe("UI Styling", () => {
   test("quiz container has proper structure", () => {
     render(<App />);
-    
+
     // Check for quiz container
     expect(screen.getByTestId("quiz-container")).toBeInTheDocument();
   });
 
   test("input field has proper size attributes", () => {
     render(<App />);
-    
+
     const input = screen.getByTestId("hangul-input") as HTMLInputElement;
     expect(input.className).toContain("hangul-input");
   });

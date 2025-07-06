@@ -3,23 +3,30 @@ them to translate English/romanized words into Hangul.
 
 ## Quick start
 
-### Environment variables
+### Prerequisites
 
-First create an `.env` file with the following variables defined:
+You will need to create an internal Notion integration:
 
-```
-NOTION_API_KEY=<Your Notion API key>
-NOTION_DB_ID=<Your Notion DB id>
-```
+https://developers.notion.com/docs/create-a-notion-integration
 
-### Database schema
+The integration only needs read-only permission.
 
-The Notion DB with the given ID must have the following fields:
+You will also need to create a Notion database with the following
+schema:
 
 - `Name` - Text, contains the English/romanized word
 - `Hangul` - Text, contains the Hangul equivalent for the word
 - `URL` - URL, contains an optional link where the user can
   learn more about the word being described.
+
+### Environment variables
+
+Now create an `.env` file with the following variables defined:
+
+```
+NOTION_API_KEY=<Your Notion API key>
+NOTION_DB_ID=<Your Notion DB id>
+```
 
 ### Downloading the database
 

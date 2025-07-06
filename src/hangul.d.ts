@@ -1,11 +1,13 @@
-export enum HangulCharClass {
-  CompatibilityJamo = "CompatibilityJamo",
-  JamoExtendedA = "JamoExtendedA",
-  JamoExtendedB = "JamoExtendedB",
-  Jamo = "Jamo",
-  Syllables = "Syllables",
-  None = "None"
-}
+export declare const HangulCharClass: {
+  readonly CompatibilityJamo: "CompatibilityJamo";
+  readonly JamoExtendedA: "JamoExtendedA";
+  readonly JamoExtendedB: "JamoExtendedB";
+  readonly Jamo: "Jamo";
+  readonly Syllables: "Syllables";
+  readonly None: "None";
+};
+
+export type HangulCharClass = typeof HangulCharClass[keyof typeof HangulCharClass];
 
 export interface HangulCharClassStatic {
   /**

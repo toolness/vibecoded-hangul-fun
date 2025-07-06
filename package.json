@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "ci": "npm run typecheck && prettier . --check && npm run test",
     "download": "node --experimental-transform-types download.ts",
     "typecheck": "tsc -b && npm run lint",
     "test": "vitest run",

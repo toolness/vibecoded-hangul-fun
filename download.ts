@@ -1,7 +1,7 @@
 import { Client } from "@notionhq/client";
 import { writeFileSync } from "fs";
 import dotenv from "dotenv";
-import { type DatabaseRow } from "./src/database-spec";
+import { type DatabaseRow } from "./src/database-spec.ts";
 
 dotenv.config();
 

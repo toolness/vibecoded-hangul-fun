@@ -13,7 +13,7 @@ describe("HangulCharClass", () => {
     expect(HangulCharClassStatic.from("이")).toBe(HangulCharClass.Syllables);
     expect(HangulCharClassStatic.from("ᆸ")).toBe(HangulCharClass.Jamo);
     expect(HangulCharClassStatic.from("ㄱ")).toBe(
-      HangulCharClass.CompatibilityJamo
+      HangulCharClass.CompatibilityJamo,
     );
     expect(HangulCharClassStatic.from("h")).toBe(HangulCharClass.None);
     expect(HangulCharClassStatic.from("")).toBe(HangulCharClass.None);

@@ -21,7 +21,7 @@ const DB_JSON_FILENAME = "src/database.json";
 
 async function downloadDatabase(
   notion: Client,
-  id: string
+  id: string,
 ): Promise<DatabaseRow[]> {
   const response = await notion.databases.query({
     database_id: id,
@@ -41,7 +41,7 @@ async function downloadDatabase(
       throw new Error(
         "Database schema validation failed: Missing required columns.\n" +
           "Required columns: Name (Text), Hangul (Text), URL (URL)\n" +
-          "Please ensure your Notion database has these columns with the exact names."
+          "Please ensure your Notion database has these columns with the exact names.",
       );
     }
 

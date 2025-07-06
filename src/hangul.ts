@@ -60,7 +60,7 @@ export const HangulCharClassStatic = {
 };
 
 export function decompose_hangul_syllable_to_jamos(
-  ch: string
+  ch: string,
 ): [string, string, string?] | null {
   if (ch.length === 0) return null;
 
@@ -74,7 +74,7 @@ export function decompose_hangul_syllable_to_jamos(
   const baseCodepoint = codepoint - 0xac00;
   const initialCodepointIdx = Math.floor(baseCodepoint / 588);
   const medialCodepointIdx = Math.floor(
-    (baseCodepoint - initialCodepointIdx * 588) / 28
+    (baseCodepoint - initialCodepointIdx * 588) / 28,
   );
   const finalCodepointIdx =
     baseCodepoint - initialCodepointIdx * 588 - medialCodepointIdx * 28;

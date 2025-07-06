@@ -163,7 +163,7 @@ describe("Real-time Character Validation", () => {
 
       // Should show feedback that all characters are correct
       expect(screen.getByTestId("character-feedback")).toHaveTextContent(
-        "1/1 characters correct"
+        "1/1 characters correct",
       );
     }
   });

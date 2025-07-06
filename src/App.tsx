@@ -4,20 +4,20 @@ import _database from "./database.json";
 import type { DatabaseRow } from "./database-spec";
 
 const DATABASE_ROWS: DatabaseRow[] = _database.filter(
-  (row) => row.name && row.hangul
+  (row) => row.name && row.hangul,
 );
 
 function App() {
   // State management
   const [currentQuestion, setCurrentQuestion] = useState<DatabaseRow | null>(
-    null
+    null,
   );
   const [userInput, setUserInput] = useState("");
   const [answeredQuestions, setAnsweredQuestions] = useState<Set<string>>(
-    new Set()
+    new Set(),
   );
   const [incorrectQuestions, setIncorrectQuestions] = useState<Set<string>>(
-    new Set()
+    new Set(),
   );
   const [showAnswer, setShowAnswer] = useState(false);
 

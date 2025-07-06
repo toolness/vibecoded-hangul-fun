@@ -12,6 +12,7 @@
     "build": "tsc -b && vite build --base /vibecoded-hangul-fun/",
     "deploy": "npm run build && gh-pages -d dist",
     "lint": "eslint .",
+    "prettier": "prettier . --write",
     "preview": "vite preview"
   },
   "dependencies": {

@@ -42,3 +42,8 @@ You can run tests via `npm run test`.
 
 You can run the tests interactively, re-running them whenever you change
 files, with `npm run test:watch`.
+
+### Code formatting
+
+Run `npm run prettier` after changing code/before committing
+to ensure that code is formatted consistently.

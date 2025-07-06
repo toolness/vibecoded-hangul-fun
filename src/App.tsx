@@ -2,6 +2,10 @@ import "./App.css";
 import { useState, useEffect } from "react";
 import _database from "./database.json";
 import type { DatabaseRow } from "./database-spec";
+import {
+  decompose_all_hangul_syllables,
+  hangul_jamo_to_compat_with_fallback,
+} from "./hangul";
 
 const DATABASE_ROWS: DatabaseRow[] = _database.filter(
   (row) => row.name && row.hangul,
@@ -48,25 +52,37 @@ function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Calculate how many characters are correct
-  const calculateCorrectCharacters = () => {
+  const decomposeToCompatJamos = (value: string) =>
+    decompose_all_hangul_syllables(value)
+      .split("")
+      .map((c) => hangul_jamo_to_compat_with_fallback(c));
+
+  // Calculate how many jamos are correct
+  const calculateCorrectJamos = () => {
     if (!currentQuestion) return { correct: 0, total: 0 };
 
-    const correctAnswer = currentQuestion.hangul;
+    const decomposedCorrectAnswer = decomposeToCompatJamos(
+      currentQuestion.hangul,
+    );
+    const decomposedUserInput = decomposeToCompatJamos(userInput);
     let correctCount = 0;
 
-    for (let i = 0; i < userInput.length && i < correctAnswer.length; i++) {
-      if (userInput[i] === correctAnswer[i]) {
+    for (
+      let i = 0;
+      i < decomposedUserInput.length && i < decomposedCorrectAnswer.length;
+      i++
+    ) {
+      if (decomposedUserInput[i] === decomposedCorrectAnswer[i]) {
         correctCount++;
       } else {
-        break; // Stop counting after first incorrect character
+        break; // Stop counting after first incorrect jamo
       }
     }
 
-    return { correct: correctCount, total: correctAnswer.length };
+    return { correct: correctCount, total: decomposedCorrectAnswer.length };
   };
 
-  const { correct, total } = calculateCorrectCharacters();
+  const { correct, total } = calculateCorrectJamos();
   const isCompletelyCorrect = userInput === currentQuestion?.hangul;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -144,7 +160,7 @@ function App() {
               data-testid="character-feedback"
               className="character-feedback"
             >
-              {correct}/{total} characters correct
+              {correct}/{total} jamos correct
             </div>
           )}
 

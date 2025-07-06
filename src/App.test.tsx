@@ -161,9 +161,9 @@ describe("Real-time Character Validation", () => {
       // Type one correct character
       await user.type(input, "네");
 
-      // Should show feedback that all characters are correct
+      // Should show feedback that all jamos are correct
       expect(screen.getByTestId("character-feedback")).toHaveTextContent(
-        "1/1 characters correct",
+        "2/2 jamos correct",
       );
     }
   });

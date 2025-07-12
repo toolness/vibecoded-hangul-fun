@@ -33,30 +33,44 @@ const BEST_VOICES = [
 /**
  * Returns the best available Korean voice, or null if none found.
  */
-function findBestKoreanVoice(): SpeechSynthesisVoice | null {
-  if (!("speechSynthesis" in window)) {
-    return null;
-  }
+const getBestKoreanVoice = (() => {
+  // This lazily figures out what the best Korean voice is and
+  // caches it for fast subsequent retrieval.
 
-  const koreanVoices = speechSynthesis
-    .getVoices()
-    .filter((voice) => voice.lang.startsWith("ko"));
-  for (const regex of BEST_VOICES) {
-    for (const voice of koreanVoices) {
-      if (regex.test(voice.name)) {
-        return voice;
+  let bestKoreanVoice: SpeechSynthesisVoice | null | undefined;
+
+  function findBestKoreanVoice(): SpeechSynthesisVoice | null {
+    if (!("speechSynthesis" in window)) {
+      return null;
+    }
+
+    const koreanVoices = speechSynthesis
+      .getVoices()
+      .filter((voice) => voice.lang.startsWith("ko"));
+    for (const regex of BEST_VOICES) {
+      for (const voice of koreanVoices) {
+        if (regex.test(voice.name)) {
+          return voice;
+        }
       }
     }
+    return koreanVoices[0] ?? null;
   }
-  return koreanVoices[0] ?? null;
-}
+
+  return () => {
+    if (bestKoreanVoice === undefined) {
+      bestKoreanVoice = findBestKoreanVoice();
+    }
+    return bestKoreanVoice;
+  };
+})();
 
 /**
  * Returns whether the browser supports the Web Speech API *and*
  * has a Korean voice available.
  */
 export function supportsKoreanSpeech(): boolean {
-  return findBestKoreanVoice() !== null;
+  return getBestKoreanVoice() !== null;
 }
 
 /**
@@ -64,7 +78,7 @@ export function supportsKoreanSpeech(): boolean {
  * Korean-language voice available.
  */
 export function vocalizeKoreanSpeech(hangul: string) {
-  const koreanVoice = findBestKoreanVoice();
+  const koreanVoice = getBestKoreanVoice();
   if (!koreanVoice) {
     console.warn("Korean speech synthesis not supported");
     return;

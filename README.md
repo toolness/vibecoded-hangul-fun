@@ -57,6 +57,6 @@ to ensure that code is formatted consistently.
 
 ### Credits
 
-- [public/Speaker_Icon.svg](public/Speaker_Icon.svg) was taken from
+- [Speaker_Icon.svg](src/assets/Speaker_Icon.svg) was taken from
   [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Speaker_Icon.svg)
   and is in the public domain.

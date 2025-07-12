@@ -1,15 +1,19 @@
 import "./App.css";
-import { useReducer, useEffect } from "react";
+import { useReducer, useEffect, useMemo, useCallback } from "react";
 import _database from "./database.json";
 import type { DatabaseRow } from "./database-spec";
 import { calculateCorrectJamos } from "./calculateCorrectJamos";
 import { quizReducer, initialState } from "./quizStateReducer";
+import SpeakerIcon from "./assets/Speaker_Icon.svg";
+import { supportsKoreanSpeech, vocalizeKoreanSpeech } from "./speech";
 
 const DATABASE_ROWS: DatabaseRow[] = _database.filter(
   (row) => row.name && row.hangul,
 );
 
 function App() {
+  const supportsSpeech = useMemo(supportsKoreanSpeech, []);
+
   // State management
   const [state, dispatch] = useReducer(quizReducer, initialState);
   const {
@@ -75,6 +79,12 @@ function App() {
     dispatch({ type: "NEXT_QUESTION", payload: selectNextQuestion() });
   };
 
+  const handleSpeakerIconClick = useCallback(() => {
+    if (currentQuestion) {
+      vocalizeKoreanSpeech(currentQuestion.hangul);
+    }
+  }, [currentQuestion]);
+
   if (!currentQuestion) {
     return <main>Loading...</main>;
   }
@@ -99,6 +109,16 @@ function App() {
               <span data-testid="question-name" className="question-text">
                 {currentQuestion.name}
               </span>
+            )}
+            {supportsSpeech && (
+              <>
+                {" "}
+                <img
+                  src={SpeakerIcon}
+                  className="speaker-icon"
+                  onClick={handleSpeakerIconClick}
+                />
+              </>
             )}
           </div>
         </div>

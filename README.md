@@ -54,3 +54,9 @@ files, with `npm run test:watch`.
 
 Run `npm run prettier` after changing code/before committing
 to ensure that code is formatted consistently.
+
+### Credits
+
+- [public/Speaker_Icon.svg](public/Speaker_Icon.svg) was taken from
+  [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Speaker_Icon.svg)
+  and is in the public domain.

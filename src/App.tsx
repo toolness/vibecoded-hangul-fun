@@ -2,10 +2,7 @@ import "./App.css";
 import { useState, useEffect } from "react";
 import _database from "./database.json";
 import type { DatabaseRow } from "./database-spec";
-import {
-  decompose_all_hangul_syllables,
-  hangul_jamo_to_compat_with_fallback,
-} from "./hangul";
+import { calculateCorrectJamos } from "./calculateCorrectJamos";
 
 const DATABASE_ROWS: DatabaseRow[] = _database.filter(
   (row) => row.name && row.hangul,
@@ -52,37 +49,10 @@ function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const decomposeToCompatJamos = (value: string) =>
-    decompose_all_hangul_syllables(value)
-      .split("")
-      .map((c) => hangul_jamo_to_compat_with_fallback(c));
-
-  // Calculate how many jamos are correct
-  const calculateCorrectJamos = () => {
-    if (!currentQuestion) return { correct: 0, total: 0 };
-
-    const decomposedCorrectAnswer = decomposeToCompatJamos(
-      currentQuestion.hangul,
-    );
-    const decomposedUserInput = decomposeToCompatJamos(userInput);
-    let correctCount = 0;
-
-    for (
-      let i = 0;
-      i < decomposedUserInput.length && i < decomposedCorrectAnswer.length;
-      i++
-    ) {
-      if (decomposedUserInput[i] === decomposedCorrectAnswer[i]) {
-        correctCount++;
-      } else {
-        break; // Stop counting after first incorrect jamo
-      }
-    }
-
-    return { correct: correctCount, total: decomposedCorrectAnswer.length };
-  };
-
-  const { correct, total } = calculateCorrectJamos();
+  const { correct, total } = calculateCorrectJamos(
+    currentQuestion?.hangul || "",
+    userInput,
+  );
   const isCompletelyCorrect = userInput === currentQuestion?.hangul;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {

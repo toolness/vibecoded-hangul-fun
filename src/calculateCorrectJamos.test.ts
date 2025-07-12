@@ -19,6 +19,18 @@ describe("calculateCorrectJamos", () => {
     expect(result.total).toBe(6);
   });
 
+  it("should count partial matches that are still being composed (compatibility unicode)", () => {
+    const result = calculateCorrectJamos("안녕", "ㅇ");
+    expect(result.correct).toBe(1);
+    expect(result.total).toBe(6);
+  });
+
+  it("should count partial matches that are still being composed (jamo unicode)", () => {
+    const result = calculateCorrectJamos("안녕", "ᄋ");
+    expect(result.correct).toBe(1);
+    expect(result.total).toBe(6);
+  });
+
   it("should stop counting at first incorrect jamo", () => {
     const result = calculateCorrectJamos("안녕", "아녕");
     expect(result.correct).toBe(3); // ㅇㅏ match, then final ㄴ of 안 doesn't match first ㄴ of 녕

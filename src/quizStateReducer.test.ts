@@ -27,18 +27,6 @@ describe("quizReducer", () => {
     });
   });
 
-  describe("SET_QUESTION", () => {
-    it("should set the current question", () => {
-      const initialState = createInitialState(mockQuestion2);
-      const result = quizReducer(initialState, {
-        type: "SET_QUESTION",
-        payload: mockQuestion,
-      });
-      expect(result.currentQuestion).toEqual(mockQuestion);
-      expect(result).not.toBe(initialState); // Ensure immutability
-    });
-  });
-
   describe("UPDATE_INPUT", () => {
     it("should update user input", () => {
       const initialState = createInitialState(mockQuestion);
@@ -92,9 +80,7 @@ describe("quizReducer", () => {
         payload: mockQuestion,
       });
       expect(result.answeredQuestions).not.toBe(state.answeredQuestions);
-      expect(result.incorrectQuestions).not.toBe(
-        state.incorrectQuestions,
-      );
+      expect(result.incorrectQuestions).not.toBe(state.incorrectQuestions);
     });
   });
 
@@ -110,7 +96,11 @@ describe("quizReducer", () => {
     });
 
     it("should preserve existing items in sets", () => {
-      const existingQuestion: DatabaseRow = { name: "existing", hangul: "기존", url: "" };
+      const existingQuestion: DatabaseRow = {
+        name: "existing",
+        hangul: "기존",
+        url: "",
+      };
       const initialState = createInitialState(mockQuestion);
       const stateWithAnswers: QuizState = {
         ...initialState,
@@ -201,12 +191,6 @@ describe("quizReducer", () => {
   describe("complex scenarios", () => {
     it("should handle multiple state transitions", () => {
       let state = createInitialState(mockQuestion2);
-
-      // Set initial question
-      state = quizReducer(state, {
-        type: "SET_QUESTION",
-        payload: mockQuestion,
-      });
 
       // User types incorrect answer
       state = quizReducer(state, {

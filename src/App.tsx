@@ -1,5 +1,5 @@
 import "./App.css";
-import { useReducer, useEffect, useMemo, useCallback } from "react";
+import { useReducer, useMemo, useCallback } from "react";
 import _database from "./database.json";
 import type { DatabaseRow } from "./database-spec";
 import { calculateCorrectJamos } from "./calculateCorrectJamos";
@@ -24,7 +24,10 @@ function App() {
   const getInitialQuestion = () => selectRandomQuestion(DATABASE_ROWS);
 
   // State management
-  const [state, dispatch] = useReducer(quizReducer, createInitialState(getInitialQuestion()));
+  const [state, dispatch] = useReducer(
+    quizReducer,
+    createInitialState(getInitialQuestion()),
+  );
   const {
     currentQuestion,
     userInput,
@@ -37,9 +40,7 @@ function App() {
   const selectNextQuestion = () => {
     // Prioritize questions that haven't been shown or were answered incorrectly
     const unansweredOrIncorrect = DATABASE_ROWS.filter((row) => {
-      return (
-        !answeredQuestions.has(row) || incorrectQuestions.has(row)
-      );
+      return !answeredQuestions.has(row) || incorrectQuestions.has(row);
     });
 
     // If we have unanswered or incorrect questions, pick from those
@@ -48,14 +49,6 @@ function App() {
 
     return selectRandomQuestion(pool);
   };
-
-  // Initialize with a random question
-  useEffect(() => {
-    if (!currentQuestion && DATABASE_ROWS.length > 0) {
-      dispatch({ type: "SET_QUESTION", payload: selectNextQuestion() });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentQuestion]);
 
   const { correct, total } = calculateCorrectJamos(
     currentQuestion.hangul || "",
@@ -86,7 +79,6 @@ function App() {
   const handleSpeakerIconClick = useCallback(() => {
     vocalizeKoreanSpeech(currentQuestion.hangul);
   }, [currentQuestion]);
-
 
   return (
     <main>

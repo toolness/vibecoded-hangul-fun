@@ -8,7 +8,9 @@ export interface QuizState {
   showAnswer: boolean;
 }
 
-export const createInitialState = (currentQuestion: DatabaseRow): QuizState => ({
+export const createInitialState = (
+  currentQuestion: DatabaseRow,
+): QuizState => ({
   currentQuestion,
   userInput: "",
   answeredQuestions: new Set(),
@@ -17,7 +19,6 @@ export const createInitialState = (currentQuestion: DatabaseRow): QuizState => (
 });
 
 export type QuizAction =
-  | { type: "SET_QUESTION"; payload: DatabaseRow }
   | { type: "UPDATE_INPUT"; payload: string }
   | { type: "MARK_CORRECT"; payload: DatabaseRow }
   | { type: "MARK_INCORRECT"; payload: DatabaseRow }
@@ -26,9 +27,6 @@ export type QuizAction =
 
 export function quizReducer(state: QuizState, action: QuizAction): QuizState {
   switch (action.type) {
-    case "SET_QUESTION":
-      return { ...state, currentQuestion: action.payload };
-
     case "UPDATE_INPUT":
       return { ...state, userInput: action.payload };
 

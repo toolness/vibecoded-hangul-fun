@@ -187,23 +187,6 @@ describe("quizReducer", () => {
     });
   });
 
-  describe("RESET_FOR_NEXT", () => {
-    it("should reset input and showAnswer but keep current question", () => {
-      const initialState = createInitialState(mockQuestion);
-      const stateWithData: QuizState = {
-        ...initialState,
-        userInput: "안녕",
-        showAnswer: true,
-      };
-      const result = quizReducer(stateWithData, {
-        type: "RESET_FOR_NEXT",
-      });
-      expect(result.currentQuestion).toEqual(mockQuestion);
-      expect(result.userInput).toBe("");
-      expect(result.showAnswer).toBe(false);
-    });
-  });
-
   describe("invalid action", () => {
     it("should return current state for unknown action type", () => {
       const initialState = createInitialState(mockQuestion);

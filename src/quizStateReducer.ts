@@ -22,8 +22,7 @@ export type QuizAction =
   | { type: "MARK_CORRECT"; payload: DatabaseRow }
   | { type: "MARK_INCORRECT"; payload: DatabaseRow }
   | { type: "SHOW_ANSWER" }
-  | { type: "NEXT_QUESTION"; payload: DatabaseRow }
-  | { type: "RESET_FOR_NEXT" };
+  | { type: "NEXT_QUESTION"; payload: DatabaseRow };
 
 export function quizReducer(state: QuizState, action: QuizAction): QuizState {
   switch (action.type) {
@@ -68,13 +67,6 @@ export function quizReducer(state: QuizState, action: QuizAction): QuizState {
       return {
         ...state,
         currentQuestion: action.payload,
-        userInput: "",
-        showAnswer: false,
-      };
-
-    case "RESET_FOR_NEXT":
-      return {
-        ...state,
         userInput: "",
         showAnswer: false,
       };

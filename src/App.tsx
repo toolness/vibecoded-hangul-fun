@@ -11,14 +11,16 @@ const DATABASE_ROWS: DatabaseRow[] = _database.filter(
   (row) => row.name && row.hangul,
 );
 
+/**
+ * Helper to select a random question from a pool.
+ */
+function selectRandomQuestion(pool: DatabaseRow[]) {
+  const randomIndex = Math.floor(Math.random() * pool.length);
+  return pool[randomIndex];
+}
+
 function App() {
   const supportsSpeech = useMemo(supportsKoreanSpeech, []);
-
-  // Helper to select a random question from a pool
-  const selectRandomQuestion = (pool: DatabaseRow[]) => {
-    const randomIndex = Math.floor(Math.random() * pool.length);
-    return pool[randomIndex];
-  };
 
   // Helper to get initial random question
   const getInitialQuestion = () => selectRandomQuestion(DATABASE_ROWS);

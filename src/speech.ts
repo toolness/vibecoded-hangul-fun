@@ -2,12 +2,12 @@
  * Returns the first available Korean voice, or null if none found.
  */
 function findKoreanVoice(): SpeechSynthesisVoice | null {
-  if (!('speechSynthesis' in window)) {
+  if (!("speechSynthesis" in window)) {
     return null;
   }
 
   const voices = speechSynthesis.getVoices();
-  return voices.find(voice => voice.lang.startsWith('ko')) || null;
+  return voices.find((voice) => voice.lang.startsWith("ko")) || null;
 }
 
 /**
@@ -25,12 +25,12 @@ export function supportsKoreanSpeech(): boolean {
 export function vocalizeKoreanSpeech(hangul: string) {
   const koreanVoice = findKoreanVoice();
   if (!koreanVoice) {
-    console.warn('Korean speech synthesis not supported');
+    console.warn("Korean speech synthesis not supported");
     return;
   }
 
   const utterance = new SpeechSynthesisUtterance(hangul);
   utterance.voice = koreanVoice;
-  utterance.lang = 'ko-KR';
+  utterance.lang = "ko-KR";
   speechSynthesis.speak(utterance);
 }

@@ -1,26 +1,26 @@
 import type { DatabaseRow } from "./database-spec";
 
 export interface QuizState {
-  currentQuestion: DatabaseRow | null;
+  currentQuestion: DatabaseRow;
   userInput: string;
-  answeredQuestions: Set<string>;
-  incorrectQuestions: Set<string>;
+  answeredQuestions: Set<DatabaseRow>;
+  incorrectQuestions: Set<DatabaseRow>;
   showAnswer: boolean;
 }
 
-export const initialState: QuizState = {
-  currentQuestion: null,
+export const createInitialState = (currentQuestion: DatabaseRow): QuizState => ({
+  currentQuestion,
   userInput: "",
   answeredQuestions: new Set(),
   incorrectQuestions: new Set(),
   showAnswer: false,
-};
+});
 
 export type QuizAction =
   | { type: "SET_QUESTION"; payload: DatabaseRow }
   | { type: "UPDATE_INPUT"; payload: string }
-  | { type: "MARK_CORRECT"; payload: string }
-  | { type: "MARK_INCORRECT"; payload: string }
+  | { type: "MARK_CORRECT"; payload: DatabaseRow }
+  | { type: "MARK_INCORRECT"; payload: DatabaseRow }
   | { type: "SHOW_ANSWER" }
   | { type: "NEXT_QUESTION"; payload: DatabaseRow }
   | { type: "RESET_FOR_NEXT" };

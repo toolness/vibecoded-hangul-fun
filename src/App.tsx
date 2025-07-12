@@ -3,7 +3,7 @@ import { useReducer, useEffect, useMemo, useCallback } from "react";
 import _database from "./database.json";
 import type { DatabaseRow } from "./database-spec";
 import { calculateCorrectJamos } from "./calculateCorrectJamos";
-import { quizReducer, initialState } from "./quizStateReducer";
+import { quizReducer, createInitialState } from "./quizStateReducer";
 import SpeakerIcon from "./assets/Speaker_Icon.svg";
 import { supportsKoreanSpeech, vocalizeKoreanSpeech } from "./speech";
 
@@ -14,8 +14,17 @@ const DATABASE_ROWS: DatabaseRow[] = _database.filter(
 function App() {
   const supportsSpeech = useMemo(supportsKoreanSpeech, []);
 
+  // Helper to select a random question from a pool
+  const selectRandomQuestion = (pool: DatabaseRow[]) => {
+    const randomIndex = Math.floor(Math.random() * pool.length);
+    return pool[randomIndex];
+  };
+
+  // Helper to get initial random question
+  const getInitialQuestion = () => selectRandomQuestion(DATABASE_ROWS);
+
   // State management
-  const [state, dispatch] = useReducer(quizReducer, initialState);
+  const [state, dispatch] = useReducer(quizReducer, createInitialState(getInitialQuestion()));
   const {
     currentQuestion,
     userInput,
@@ -28,9 +37,8 @@ function App() {
   const selectNextQuestion = () => {
     // Prioritize questions that haven't been shown or were answered incorrectly
     const unansweredOrIncorrect = DATABASE_ROWS.filter((row) => {
-      const questionId = row.name;
       return (
-        !answeredQuestions.has(questionId) || incorrectQuestions.has(questionId)
+        !answeredQuestions.has(row) || incorrectQuestions.has(row)
       );
     });
 
@@ -38,9 +46,7 @@ function App() {
     const pool =
       unansweredOrIncorrect.length > 0 ? unansweredOrIncorrect : DATABASE_ROWS;
 
-    // Select a random question from the pool
-    const randomIndex = Math.floor(Math.random() * pool.length);
-    return pool[randomIndex];
+    return selectRandomQuestion(pool);
   };
 
   // Initialize with a random question
@@ -49,30 +55,28 @@ function App() {
       dispatch({ type: "SET_QUESTION", payload: selectNextQuestion() });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [currentQuestion]);
 
   const { correct, total } = calculateCorrectJamos(
-    currentQuestion?.hangul || "",
+    currentQuestion.hangul || "",
     userInput,
   );
-  const isCompletelyCorrect = userInput === currentQuestion?.hangul;
+  const isCompletelyCorrect = userInput === currentQuestion.hangul;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     dispatch({ type: "UPDATE_INPUT", payload: e.target.value });
   };
 
   const handleGiveUp = () => {
-    if (currentQuestion) {
-      // Mark as incorrect since user gave up
-      dispatch({ type: "MARK_INCORRECT", payload: currentQuestion.name });
-    }
+    // Mark as incorrect since user gave up
+    dispatch({ type: "MARK_INCORRECT", payload: currentQuestion });
     dispatch({ type: "SHOW_ANSWER" });
   };
 
   const handleNext = () => {
-    if (currentQuestion && isCompletelyCorrect && !showAnswer) {
+    if (isCompletelyCorrect && !showAnswer) {
       // Mark as answered correctly (remove from incorrect if it was there)
-      dispatch({ type: "MARK_CORRECT", payload: currentQuestion.name });
+      dispatch({ type: "MARK_CORRECT", payload: currentQuestion });
     }
 
     // Move to next question
@@ -80,14 +84,9 @@ function App() {
   };
 
   const handleSpeakerIconClick = useCallback(() => {
-    if (currentQuestion) {
-      vocalizeKoreanSpeech(currentQuestion.hangul);
-    }
+    vocalizeKoreanSpeech(currentQuestion.hangul);
   }, [currentQuestion]);
 
-  if (!currentQuestion) {
-    return <main>Loading...</main>;
-  }
 
   return (
     <main>

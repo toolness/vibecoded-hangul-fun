@@ -1,8 +1,9 @@
 import "./App.css";
-import { useState, useEffect } from "react";
+import { useReducer, useEffect } from "react";
 import _database from "./database.json";
 import type { DatabaseRow } from "./database-spec";
 import { calculateCorrectJamos } from "./calculateCorrectJamos";
+import { quizReducer, initialState } from "./quizStateReducer";
 
 const DATABASE_ROWS: DatabaseRow[] = _database.filter(
   (row) => row.name && row.hangul,
@@ -10,17 +11,14 @@ const DATABASE_ROWS: DatabaseRow[] = _database.filter(
 
 function App() {
   // State management
-  const [currentQuestion, setCurrentQuestion] = useState<DatabaseRow | null>(
-    null,
-  );
-  const [userInput, setUserInput] = useState("");
-  const [answeredQuestions, setAnsweredQuestions] = useState<Set<string>>(
-    new Set(),
-  );
-  const [incorrectQuestions, setIncorrectQuestions] = useState<Set<string>>(
-    new Set(),
-  );
-  const [showAnswer, setShowAnswer] = useState(false);
+  const [state, dispatch] = useReducer(quizReducer, initialState);
+  const {
+    currentQuestion,
+    userInput,
+    answeredQuestions,
+    incorrectQuestions,
+    showAnswer,
+  } = state;
 
   // Function to select next question
   const selectNextQuestion = () => {
@@ -44,7 +42,7 @@ function App() {
   // Initialize with a random question
   useEffect(() => {
     if (!currentQuestion && DATABASE_ROWS.length > 0) {
-      setCurrentQuestion(selectNextQuestion());
+      dispatch({ type: "SET_QUESTION", payload: selectNextQuestion() });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -56,34 +54,25 @@ function App() {
   const isCompletelyCorrect = userInput === currentQuestion?.hangul;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setUserInput(e.target.value);
+    dispatch({ type: "UPDATE_INPUT", payload: e.target.value });
   };
 
   const handleGiveUp = () => {
     if (currentQuestion) {
       // Mark as incorrect since user gave up
-      setIncorrectQuestions((prev) => new Set(prev).add(currentQuestion.name));
-      // Also mark as answered
-      setAnsweredQuestions((prev) => new Set(prev).add(currentQuestion.name));
+      dispatch({ type: "MARK_INCORRECT", payload: currentQuestion.name });
     }
-    setShowAnswer(true);
+    dispatch({ type: "SHOW_ANSWER" });
   };
 
   const handleNext = () => {
     if (currentQuestion && isCompletelyCorrect && !showAnswer) {
       // Mark as answered correctly (remove from incorrect if it was there)
-      setAnsweredQuestions((prev) => new Set(prev).add(currentQuestion.name));
-      setIncorrectQuestions((prev) => {
-        const newSet = new Set(prev);
-        newSet.delete(currentQuestion.name);
-        return newSet;
-      });
+      dispatch({ type: "MARK_CORRECT", payload: currentQuestion.name });
     }
 
-    // Reset state for next question
-    setUserInput("");
-    setShowAnswer(false);
-    setCurrentQuestion(selectNextQuestion());
+    // Move to next question
+    dispatch({ type: "NEXT_QUESTION", payload: selectNextQuestion() });
   };
 
   if (!currentQuestion) {

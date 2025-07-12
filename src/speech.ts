@@ -1,26 +1,36 @@
 /**
+ * Returns the first available Korean voice, or null if none found.
+ */
+function findKoreanVoice(): SpeechSynthesisVoice | null {
+  if (!("speechSynthesis" in window)) {
+    return null;
+  }
+
+  const voices = speechSynthesis.getVoices();
+  return voices.find((voice) => voice.lang.startsWith("ko")) || null;
+}
+
+/**
  * Returns whether the browser supports the Web Speech API *and*
  * has a Korean voice available.
  */
 export function supportsKoreanSpeech(): boolean {
-  if (!("speechSynthesis" in window)) {
-    return false;
-  }
-
-  return speechSynthesis
-    .getVoices()
-    .some((voice) => voice.lang.startsWith("ko"));
+  return findKoreanVoice() !== null;
 }
 
 /**
- * Use the Web Speech API to vocalize the given Hangul using the best
+ * Use the Web Speech API to vocalize the given Hangul using the first
  * Korean-language voice available.
  */
 export function vocalizeKoreanSpeech(hangul: string) {
-  // Note that we're not actually setting the voice. On MacOS, at least,
-  // this means that the browser will choose the user's default Korean
-  // voice, which can be set via System Settings.
+  const koreanVoice = findKoreanVoice();
+  if (!koreanVoice) {
+    console.warn("Korean speech synthesis not supported");
+    return;
+  }
+
   const utterance = new SpeechSynthesisUtterance(hangul);
+  utterance.voice = koreanVoice;
   utterance.lang = "ko-KR";
   utterance.rate = 0.5;
   speechSynthesis.speak(utterance);

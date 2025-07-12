@@ -32,5 +32,6 @@ export function vocalizeKoreanSpeech(hangul: string) {
   const utterance = new SpeechSynthesisUtterance(hangul);
   utterance.voice = koreanVoice;
   utterance.lang = "ko-KR";
+  utterance.rate = 0.5;
   speechSynthesis.speak(utterance);
 }

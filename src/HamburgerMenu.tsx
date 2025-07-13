@@ -41,10 +41,7 @@ function HamburgerMenu({ words, onSelectWord }: HamburgerMenuProps) {
       {isMenuOpen && (
         <div className="menu-dropdown">
           <div className="menu-content">
-            <button
-              className="menu-link"
-              onClick={handleChooseWord}
-            >
+            <button className="menu-link" onClick={handleChooseWord}>
               Choose word
             </button>
             <a
@@ -58,7 +55,7 @@ function HamburgerMenu({ words, onSelectWord }: HamburgerMenuProps) {
           </div>
         </div>
       )}
-      
+
       {isModalOpen && (
         <WordSelectionModal
           words={words}

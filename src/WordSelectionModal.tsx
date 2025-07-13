@@ -8,12 +8,16 @@ interface WordSelectionModalProps {
   onClose: () => void;
 }
 
-function WordSelectionModal({ words, onSelectWord, onClose }: WordSelectionModalProps) {
+function WordSelectionModal({
+  words,
+  onSelectWord,
+  onClose,
+}: WordSelectionModalProps) {
   const [selectedWord, setSelectedWord] = useState<string>("");
-  
+
   // Sort words alphabetically
-  const sortedWords = [...words].sort((a, b) => 
-    (a.name || "").localeCompare(b.name || "")
+  const sortedWords = [...words].sort((a, b) =>
+    (a.name || "").localeCompare(b.name || ""),
   );
 
   useEffect(() => {
@@ -24,7 +28,7 @@ function WordSelectionModal({ words, onSelectWord, onClose }: WordSelectionModal
   }, []);
 
   const handleSelect = () => {
-    const word = sortedWords.find(w => w.name === selectedWord);
+    const word = sortedWords.find((w) => w.name === selectedWord);
     if (word) {
       onSelectWord(word);
       onClose();
@@ -42,12 +46,16 @@ function WordSelectionModal({ words, onSelectWord, onClose }: WordSelectionModal
       <div className="modal-container">
         <div className="modal-header">
           <h2>Choose a word</h2>
-          <button className="modal-close" onClick={onClose} aria-label="Close modal">
+          <button
+            className="modal-close"
+            onClick={onClose}
+            aria-label="Close modal"
+          >
             ×
           </button>
         </div>
         <div className="modal-body">
-          <select 
+          <select
             className="word-select"
             value={selectedWord}
             onChange={(e) => setSelectedWord(e.target.value)}

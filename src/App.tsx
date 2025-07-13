@@ -103,7 +103,14 @@ function App() {
         {isMenuOpen && (
           <div className="menu-dropdown">
             <div className="menu-content">
-              TODO
+              <a 
+                href="https://github.com/toolness/vibecoded-hangul-fun" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="menu-link"
+              >
+                About
+              </a>
             </div>
           </div>
         )}

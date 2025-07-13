@@ -79,9 +79,21 @@ function App() {
     dispatch({ type: "NEXT_QUESTION", payload: selectNextQuestion() });
   };
 
-  const handleSpeakerIconClick = useCallback(() => {
-    vocalizeKoreanSpeech(currentQuestion.hangul);
-  }, [currentQuestion]);
+  const handleSpeakerPointerDown = useCallback(
+    (e: React.PointerEvent) => {
+      // Preventing the default behavior will ensure that
+      // focus from the text field isn't lost if the user
+      // is currently on it. Hopefully this won't cancel
+      // the current composition session if the user is
+      // in the middle of one (e.g. they may be tapping
+      // the speaker icon to hear the word said aloud,
+      // to translate it more accurately).
+      e.preventDefault();
+
+      vocalizeKoreanSpeech(currentQuestion.hangul);
+    },
+    [currentQuestion],
+  );
 
   const handleWordSelection = (word: DatabaseRow) => {
     dispatch({ type: "NEXT_QUESTION", payload: word });
@@ -116,7 +128,7 @@ function App() {
                 <img
                   src={SpeakerIcon}
                   className="speaker-icon"
-                  onClick={handleSpeakerIconClick}
+                  onPointerDown={handleSpeakerPointerDown}
                 />
               </>
             )}

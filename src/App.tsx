@@ -1,11 +1,12 @@
 import "./App.css";
-import { useReducer, useMemo, useCallback, useState } from "react";
+import { useReducer, useMemo, useCallback } from "react";
 import _database from "./database.json";
 import type { DatabaseRow } from "./database-spec";
 import { calculateCorrectJamos } from "./calculateCorrectJamos";
 import { quizReducer, createInitialState } from "./quizStateReducer";
 import SpeakerIcon from "./assets/Speaker_Icon.svg";
 import { supportsKoreanSpeech, vocalizeKoreanSpeech } from "./speech";
+import HamburgerMenu from "./HamburgerMenu";
 
 const DATABASE_ROWS: DatabaseRow[] = _database.filter(
   (row) => row.name && row.hangul,
@@ -21,7 +22,6 @@ function selectRandomQuestion(pool: DatabaseRow[]) {
 
 function App() {
   const supportsSpeech = useMemo(supportsKoreanSpeech, []);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // Helper to get initial random question
   const getInitialQuestion = () => selectRandomQuestion(DATABASE_ROWS);
@@ -83,38 +83,9 @@ function App() {
     vocalizeKoreanSpeech(currentQuestion.hangul);
   }, [currentQuestion]);
 
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
-
   return (
     <main>
-      <div className="hamburger-menu">
-        <button 
-          className="hamburger-button" 
-          onClick={toggleMenu}
-          aria-label="Toggle menu"
-        >
-          <span className="hamburger-line"></span>
-          <span className="hamburger-line"></span>
-          <span className="hamburger-line"></span>
-        </button>
-        
-        {isMenuOpen && (
-          <div className="menu-dropdown">
-            <div className="menu-content">
-              <a 
-                href="https://github.com/toolness/vibecoded-hangul-fun" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="menu-link"
-              >
-                About
-              </a>
-            </div>
-          </div>
-        )}
-      </div>
+      <HamburgerMenu />
       
       <div className="quiz-container" data-testid="quiz-container">
         <div className="question-section">

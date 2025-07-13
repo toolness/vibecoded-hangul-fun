@@ -41,9 +41,6 @@ function HamburgerMenu({ words, onSelectWord }: HamburgerMenuProps) {
       {isMenuOpen && (
         <div className="menu-dropdown">
           <div className="menu-content">
-            <button className="menu-link" onClick={handleChooseWord}>
-              Choose word
-            </button>
             <a
               href="https://github.com/toolness/vibecoded-hangul-fun"
               target="_blank"
@@ -52,6 +49,9 @@ function HamburgerMenu({ words, onSelectWord }: HamburgerMenuProps) {
             >
               About
             </a>
+            <button className="menu-link" onClick={handleChooseWord}>
+              Choose word&hellip;
+            </button>
           </div>
         </div>
       )}

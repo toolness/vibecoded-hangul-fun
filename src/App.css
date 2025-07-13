@@ -143,4 +143,7 @@
 .speaker-icon {
   width: 0.8em;
   cursor: pointer;
+  padding: 0.25em;
+  margin: -0.25em;
+  position: relative;
 }

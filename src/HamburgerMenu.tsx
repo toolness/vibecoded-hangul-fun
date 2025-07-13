@@ -1,11 +1,29 @@
 import { useState } from "react";
 import "./HamburgerMenu.css";
+import WordSelectionModal from "./WordSelectionModal";
+import type { DatabaseRow } from "./database-spec";
 
-function HamburgerMenu() {
+interface HamburgerMenuProps {
+  words: DatabaseRow[];
+  onSelectWord: (word: DatabaseRow) => void;
+}
+
+function HamburgerMenu({ words, onSelectWord }: HamburgerMenuProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
+  };
+
+  const handleChooseWord = () => {
+    setIsMenuOpen(false);
+    setIsModalOpen(true);
+  };
+
+  const handleWordSelected = (word: DatabaseRow) => {
+    onSelectWord(word);
+    setIsModalOpen(false);
   };
 
   return (
@@ -23,6 +41,12 @@ function HamburgerMenu() {
       {isMenuOpen && (
         <div className="menu-dropdown">
           <div className="menu-content">
+            <button
+              className="menu-link"
+              onClick={handleChooseWord}
+            >
+              Choose word
+            </button>
             <a
               href="https://github.com/toolness/vibecoded-hangul-fun"
               target="_blank"
@@ -33,6 +57,14 @@ function HamburgerMenu() {
             </a>
           </div>
         </div>
+      )}
+      
+      {isModalOpen && (
+        <WordSelectionModal
+          words={words}
+          onSelectWord={handleWordSelected}
+          onClose={() => setIsModalOpen(false)}
+        />
       )}
     </div>
   );

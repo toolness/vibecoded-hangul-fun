@@ -83,9 +83,13 @@ function App() {
     vocalizeKoreanSpeech(currentQuestion.hangul);
   }, [currentQuestion]);
 
+  const handleWordSelection = (word: DatabaseRow) => {
+    dispatch({ type: "NEXT_QUESTION", payload: word });
+  };
+
   return (
     <main>
-      <HamburgerMenu />
+      <HamburgerMenu words={DATABASE_ROWS} onSelectWord={handleWordSelection} />
 
       <div className="quiz-container" data-testid="quiz-container">
         <div className="question-section">

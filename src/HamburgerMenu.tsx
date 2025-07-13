@@ -10,8 +10,8 @@ function HamburgerMenu() {
 
   return (
     <div className="hamburger-menu">
-      <button 
-        className="hamburger-button" 
+      <button
+        className="hamburger-button"
         onClick={toggleMenu}
         aria-label="Toggle menu"
       >
@@ -19,13 +19,13 @@ function HamburgerMenu() {
         <span className="hamburger-line"></span>
         <span className="hamburger-line"></span>
       </button>
-      
+
       {isMenuOpen && (
         <div className="menu-dropdown">
           <div className="menu-content">
-            <a 
-              href="https://github.com/toolness/vibecoded-hangul-fun" 
-              target="_blank" 
+            <a
+              href="https://github.com/toolness/vibecoded-hangul-fun"
+              target="_blank"
               rel="noopener noreferrer"
               className="menu-link"
             >

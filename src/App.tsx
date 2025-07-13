@@ -86,7 +86,7 @@ function App() {
   return (
     <main>
       <HamburgerMenu />
-      
+
       <div className="quiz-container" data-testid="quiz-container">
         <div className="question-section">
           <h2 className="question-prompt">Translate to Hangul:</h2>

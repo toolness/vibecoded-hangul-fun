@@ -53,6 +53,7 @@ function QuestionDisplay({
           rel="noopener noreferrer"
           data-testid="question-name"
           className={className}
+          title={isTypingTutorMode ? currentQuestion.name : undefined}
         >
           {displayText}
         </a>

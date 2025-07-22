@@ -30,25 +30,19 @@ function QuestionDisplay({
     [currentQuestion],
   );
 
-  if (isTypingTutorMode) {
-    return (
-      <>
-        <span data-testid="question-name" className="question-text hangul">
-          {currentQuestion.hangul}
-        </span>
-        {supportsSpeech && (
-          <>
-            {" "}
-            <img
-              src={SpeakerIcon}
-              className="speaker-icon"
-              onPointerDown={handleSpeakerPointerDown}
-            />
-          </>
-        )}
-      </>
-    );
-  }
+  const displayText = isTypingTutorMode
+    ? currentQuestion.hangul
+    : currentQuestion.name;
+
+  // Always use question-link for links, question-text for non-links
+  // Add hangul class when in typing tutor mode
+  const className = currentQuestion.url
+    ? isTypingTutorMode
+      ? "question-link hangul"
+      : "question-link"
+    : isTypingTutorMode
+      ? "question-text hangul"
+      : "question-text";
 
   return (
     <>
@@ -58,13 +52,13 @@ function QuestionDisplay({
           target="_blank"
           rel="noopener noreferrer"
           data-testid="question-name"
-          className="question-link"
+          className={className}
         >
-          {currentQuestion.name}
+          {displayText}
         </a>
       ) : (
-        <span data-testid="question-name" className="question-text">
-          {currentQuestion.name}
+        <span data-testid="question-name" className={className}>
+          {displayText}
         </span>
       )}
       {supportsSpeech && (

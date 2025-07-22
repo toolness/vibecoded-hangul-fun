@@ -1,12 +1,12 @@
 import "./App.css";
-import { useReducer, useMemo, useCallback } from "react";
+import { useReducer, useMemo } from "react";
 import _database from "./database.json";
 import type { DatabaseRow } from "./database-spec";
 import { calculateCorrectJamos } from "./calculateCorrectJamos";
 import { quizReducer, createInitialState } from "./quizStateReducer";
-import SpeakerIcon from "./assets/Speaker_Icon.svg";
-import { supportsKoreanSpeech, vocalizeKoreanSpeech } from "./speech";
+import { supportsKoreanSpeech } from "./speech";
 import HamburgerMenu from "./HamburgerMenu";
+import QuestionDisplay from "./QuestionDisplay";
 
 const DATABASE_ROWS: DatabaseRow[] = _database.filter(
   (row) => row.name && row.hangul,
@@ -80,22 +80,6 @@ function App() {
     dispatch({ type: "NEXT_QUESTION", payload: selectNextQuestion() });
   };
 
-  const handleSpeakerPointerDown = useCallback(
-    (e: React.PointerEvent) => {
-      // Preventing the default behavior will ensure that
-      // focus from the text field isn't lost if the user
-      // is currently on it. Hopefully this won't cancel
-      // the current composition session if the user is
-      // in the middle of one (e.g. they may be tapping
-      // the speaker icon to hear the word said aloud,
-      // to translate it more accurately).
-      e.preventDefault();
-
-      vocalizeKoreanSpeech(currentQuestion.hangul);
-    },
-    [currentQuestion],
-  );
-
   const handleWordSelection = (word: DatabaseRow) => {
     dispatch({ type: "NEXT_QUESTION", payload: word });
   };
@@ -119,54 +103,11 @@ function App() {
             {isTypingTutorMode ? "Type this Hangul:" : "Translate to Hangul:"}
           </h2>
           <div className="question-name">
-            {isTypingTutorMode ? (
-              <>
-                <span
-                  data-testid="question-name"
-                  className="question-text hangul"
-                >
-                  {currentQuestion.hangul}
-                </span>
-                {supportsSpeech && (
-                  <>
-                    {" "}
-                    <img
-                      src={SpeakerIcon}
-                      className="speaker-icon"
-                      onPointerDown={handleSpeakerPointerDown}
-                    />
-                  </>
-                )}
-              </>
-            ) : (
-              <>
-                {currentQuestion.url ? (
-                  <a
-                    href={currentQuestion.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    data-testid="question-name"
-                    className="question-link"
-                  >
-                    {currentQuestion.name}
-                  </a>
-                ) : (
-                  <span data-testid="question-name" className="question-text">
-                    {currentQuestion.name}
-                  </span>
-                )}
-                {supportsSpeech && (
-                  <>
-                    {" "}
-                    <img
-                      src={SpeakerIcon}
-                      className="speaker-icon"
-                      onPointerDown={handleSpeakerPointerDown}
-                    />
-                  </>
-                )}
-              </>
-            )}
+            <QuestionDisplay
+              currentQuestion={currentQuestion}
+              isTypingTutorMode={isTypingTutorMode}
+              supportsSpeech={supportsSpeech}
+            />
           </div>
         </div>
 

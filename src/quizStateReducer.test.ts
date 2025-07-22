@@ -24,6 +24,7 @@ describe("quizReducer", () => {
       answeredQuestions: new Set(),
       incorrectQuestions: new Set(),
       showAnswer: false,
+      isTypingTutorMode: false,
     });
   });
 
@@ -185,6 +186,45 @@ describe("quizReducer", () => {
         type: "INVALID_ACTION",
       });
       expect(result).toBe(initialState);
+    });
+  });
+
+  describe("TOGGLE_TYPING_TUTOR_MODE", () => {
+    it("should toggle typing tutor mode from false to true", () => {
+      const initialState = createInitialState(mockQuestion);
+      const result = quizReducer(initialState, {
+        type: "TOGGLE_TYPING_TUTOR_MODE",
+      });
+      expect(result.isTypingTutorMode).toBe(true);
+    });
+
+    it("should toggle typing tutor mode from true to false", () => {
+      const initialState = createInitialState(mockQuestion);
+      const stateWithTutorMode: QuizState = {
+        ...initialState,
+        isTypingTutorMode: true,
+      };
+      const result = quizReducer(stateWithTutorMode, {
+        type: "TOGGLE_TYPING_TUTOR_MODE",
+      });
+      expect(result.isTypingTutorMode).toBe(false);
+    });
+
+    it("should not affect other state properties", () => {
+      const initialState = createInitialState(mockQuestion);
+      const stateWithData: QuizState = {
+        ...initialState,
+        userInput: "test",
+        showAnswer: true,
+        answeredQuestions: new Set([mockQuestion]),
+      };
+      const result = quizReducer(stateWithData, {
+        type: "TOGGLE_TYPING_TUTOR_MODE",
+      });
+      expect(result.isTypingTutorMode).toBe(true);
+      expect(result.userInput).toBe("test");
+      expect(result.showAnswer).toBe(true);
+      expect(result.answeredQuestions.has(mockQuestion)).toBe(true);
     });
   });
 

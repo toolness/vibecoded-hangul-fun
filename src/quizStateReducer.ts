@@ -6,6 +6,7 @@ export interface QuizState {
   answeredQuestions: Set<DatabaseRow>;
   incorrectQuestions: Set<DatabaseRow>;
   showAnswer: boolean;
+  isTypingTutorMode: boolean;
 }
 
 export const createInitialState = (
@@ -16,6 +17,7 @@ export const createInitialState = (
   answeredQuestions: new Set(),
   incorrectQuestions: new Set(),
   showAnswer: false,
+  isTypingTutorMode: false,
 });
 
 export type QuizAction =
@@ -23,7 +25,8 @@ export type QuizAction =
   | { type: "MARK_CORRECT"; payload: DatabaseRow }
   | { type: "MARK_INCORRECT"; payload: DatabaseRow }
   | { type: "SHOW_ANSWER" }
-  | { type: "NEXT_QUESTION"; payload: DatabaseRow };
+  | { type: "NEXT_QUESTION"; payload: DatabaseRow }
+  | { type: "TOGGLE_TYPING_TUTOR_MODE" };
 
 export function quizReducer(state: QuizState, action: QuizAction): QuizState {
   switch (action.type) {
@@ -67,6 +70,12 @@ export function quizReducer(state: QuizState, action: QuizAction): QuizState {
         currentQuestion: action.payload,
         userInput: "",
         showAnswer: false,
+      };
+
+    case "TOGGLE_TYPING_TUTOR_MODE":
+      return {
+        ...state,
+        isTypingTutorMode: !state.isTypingTutorMode,
       };
 
     default:

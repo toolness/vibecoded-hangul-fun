@@ -6,9 +6,16 @@ import type { DatabaseRow } from "./database-spec";
 interface HamburgerMenuProps {
   words: DatabaseRow[];
   onSelectWord: (word: DatabaseRow) => void;
+  isTypingTutorMode: boolean;
+  onToggleTypingTutorMode: () => void;
 }
 
-function HamburgerMenu({ words, onSelectWord }: HamburgerMenuProps) {
+function HamburgerMenu({
+  words,
+  onSelectWord,
+  isTypingTutorMode,
+  onToggleTypingTutorMode,
+}: HamburgerMenuProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -51,6 +58,15 @@ function HamburgerMenu({ words, onSelectWord }: HamburgerMenuProps) {
             </a>
             <button className="menu-link" onClick={handleChooseWord}>
               Choose word&hellip;
+            </button>
+            <button
+              className="menu-link"
+              onClick={() => {
+                onToggleTypingTutorMode();
+                setIsMenuOpen(false);
+              }}
+            >
+              {isTypingTutorMode && "✓ "}Typing tutor mode
             </button>
           </div>
         </div>

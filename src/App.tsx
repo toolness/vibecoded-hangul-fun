@@ -37,6 +37,7 @@ function App() {
     answeredQuestions,
     incorrectQuestions,
     showAnswer,
+    isTypingTutorMode,
   } = state;
 
   // Function to select next question
@@ -99,37 +100,71 @@ function App() {
     dispatch({ type: "NEXT_QUESTION", payload: word });
   };
 
+  const handleToggleTypingTutorMode = () => {
+    dispatch({ type: "TOGGLE_TYPING_TUTOR_MODE" });
+  };
+
   return (
     <main>
-      <HamburgerMenu words={DATABASE_ROWS} onSelectWord={handleWordSelection} />
+      <HamburgerMenu
+        words={DATABASE_ROWS}
+        onSelectWord={handleWordSelection}
+        isTypingTutorMode={isTypingTutorMode}
+        onToggleTypingTutorMode={handleToggleTypingTutorMode}
+      />
 
       <div className="quiz-container" data-testid="quiz-container">
         <div className="question-section">
-          <h2 className="question-prompt">Translate to Hangul:</h2>
+          <h2 className="question-prompt">
+            {isTypingTutorMode ? "Type this Hangul:" : "Translate to Hangul:"}
+          </h2>
           <div className="question-name">
-            {currentQuestion.url ? (
-              <a
-                href={currentQuestion.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                data-testid="question-name"
-                className="question-link"
-              >
-                {currentQuestion.name}
-              </a>
-            ) : (
-              <span data-testid="question-name" className="question-text">
-                {currentQuestion.name}
-              </span>
-            )}
-            {supportsSpeech && (
+            {isTypingTutorMode ? (
               <>
-                {" "}
-                <img
-                  src={SpeakerIcon}
-                  className="speaker-icon"
-                  onPointerDown={handleSpeakerPointerDown}
-                />
+                <span
+                  data-testid="question-name"
+                  className="question-text hangul"
+                >
+                  {currentQuestion.hangul}
+                </span>
+                {supportsSpeech && (
+                  <>
+                    {" "}
+                    <img
+                      src={SpeakerIcon}
+                      className="speaker-icon"
+                      onPointerDown={handleSpeakerPointerDown}
+                    />
+                  </>
+                )}
+              </>
+            ) : (
+              <>
+                {currentQuestion.url ? (
+                  <a
+                    href={currentQuestion.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-testid="question-name"
+                    className="question-link"
+                  >
+                    {currentQuestion.name}
+                  </a>
+                ) : (
+                  <span data-testid="question-name" className="question-text">
+                    {currentQuestion.name}
+                  </span>
+                )}
+                {supportsSpeech && (
+                  <>
+                    {" "}
+                    <img
+                      src={SpeakerIcon}
+                      className="speaker-icon"
+                      onPointerDown={handleSpeakerPointerDown}
+                    />
+                  </>
+                )}
               </>
             )}
           </div>

@@ -242,3 +242,108 @@ describe("UI Styling", () => {
     expect(input.className).toContain("hangul-input");
   });
 });
+
+describe("Typing Tutor Mode", () => {
+  test("displays 'Translate to Hangul:' in normal mode", () => {
+    render(<App />);
+    expect(screen.getByText("Translate to Hangul:")).toBeInTheDocument();
+  });
+
+  test("toggles to typing tutor mode when menu option is clicked", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    // Open hamburger menu
+    const hamburgerButton = screen.getByLabelText("Toggle menu");
+    await user.click(hamburgerButton);
+
+    // Click typing tutor mode
+    const typingTutorButton = screen.getByText("Typing tutor mode");
+    await user.click(typingTutorButton);
+
+    // Should now show "Type this Hangul:" instead
+    expect(screen.getByText("Type this Hangul:")).toBeInTheDocument();
+    expect(screen.queryByText("Translate to Hangul:")).not.toBeInTheDocument();
+  });
+
+  test("displays Hangul directly in typing tutor mode", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    // Enable typing tutor mode
+    const hamburgerButton = screen.getByLabelText("Toggle menu");
+    await user.click(hamburgerButton);
+    const typingTutorButton = screen.getByText("Typing tutor mode");
+    await user.click(typingTutorButton);
+
+    // The question should now show Hangul characters
+    const questionElement = screen.getByTestId("question-name");
+    const questionText = questionElement.textContent || "";
+
+    // Check that it's showing Hangul (contains Korean characters)
+    const hasKoreanCharacters = /[\u3131-\uD79D]/.test(questionText);
+    expect(hasKoreanCharacters).toBe(true);
+  });
+
+  test("shows romanized version in normal mode", () => {
+    render(<App />);
+
+    const questionElement = screen.getByTestId("question-name");
+    const questionText = questionElement.textContent || "";
+
+    // Should show English text in normal mode
+    const hasLatinCharacters = /[a-zA-Z]/.test(questionText);
+    expect(hasLatinCharacters).toBe(true);
+  });
+
+  test("toggling back from typing tutor mode restores normal display", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    // Enable typing tutor mode
+    await user.click(screen.getByLabelText("Toggle menu"));
+    await user.click(screen.getByText("Typing tutor mode"));
+
+    // Verify it's in typing tutor mode
+    expect(screen.getByText("Type this Hangul:")).toBeInTheDocument();
+
+    // Open menu again and toggle off
+    await user.click(screen.getByLabelText("Toggle menu"));
+    await user.click(screen.getByText("✓ Typing tutor mode"));
+
+    // Should be back to normal mode
+    expect(screen.getByText("Translate to Hangul:")).toBeInTheDocument();
+    expect(screen.queryByText("Type this Hangul:")).not.toBeInTheDocument();
+  });
+
+  test("checkmark appears in menu when typing tutor mode is active", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    // Enable typing tutor mode
+    await user.click(screen.getByLabelText("Toggle menu"));
+    await user.click(screen.getByText("Typing tutor mode"));
+
+    // Open menu again to check for checkmark
+    await user.click(screen.getByLabelText("Toggle menu"));
+    expect(screen.getByText("✓ Typing tutor mode")).toBeInTheDocument();
+  });
+
+  test("answer validation works the same in typing tutor mode", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    // Enable typing tutor mode
+    const hamburgerButton = screen.getByLabelText("Toggle menu");
+    await user.click(hamburgerButton);
+    const typingTutorButton = screen.getByText("Typing tutor mode");
+    await user.click(typingTutorButton);
+
+    // Type some input
+    const input = screen.getByTestId("hangul-input") as HTMLInputElement;
+    await user.type(input, "안");
+
+    // Should still show character feedback
+    expect(screen.getByTestId("character-feedback")).toBeInTheDocument();
+  });
+});

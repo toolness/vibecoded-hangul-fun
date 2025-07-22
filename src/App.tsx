@@ -64,6 +64,12 @@ function App() {
     dispatch({ type: "UPDATE_INPUT", payload: e.target.value });
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && (isCompletelyCorrect || showAnswer)) {
+      handleNext();
+    }
+  };
+
   const handleGiveUp = () => {
     // Mark as incorrect since user gave up
     dispatch({ type: "MARK_INCORRECT", payload: currentQuestion });
@@ -116,6 +122,7 @@ function App() {
             type="text"
             value={userInput}
             onChange={handleInputChange}
+            onKeyDown={handleKeyDown}
             data-testid="hangul-input"
             className="hangul-input"
             placeholder="Enter Hangul..."

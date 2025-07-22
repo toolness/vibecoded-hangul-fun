@@ -138,6 +138,76 @@ describe("URL Display", () => {
   });
 });
 
+describe("Keyboard Accessibility", () => {
+  test("Enter key advances to next question when answer is correct", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    // Find a predictable question
+    let found = false;
+    for (let i = 0; i < 10 && !found; i++) {
+      const questionName = screen.getByTestId("question-name").textContent;
+      if (questionName === "yes") {
+        found = true;
+        break;
+      }
+      await user.click(screen.getByText("Give up"));
+      await user.click(screen.getByText("Next"));
+    }
+
+    if (found) {
+      const input = screen.getByTestId("hangul-input") as HTMLInputElement;
+
+      // Type the correct answer
+      await user.type(input, "네");
+
+      // Press Enter
+      await user.keyboard("{Enter}");
+
+      // Should have moved to next question
+      expect(input.value).toBe(""); // Input should be cleared
+      expect(screen.getByTestId("question-name")).toBeInTheDocument();
+    }
+  });
+
+  test("Enter key advances when answer is shown", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    // Give up to show the answer
+    await user.click(screen.getByText("Give up"));
+
+    // Should show the answer
+    expect(screen.getByTestId("correct-answer")).toBeInTheDocument();
+    expect(screen.getByText("Next")).toBeInTheDocument();
+
+    // Press Enter
+    await user.keyboard("{Enter}");
+
+    // Should have moved to next question
+    expect(screen.queryByTestId("correct-answer")).not.toBeInTheDocument();
+    expect(screen.getByTestId("question-name")).toBeInTheDocument();
+  });
+
+  test("Enter key does nothing when answer is incorrect", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    const input = screen.getByTestId("hangul-input") as HTMLInputElement;
+
+    // Type an incorrect answer
+    await user.type(input, "잘못");
+
+    // Press Enter
+    await user.keyboard("{Enter}");
+
+    // Should still be on the same question with Give up button
+    expect(input.value).toBe("잘못");
+    expect(screen.getByText("Give up")).toBeInTheDocument();
+    expect(screen.queryByText("Next")).not.toBeInTheDocument();
+  });
+});
+
 describe("Real-time Character Validation", () => {
   test("shows character accuracy feedback", async () => {
     const user = userEvent.setup();

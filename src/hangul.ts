@@ -91,6 +91,46 @@ export function decompose_hangul_syllable_to_jamos(
   return [initialCh, medialCh, maybeFinalCh];
 }
 
+/**
+ * In IMEs, the mapping of keystrokes to jamos can be
+ * ambiguous because the IME doesn't know whether to
+ * combine adjacent consonants/vowels into compound ones.
+ *
+ * Sometimes it eagerly combines them, only to split them
+ * up once the user keeps typing and it's clear that they
+ * need to be separate.
+ *
+ * This decomposes such compound jamos into their constituent
+ * parts.
+ */
+export function split_hangul_compat_into_keystrokes(ch: string): string[] {
+  const decompositionMap: { [key: string]: string[] | undefined } = {
+    // Consonants
+    ㄳ: ["ㄱ", "ㅅ"],
+    ㄵ: ["ㄴ", "ㅈ"],
+    ㄶ: ["ㄴ", "ㅎ"],
+    ㄺ: ["ㄹ", "ㄱ"],
+    ㄻ: ["ㄹ", "ㅁ"],
+    ㄼ: ["ㄹ", "ㅂ"],
+    ㄽ: ["ㄹ", "ㅅ"],
+    ㄾ: ["ㄹ", "ㅌ"],
+    ㄿ: ["ㄹ", "ㅍ"],
+    ㅀ: ["ㄹ", "ㅎ"],
+    ㅄ: ["ㅂ", "ㅅ"],
+
+    // Vowels
+    ㅘ: ["ㅗ", "ㅏ"],
+    ㅙ: ["ㅗ", "ㅐ"],
+    ㅚ: ["ㅗ", "ㅣ"],
+    ㅝ: ["ㅜ", "ㅓ"],
+    ㅞ: ["ㅜ", "ㅔ"],
+    ㅟ: ["ㅜ", "ㅣ"],
+    ㅢ: ["ㅡ", "ㅣ"],
+  };
+
+  return decompositionMap[ch] ?? [ch];
+}
+
 export function hangul_jamo_to_compat(ch: string): string | null {
   const jamoToCompatMap: { [key: string]: string } = {
     // Consonants

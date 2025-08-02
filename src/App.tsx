@@ -2,7 +2,7 @@ import "./App.css";
 import { useReducer, useMemo } from "react";
 import _database from "./database.json";
 import type { DatabaseRow } from "./database-spec";
-import { calculateCorrectJamos } from "./calculateCorrectJamos";
+import { calculateCorrectKeystrokes } from "./calculateCorrectJamos";
 import { quizReducer, createInitialState } from "./quizStateReducer";
 import { supportsKoreanSpeech } from "./speech";
 import HamburgerMenu from "./HamburgerMenu";
@@ -54,7 +54,7 @@ function App() {
     return selectRandomQuestion(pool);
   };
 
-  const { correct, total } = calculateCorrectJamos(
+  const { correct, total } = calculateCorrectKeystrokes(
     currentQuestion.hangul || "",
     userInput,
   );
@@ -134,7 +134,7 @@ function App() {
               data-testid="character-feedback"
               className="character-feedback"
             >
-              {correct}/{total} jamos correct
+              {correct}/{total} keys correct
             </div>
           )}
 

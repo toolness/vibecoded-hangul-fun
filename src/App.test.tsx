@@ -233,7 +233,7 @@ describe("Real-time Character Validation", () => {
 
       // Should show feedback that all jamos are correct
       expect(screen.getByTestId("character-feedback")).toHaveTextContent(
-        "2/2 jamos correct",
+        "2/2 keys correct",
       );
     }
   });

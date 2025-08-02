@@ -53,6 +53,8 @@
 }
 
 .hangul-input {
+  box-sizing: border-box;
+  width: 100%;
   font-size: 2rem;
   padding: 1rem;
   text-align: center;

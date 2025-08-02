@@ -2,7 +2,7 @@ import "./App.css";
 import { useReducer, useMemo } from "react";
 import _database from "./database.json";
 import type { DatabaseRow } from "./database-spec";
-import { calculateCorrectKeystrokes } from "./calculateCorrectJamos";
+import { calculateCorrectKeystrokes } from "./calculateCorrectKeystrokes";
 import { quizReducer, createInitialState } from "./quizStateReducer";
 import { supportsKoreanSpeech } from "./speech";
 import HamburgerMenu from "./HamburgerMenu";

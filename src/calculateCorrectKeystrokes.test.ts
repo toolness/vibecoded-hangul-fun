@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { calculateCorrectKeystrokes } from "./calculateCorrectJamos";
+import { calculateCorrectKeystrokes } from "./calculateCorrectKeystrokes";
 
 describe("calculateCorrectJamos", () => {
   it("should handle empty correct hangul string", () => {

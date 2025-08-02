@@ -134,7 +134,7 @@ function App() {
               data-testid="character-feedback"
               className="character-feedback"
             >
-              {correct}/{total} keys correct
+              {correct}/{total} keystrokes correct
             </div>
           )}
 

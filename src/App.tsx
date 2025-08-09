@@ -1,10 +1,10 @@
 import "./App.css";
-import { useReducer, useMemo } from "react";
+import { useReducer } from "react";
 import _database from "./database.json";
 import type { DatabaseRow } from "./database-spec";
 import { calculateCorrectKeystrokes } from "./calculateCorrectKeystrokes";
 import { quizReducer, createInitialState } from "./quizStateReducer";
-import { supportsKoreanSpeech } from "./speech";
+import { useKoreanVocalizer } from "./speech";
 import HamburgerMenu from "./HamburgerMenu";
 import QuestionDisplay from "./QuestionDisplay";
 
@@ -21,7 +21,7 @@ function selectRandomQuestion(pool: DatabaseRow[]) {
 }
 
 function App() {
-  const supportsSpeech = useMemo(supportsKoreanSpeech, []);
+  const vocalizer = useKoreanVocalizer();
 
   // Helper to get initial random question
   const getInitialQuestion = () => selectRandomQuestion(DATABASE_ROWS);
@@ -112,7 +112,7 @@ function App() {
             <QuestionDisplay
               currentQuestion={currentQuestion}
               isTypingTutorMode={isTypingTutorMode}
-              supportsSpeech={supportsSpeech}
+              vocalizer={vocalizer}
             />
           </div>
         </div>

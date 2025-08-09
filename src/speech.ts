@@ -1,3 +1,5 @@
+import { useEffect, useMemo, useState } from "react";
+
 /**
  * Ideally we'd just lean on the browser to choose whatever
  * Korean voice the user has indicated a preference for at
@@ -33,60 +35,71 @@ const BEST_VOICES = [
 /**
  * Returns the best available Korean voice, or null if none found.
  */
-const getBestKoreanVoice = (() => {
-  // This lazily figures out what the best Korean voice is and
-  // caches it for fast subsequent retrieval.
+function findBestKoreanVoice(): SpeechSynthesisVoice | null {
+  if (!("speechSynthesis" in window)) {
+    return null;
+  }
 
-  let bestKoreanVoice: SpeechSynthesisVoice | null | undefined;
-
-  function findBestKoreanVoice(): SpeechSynthesisVoice | null {
-    if (!("speechSynthesis" in window)) {
-      return null;
-    }
-
-    const koreanVoices = speechSynthesis
-      .getVoices()
-      .filter((voice) => voice.lang.startsWith("ko"));
-    for (const regex of BEST_VOICES) {
-      for (const voice of koreanVoices) {
-        if (regex.test(voice.name)) {
-          return voice;
-        }
+  const koreanVoices = speechSynthesis
+    .getVoices()
+    .filter((voice) => voice.lang.startsWith("ko"));
+  for (const regex of BEST_VOICES) {
+    for (const voice of koreanVoices) {
+      if (regex.test(voice.name)) {
+        return voice;
       }
     }
-    return koreanVoices[0] ?? null;
   }
-
-  return () => {
-    if (bestKoreanVoice === undefined) {
-      bestKoreanVoice = findBestKoreanVoice();
-    }
-    return bestKoreanVoice;
-  };
-})();
-
-/**
- * Returns whether the browser supports the Web Speech API *and*
- * has a Korean voice available.
- */
-export function supportsKoreanSpeech(): boolean {
-  return getBestKoreanVoice() !== null;
+  return koreanVoices[0] ?? null;
 }
 
+export type Vocalizer = (hangul: string) => void;
+
 /**
- * Use the Web Speech API to vocalize the given Hangul using the best
+ * A React hook that returns a function to vocalize the given
+ * Hangul, using the Web Speech API with the best
  * Korean-language voice available.
  */
-export function vocalizeKoreanSpeech(hangul: string) {
-  const koreanVoice = getBestKoreanVoice();
-  if (!koreanVoice) {
-    console.warn("Korean speech synthesis not supported");
-    return;
-  }
+export function useKoreanVocalizer(): Vocalizer | null {
+  const [bestKoreanVoice, setBestKoreanVoice] = useState(findBestKoreanVoice);
 
-  const utterance = new SpeechSynthesisUtterance(hangul);
-  utterance.voice = koreanVoice;
-  utterance.lang = "ko-KR";
-  utterance.rate = 0.5;
-  speechSynthesis.speak(utterance);
+  useEffect(() => {
+    if ("speechSynthesis" in window) {
+      const handleVoicesChanged = () => {
+        setBestKoreanVoice(findBestKoreanVoice());
+      };
+      // On Firefox, there are no voices loaded before the 'load'
+      // event is fired, it seems.
+      window.addEventListener("load", handleVoicesChanged);
+      // Browsers should technically fire this event whenever
+      // the voice list changes, though I haven't observed this
+      // happen in practice yet.
+      window.speechSynthesis.addEventListener(
+        "voiceschanged",
+        handleVoicesChanged,
+      );
+      return () => {
+        window.removeEventListener("load", handleVoicesChanged);
+        window.speechSynthesis.removeEventListener(
+          "voiceschanged",
+          handleVoicesChanged,
+        );
+      };
+    }
+  });
+
+  const vocalizer: Vocalizer | null = useMemo(() => {
+    if (!bestKoreanVoice) {
+      return null;
+    }
+    return (hangul: string) => {
+      const utterance = new SpeechSynthesisUtterance(hangul);
+      utterance.voice = bestKoreanVoice;
+      utterance.lang = "ko-KR";
+      utterance.rate = 0.5;
+      speechSynthesis.speak(utterance);
+    };
+  }, [bestKoreanVoice]);
+
+  return vocalizer;
 }

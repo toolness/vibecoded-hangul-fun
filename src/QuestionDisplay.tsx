@@ -1,18 +1,18 @@
 import { useCallback } from "react";
 import type { DatabaseRow } from "./database-spec";
 import SpeakerIcon from "./assets/Speaker_Icon.svg";
-import { vocalizeKoreanSpeech } from "./speech";
+import { type Vocalizer } from "./speech";
 
 interface QuestionDisplayProps {
   currentQuestion: DatabaseRow;
   isTypingTutorMode: boolean;
-  supportsSpeech: boolean;
+  vocalizer: Vocalizer | null;
 }
 
 function QuestionDisplay({
   currentQuestion,
   isTypingTutorMode,
-  supportsSpeech,
+  vocalizer,
 }: QuestionDisplayProps) {
   const handleSpeakerPointerDown = useCallback(
     (e: React.PointerEvent) => {
@@ -25,9 +25,9 @@ function QuestionDisplay({
       // to translate it more accurately).
       e.preventDefault();
 
-      vocalizeKoreanSpeech(currentQuestion.hangul);
+      vocalizer?.(currentQuestion.hangul);
     },
-    [currentQuestion],
+    [currentQuestion, vocalizer],
   );
 
   const displayText = isTypingTutorMode
@@ -62,7 +62,7 @@ function QuestionDisplay({
           {displayText}
         </span>
       )}
-      {supportsSpeech && (
+      {vocalizer && (
         <>
           {" "}
           <img

@@ -1,5 +1,5 @@
 import "./App.css";
-import { useReducer } from "react";
+import { useReducer, useEffect, useState } from "react";
 import _database from "./database.json";
 import type { DatabaseRow } from "./database-spec";
 import { calculateCorrectKeystrokes } from "./calculateCorrectKeystrokes";
@@ -7,6 +7,7 @@ import { quizReducer, createInitialState } from "./quizStateReducer";
 import { useKoreanVocalizer } from "./speech";
 import HamburgerMenu from "./HamburgerMenu";
 import QuestionDisplay from "./QuestionDisplay";
+import Confetti from "./Confetti";
 
 const DATABASE_ROWS: DatabaseRow[] = _database.filter(
   (row) => row.name && row.hangul,
@@ -22,6 +23,7 @@ function selectRandomQuestion(pool: DatabaseRow[]) {
 
 function App() {
   const vocalizer = useKoreanVocalizer();
+  const [showConfetti, setShowConfetti] = useState(false);
 
   // Helper to get initial random question
   const getInitialQuestion = () => selectRandomQuestion(DATABASE_ROWS);
@@ -60,6 +62,13 @@ function App() {
   );
   const isCompletelyCorrect = userInput === currentQuestion.hangul;
 
+  // Trigger confetti when user completes the word correctly
+  useEffect(() => {
+    if (isCompletelyCorrect && !showAnswer) {
+      setShowConfetti(true);
+    }
+  }, [isCompletelyCorrect, showAnswer]);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     dispatch({ type: "UPDATE_INPUT", payload: e.target.value });
   };
@@ -82,11 +91,15 @@ function App() {
       dispatch({ type: "MARK_CORRECT", payload: currentQuestion });
     }
 
+    // Reset confetti for next question
+    setShowConfetti(false);
+
     // Move to next question
     dispatch({ type: "NEXT_QUESTION", payload: selectNextQuestion() });
   };
 
   const handleWordSelection = (word: DatabaseRow) => {
+    setShowConfetti(false);
     dispatch({ type: "NEXT_QUESTION", payload: word });
   };
 
@@ -96,6 +109,7 @@ function App() {
 
   return (
     <main>
+      <Confetti show={showConfetti} />
       <HamburgerMenu
         words={DATABASE_ROWS}
         onSelectWord={handleWordSelection}

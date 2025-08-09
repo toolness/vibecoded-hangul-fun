@@ -22,7 +22,7 @@ describe("QuestionDisplay", () => {
         <QuestionDisplay
           currentQuestion={mockQuestionWithUrl}
           isTypingTutorMode={false}
-          supportsSpeech={false}
+          vocalizer={null}
         />,
       );
 
@@ -40,7 +40,7 @@ describe("QuestionDisplay", () => {
         <QuestionDisplay
           currentQuestion={mockQuestionWithoutUrl}
           isTypingTutorMode={false}
-          supportsSpeech={false}
+          vocalizer={null}
         />,
       );
 
@@ -57,7 +57,7 @@ describe("QuestionDisplay", () => {
         <QuestionDisplay
           currentQuestion={mockQuestionWithUrl}
           isTypingTutorMode={true}
-          supportsSpeech={false}
+          vocalizer={null}
         />,
       );
 
@@ -75,7 +75,7 @@ describe("QuestionDisplay", () => {
         <QuestionDisplay
           currentQuestion={mockQuestionWithoutUrl}
           isTypingTutorMode={true}
-          supportsSpeech={false}
+          vocalizer={null}
         />,
       );
 
@@ -92,7 +92,7 @@ describe("QuestionDisplay", () => {
         <QuestionDisplay
           currentQuestion={mockQuestionWithUrl}
           isTypingTutorMode={false}
-          supportsSpeech={true}
+          vocalizer={() => {}}
         />,
       );
 
@@ -105,7 +105,7 @@ describe("QuestionDisplay", () => {
         <QuestionDisplay
           currentQuestion={mockQuestionWithUrl}
           isTypingTutorMode={false}
-          supportsSpeech={false}
+          vocalizer={null}
         />,
       );
 

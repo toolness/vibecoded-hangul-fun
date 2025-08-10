@@ -1,5 +1,5 @@
 import "./App.css";
-import { useReducer, useEffect, useState } from "react";
+import { useReducer, useEffect, useState, useRef } from "react";
 import _database from "./database.json";
 import type { DatabaseRow } from "./database-spec";
 import { calculateCorrectKeystrokes } from "./calculateCorrectKeystrokes";
@@ -24,6 +24,7 @@ function selectRandomQuestion(pool: DatabaseRow[]) {
 function App() {
   const vocalizer = useKoreanVocalizer();
   const [showConfetti, setShowConfetti] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Helper to get initial random question
   const getInitialQuestion = () => selectRandomQuestion(DATABASE_ROWS);
@@ -96,6 +97,11 @@ function App() {
 
     // Move to next question
     dispatch({ type: "NEXT_QUESTION", payload: selectNextQuestion() });
+
+    // Focus the input field
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 0);
   };
 
   const handleSkip = () => {
@@ -104,11 +110,21 @@ function App() {
 
     // Move to next question without marking as correct or incorrect
     dispatch({ type: "NEXT_QUESTION", payload: selectNextQuestion() });
+
+    // Focus the input field
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 0);
   };
 
   const handleWordSelection = (word: DatabaseRow) => {
     setShowConfetti(false);
     dispatch({ type: "NEXT_QUESTION", payload: word });
+
+    // Focus the input field
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 0);
   };
 
   const handleToggleTypingTutorMode = () => {
@@ -141,6 +157,7 @@ function App() {
 
         <div className="input-section">
           <input
+            ref={inputRef}
             type="text"
             value={userInput}
             onChange={handleInputChange}

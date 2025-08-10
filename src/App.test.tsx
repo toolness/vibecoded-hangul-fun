@@ -1,5 +1,5 @@
 import { expect, test, describe, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import App from "./App";
 import "@testing-library/jest-dom";
@@ -66,6 +66,37 @@ describe("App State Management", () => {
     expect(screen.getByText("Skip")).toBeInTheDocument();
     expect(screen.getByText("Give up")).toBeInTheDocument();
     expect(screen.queryByText("Next")).not.toBeInTheDocument();
+  });
+
+  test("input field receives focus after clicking Skip", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    // Click skip
+    await user.click(screen.getByText("Skip"));
+
+    // Wait for the input to be focused
+    const input = screen.getByTestId("hangul-input");
+    await waitFor(() => {
+      expect(document.activeElement).toBe(input);
+    });
+  });
+
+  test("input field receives focus after clicking Next", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    // Give up to show Next button
+    await user.click(screen.getByText("Give up"));
+
+    // Click Next
+    await user.click(screen.getByText("Next"));
+
+    // Wait for the input to be focused
+    const input = screen.getByTestId("hangul-input");
+    await waitFor(() => {
+      expect(document.activeElement).toBe(input);
+    });
   });
 
   test("tracks answered questions", async () => {

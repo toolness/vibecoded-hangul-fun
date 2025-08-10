@@ -117,6 +117,17 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
+.button-skip {
+  background-color: #2196f3;
+  color: white;
+}
+
+.button-skip:hover {
+  background-color: #1976d2;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
 .button-giveup {
   background-color: #ff9800;
   color: white;

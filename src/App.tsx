@@ -98,6 +98,14 @@ function App() {
     dispatch({ type: "NEXT_QUESTION", payload: selectNextQuestion() });
   };
 
+  const handleSkip = () => {
+    // Reset confetti for next question
+    setShowConfetti(false);
+
+    // Move to next question without marking as correct or incorrect
+    dispatch({ type: "NEXT_QUESTION", payload: selectNextQuestion() });
+  };
+
   const handleWordSelection = (word: DatabaseRow) => {
     setShowConfetti(false);
     dispatch({ type: "NEXT_QUESTION", payload: word });
@@ -166,9 +174,14 @@ function App() {
               Next
             </button>
           ) : (
-            <button onClick={handleGiveUp} className="button button-giveup">
-              Give up
-            </button>
+            <>
+              <button onClick={handleSkip} className="button button-skip">
+                Skip
+              </button>
+              <button onClick={handleGiveUp} className="button button-giveup">
+                Give up
+              </button>
+            </>
           )}
         </div>
       </div>

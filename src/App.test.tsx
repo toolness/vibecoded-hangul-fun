@@ -43,6 +43,31 @@ describe("App State Management", () => {
     expect(screen.getByText("Give up")).toBeInTheDocument();
   });
 
+  test("shows skip button", () => {
+    render(<App />);
+    expect(screen.getByText("Skip")).toBeInTheDocument();
+  });
+
+  test("skip button moves to next question without revealing answer", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    // Click skip
+    await user.click(screen.getByText("Skip"));
+
+    // Should not show the answer
+    expect(screen.queryByTestId("correct-answer")).not.toBeInTheDocument();
+
+    // Should still be on a question (might be the same due to randomness)
+    expect(screen.getByTestId("question-name")).toBeInTheDocument();
+    expect(screen.getByTestId("hangul-input")).toBeInTheDocument();
+
+    // Should show Skip and Give up buttons, not Next
+    expect(screen.getByText("Skip")).toBeInTheDocument();
+    expect(screen.getByText("Give up")).toBeInTheDocument();
+    expect(screen.queryByText("Next")).not.toBeInTheDocument();
+  });
+
   test("tracks answered questions", async () => {
     const user = userEvent.setup();
     render(<App />);
@@ -181,7 +206,9 @@ describe("Keyboard Accessibility", () => {
     expect(screen.getByTestId("correct-answer")).toBeInTheDocument();
     expect(screen.getByText("Next")).toBeInTheDocument();
 
-    // Press Enter
+    // Focus the input and press Enter
+    const input = screen.getByTestId("hangul-input");
+    input.focus();
     await user.keyboard("{Enter}");
 
     // Should have moved to next question

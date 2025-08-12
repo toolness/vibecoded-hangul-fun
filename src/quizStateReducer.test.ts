@@ -18,21 +18,24 @@ describe("quizReducer", () => {
     imageUrl: "",
   };
 
+  const mockQuestions = [mockQuestion, mockQuestion2];
+
   it("should return initial state", () => {
-    const initialState = createInitialState(mockQuestion);
-    expect(initialState).toEqual({
-      currentQuestion: mockQuestion,
-      userInput: "",
-      answeredQuestions: new Set(),
-      incorrectQuestions: new Set(),
-      showAnswer: false,
-      mode: "translate",
-    });
+    const initialState = createInitialState(mockQuestions);
+    expect(initialState.userInput).toBe("");
+    expect(initialState.showAnswer).toBe(false);
+    expect(initialState.mode).toBe("translate");
+    expect(initialState.allQuestions).toEqual(mockQuestions);
+    expect(initialState.allQuestionsForMode).toEqual(mockQuestions);
+    // Current question should be one of the mock questions
+    expect(mockQuestions).toContainEqual(initialState.currentQuestion);
+    // Remaining questions should have the other question
+    expect(initialState.remainingQuestions.length).toBe(1);
   });
 
   describe("UPDATE_INPUT", () => {
     it("should update user input", () => {
-      const initialState = createInitialState(mockQuestion);
+      const initialState = createInitialState(mockQuestions);
       const result = quizReducer(initialState, {
         type: "UPDATE_INPUT",
         payload: "안",
@@ -41,7 +44,7 @@ describe("quizReducer", () => {
     });
 
     it("should handle empty input", () => {
-      const initialState = createInitialState(mockQuestion);
+      const initialState = createInitialState(mockQuestions);
       const stateWithInput: QuizState = { ...initialState, userInput: "test" };
       const result = quizReducer(stateWithInput, {
         type: "UPDATE_INPUT",
@@ -51,80 +54,39 @@ describe("quizReducer", () => {
     });
   });
 
-  describe("MARK_CORRECT", () => {
-    it("should add question to answered set", () => {
-      const state = createInitialState(mockQuestion);
+  describe("SET_QUESTION", () => {
+    it("should set a specific question", () => {
+      const state = createInitialState(mockQuestions);
       const result = quizReducer(state, {
-        type: "MARK_CORRECT",
-        payload: mockQuestion,
+        type: "SET_QUESTION",
+        payload: mockQuestion2,
       });
-      expect(result.answeredQuestions.has(mockQuestion)).toBe(true);
-      expect(result.incorrectQuestions.has(mockQuestion)).toBe(false);
+      expect(result.currentQuestion).toBe(mockQuestion2);
+      expect(result.userInput).toBe("");
+      expect(result.showAnswer).toBe(false);
     });
 
-    it("should remove question from incorrect set if present", () => {
-      const initialState = createInitialState(mockQuestion);
-      const stateWithIncorrect: QuizState = {
+    it("should reset user input and showAnswer", () => {
+      const initialState = createInitialState(mockQuestions);
+      const stateWithData: QuizState = {
         ...initialState,
-        incorrectQuestions: new Set([mockQuestion]),
+        userInput: "test",
+        showAnswer: true,
       };
-      const result = quizReducer(stateWithIncorrect, {
-        type: "MARK_CORRECT",
+      const result = quizReducer(stateWithData, {
+        type: "SET_QUESTION",
         payload: mockQuestion,
       });
-      expect(result.answeredQuestions.has(mockQuestion)).toBe(true);
-      expect(result.incorrectQuestions.has(mockQuestion)).toBe(false);
-    });
-
-    it("should preserve immutability of sets", () => {
-      const state = createInitialState(mockQuestion);
-      const result = quizReducer(state, {
-        type: "MARK_CORRECT",
-        payload: mockQuestion,
-      });
-      expect(result.answeredQuestions).not.toBe(state.answeredQuestions);
-      expect(result.incorrectQuestions).not.toBe(state.incorrectQuestions);
+      expect(result.currentQuestion).toBe(mockQuestion);
+      expect(result.userInput).toBe("");
+      expect(result.showAnswer).toBe(false);
     });
   });
 
-  describe("MARK_INCORRECT", () => {
-    it("should add question to both answered and incorrect sets", () => {
-      const state = createInitialState(mockQuestion);
-      const result = quizReducer(state, {
-        type: "MARK_INCORRECT",
-        payload: mockQuestion,
-      });
-      expect(result.answeredQuestions.has(mockQuestion)).toBe(true);
-      expect(result.incorrectQuestions.has(mockQuestion)).toBe(true);
-    });
-
-    it("should preserve existing items in sets", () => {
-      const existingQuestion: DatabaseRow = {
-        name: "existing",
-        hangul: "기존",
-        url: "",
-        imageUrl: "",
-      };
-      const initialState = createInitialState(mockQuestion);
-      const stateWithAnswers: QuizState = {
-        ...initialState,
-        answeredQuestions: new Set([existingQuestion]),
-        incorrectQuestions: new Set([existingQuestion]),
-      };
-      const result = quizReducer(stateWithAnswers, {
-        type: "MARK_INCORRECT",
-        payload: mockQuestion,
-      });
-      expect(result.answeredQuestions.has(existingQuestion)).toBe(true);
-      expect(result.answeredQuestions.has(mockQuestion)).toBe(true);
-      expect(result.incorrectQuestions.has(existingQuestion)).toBe(true);
-      expect(result.incorrectQuestions.has(mockQuestion)).toBe(true);
-    });
-  });
 
   describe("SHOW_ANSWER", () => {
     it("should set showAnswer to true", () => {
-      const initialState = createInitialState(mockQuestion);
+      const initialState = createInitialState(mockQuestions);
       const result = quizReducer(initialState, {
         type: "SHOW_ANSWER",
       });
@@ -132,7 +94,8 @@ describe("quizReducer", () => {
     });
 
     it("should not affect other state properties", () => {
-      const initialState = createInitialState(mockQuestion);
+      const initialState = createInitialState(mockQuestions);
+      const originalQuestion = initialState.currentQuestion;
       const stateWithData: QuizState = {
         ...initialState,
         userInput: "test",
@@ -141,29 +104,13 @@ describe("quizReducer", () => {
         type: "SHOW_ANSWER",
       });
       expect(result.showAnswer).toBe(true);
-      expect(result.currentQuestion).toEqual(mockQuestion);
+      expect(result.currentQuestion).toEqual(originalQuestion);
       expect(result.userInput).toBe("test");
     });
   });
 
   describe("NEXT_QUESTION", () => {
-    it("should set new question and reset input/showAnswer", () => {
-      const initialState = createInitialState(mockQuestion);
-      const stateWithData: QuizState = {
-        ...initialState,
-        userInput: "안녕",
-        showAnswer: true,
-      };
-      const result = quizReducer(stateWithData, {
-        type: "NEXT_QUESTION",
-        payload: mockQuestion2,
-      });
-      expect(result.currentQuestion).toEqual(mockQuestion2);
-      expect(result.userInput).toBe("");
-      expect(result.showAnswer).toBe(false);
-    });
-
-    it("should preserve answered and incorrect questions", () => {
+    it("should move to next question from remaining questions", () => {
       const q1: DatabaseRow = {
         name: "q1",
         hangul: "하나",
@@ -176,24 +123,48 @@ describe("quizReducer", () => {
         url: "",
         imageUrl: "",
       };
-      const initialState = createInitialState(q1);
-      const stateWithAnswers: QuizState = {
-        ...initialState,
-        answeredQuestions: new Set([q1, q2]),
-        incorrectQuestions: new Set([q1]),
+      const q3: DatabaseRow = {
+        name: "q3",
+        hangul: "셋",
+        url: "",
+        imageUrl: "",
       };
-      const result = quizReducer(stateWithAnswers, {
+      const questions = [q1, q2, q3];
+      const initialState = createInitialState(questions);
+      const beforeLength = initialState.remainingQuestions.length;
+      
+      const result = quizReducer(initialState, {
         type: "NEXT_QUESTION",
-        payload: mockQuestion,
       });
-      expect(result.answeredQuestions.size).toBe(2);
-      expect(result.incorrectQuestions.size).toBe(1);
+      
+      expect(result.remainingQuestions.length).toBe(beforeLength - 1);
+      expect(result.userInput).toBe("");
+      expect(result.showAnswer).toBe(false);
+    });
+
+    it("should restart when no remaining questions", () => {
+      const questions = [mockQuestion, mockQuestion2];
+      const initialState = createInitialState(questions);
+      // Empty the remaining questions
+      const stateWithNoRemaining: QuizState = {
+        ...initialState,
+        remainingQuestions: [],
+      };
+      
+      const result = quizReducer(stateWithNoRemaining, {
+        type: "NEXT_QUESTION",
+      });
+      
+      // Should have reset with all questions
+      expect(result.allQuestionsForMode.length).toBe(2);
+      expect(result.remainingQuestions.length).toBe(1);
+      expect(questions).toContainEqual(result.currentQuestion);
     });
   });
 
   describe("invalid action", () => {
     it("should return current state for unknown action type", () => {
-      const initialState = createInitialState(mockQuestion);
+      const initialState = createInitialState(mockQuestions);
       const result = quizReducer(initialState, {
         // @ts-expect-error - Testing invalid action
         type: "INVALID_ACTION",
@@ -204,7 +175,7 @@ describe("quizReducer", () => {
 
   describe("SET_MODE", () => {
     it("should set mode to typingtutor", () => {
-      const initialState = createInitialState(mockQuestion);
+      const initialState = createInitialState(mockQuestions);
       const result = quizReducer(initialState, {
         type: "SET_MODE",
         payload: "typingtutor",
@@ -213,40 +184,37 @@ describe("quizReducer", () => {
     });
 
     it("should set mode to translate", () => {
-      const initialState = createInitialState(mockQuestion);
-      const stateWithTutorMode: QuizState = {
-        ...initialState,
-        mode: "typingtutor",
-      };
-      const result = quizReducer(stateWithTutorMode, {
+      const initialState = createInitialState(mockQuestions, "typingtutor");
+      const result = quizReducer(initialState, {
         type: "SET_MODE",
         payload: "translate",
       });
       expect(result.mode).toBe("translate");
     });
 
-    it("should not affect other state properties", () => {
-      const initialState = createInitialState(mockQuestion);
+    it("should reset state when changing mode", () => {
+      const initialState = createInitialState(mockQuestions);
       const stateWithData: QuizState = {
         ...initialState,
         userInput: "test",
         showAnswer: true,
-        answeredQuestions: new Set([mockQuestion]),
       };
       const result = quizReducer(stateWithData, {
         type: "SET_MODE",
         payload: "typingtutor",
       });
       expect(result.mode).toBe("typingtutor");
-      expect(result.userInput).toBe("test");
-      expect(result.showAnswer).toBe(true);
-      expect(result.answeredQuestions.has(mockQuestion)).toBe(true);
+      // State should be reset
+      expect(result.userInput).toBe("");
+      expect(result.showAnswer).toBe(false);
+      // Should have new shuffled questions
+      expect(result.allQuestionsForMode).toEqual(mockQuestions);
     });
   });
 
   describe("complex scenarios", () => {
     it("should handle multiple state transitions", () => {
-      let state = createInitialState(mockQuestion2);
+      let state = createInitialState(mockQuestions);
 
       // User types incorrect answer
       state = quizReducer(state, {
@@ -254,28 +222,27 @@ describe("quizReducer", () => {
         payload: "가나",
       });
 
+      expect(state.userInput).toBe("가나");
+
       // User gives up
       state = quizReducer(state, {
         type: "SHOW_ANSWER",
       });
 
-      // Mark as incorrect
-      state = quizReducer(state, {
-        type: "MARK_INCORRECT",
-        payload: mockQuestion,
-      });
+      expect(state.showAnswer).toBe(true);
 
       // Move to next question
+      const prevQuestion = state.currentQuestion;
       state = quizReducer(state, {
         type: "NEXT_QUESTION",
-        payload: mockQuestion2,
       });
 
-      expect(state.currentQuestion).toEqual(mockQuestion2);
       expect(state.userInput).toBe("");
       expect(state.showAnswer).toBe(false);
-      expect(state.answeredQuestions.has(mockQuestion)).toBe(true);
-      expect(state.incorrectQuestions.has(mockQuestion)).toBe(true);
+      // Should have moved to a different question (or restarted)
+      if (state.remainingQuestions.length > 0) {
+        expect(state.currentQuestion).not.toBe(prevQuestion);
+      }
     });
   });
 });

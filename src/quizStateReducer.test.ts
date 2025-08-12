@@ -83,7 +83,6 @@ describe("quizReducer", () => {
     });
   });
 
-
   describe("SHOW_ANSWER", () => {
     it("should set showAnswer to true", () => {
       const initialState = createInitialState(mockQuestions);
@@ -132,11 +131,11 @@ describe("quizReducer", () => {
       const questions = [q1, q2, q3];
       const initialState = createInitialState(questions);
       const beforeLength = initialState.remainingQuestions.length;
-      
+
       const result = quizReducer(initialState, {
         type: "NEXT_QUESTION",
       });
-      
+
       expect(result.remainingQuestions.length).toBe(beforeLength - 1);
       expect(result.userInput).toBe("");
       expect(result.showAnswer).toBe(false);
@@ -150,11 +149,11 @@ describe("quizReducer", () => {
         ...initialState,
         remainingQuestions: [],
       };
-      
+
       const result = quizReducer(stateWithNoRemaining, {
         type: "NEXT_QUESTION",
       });
-      
+
       // Should have reset with all questions
       expect(result.allQuestionsForMode.length).toBe(2);
       expect(result.remainingQuestions.length).toBe(1);

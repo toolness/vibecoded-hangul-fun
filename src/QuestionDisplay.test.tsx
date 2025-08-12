@@ -69,7 +69,7 @@ describe("QuestionDisplay", () => {
       expect(link).toHaveAttribute("target", "_blank");
       expect(link).toHaveAttribute("rel", "noopener noreferrer");
       expect(link).toHaveTextContent("안녕하세요");
-      expect(link).toHaveClass("question-link hangul");
+      expect(link).toHaveClass("question-link");
     });
 
     it("should display Hangul text as span when no URL", () => {
@@ -84,7 +84,7 @@ describe("QuestionDisplay", () => {
       const span = screen.getByTestId("question-name");
       expect(span.tagName).toBe("SPAN");
       expect(span).toHaveTextContent("안녕히 가세요");
-      expect(span).toHaveClass("question-text hangul");
+      expect(span).toHaveClass("question-text");
     });
   });
 

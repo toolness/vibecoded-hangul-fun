@@ -46,6 +46,12 @@
   color: #213547;
 }
 
+.mode-picture {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .input-section {
   display: flex;
   flex-direction: column;

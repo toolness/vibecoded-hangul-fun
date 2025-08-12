@@ -7,6 +7,7 @@ import type { Mode } from "./quizStateReducer";
 const MODE_NAMES: { [k in Mode]: string } = {
   translate: "Translate",
   typingtutor: "Typing tutor",
+  picture: "Picture",
 };
 
 const MODE_ORDER: Mode[] = Object.keys(MODE_NAMES) as Mode[];

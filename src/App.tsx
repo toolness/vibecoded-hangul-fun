@@ -9,6 +9,12 @@ import QuestionDisplay from "./QuestionDisplay";
 import Confetti from "./Confetti";
 import databaseRows from "./database.json";
 
+const MODE_PROMPT: Record<Mode, string> = {
+  typingtutor: "Type this Hangul:",
+  translate: "Translate to Hangul:",
+  picture: "Identify this picture using Hangul:",
+};
+
 function App() {
   const vocalizer = useKoreanVocalizer();
   const [showConfetti, setShowConfetti] = useState(false);
@@ -99,11 +105,7 @@ function App() {
 
       <div className="quiz-container" data-testid="quiz-container">
         <div className="question-section">
-          <h2 className="question-prompt">
-            {mode === "typingtutor"
-              ? "Type this Hangul:"
-              : "Translate to Hangul:"}
-          </h2>
+          <h2 className="question-prompt">{MODE_PROMPT[mode]}</h2>
           <div className="question-name">
             <QuestionDisplay
               currentQuestion={currentQuestion}

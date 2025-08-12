@@ -31,21 +31,22 @@ function QuestionDisplay({
     [currentQuestion, vocalizer],
   );
 
-  const displayText =
-    mode === "typingtutor" ? currentQuestion.hangul : currentQuestion.name;
+  const getQuestion = (): React.ReactNode => {
+    switch (mode) {
+      case "typingtutor":
+        return currentQuestion.hangul;
+      case "translate":
+        return currentQuestion.name;
+      case "picture":
+        return <img src={currentQuestion.imageUrl} />;
+    }
+  };
 
   // Always use question-link for links, question-text for non-links
-  // Add hangul class when in typing tutor mode
-  const className = currentQuestion.url
-    ? mode === "typingtutor"
-      ? "question-link hangul"
-      : "question-link"
-    : mode === "typingtutor"
-      ? "question-text hangul"
-      : "question-text";
+  const className = currentQuestion.url ? "question-link" : "question-text";
 
   return (
-    <>
+    <div className={`mode-${mode}`}>
       {currentQuestion.url ? (
         <a
           href={currentQuestion.url}
@@ -53,13 +54,13 @@ function QuestionDisplay({
           rel="noopener noreferrer"
           data-testid="question-name"
           className={className}
-          title={mode === "typingtutor" ? currentQuestion.name : undefined}
+          title={mode !== "translate" ? currentQuestion.name : undefined}
         >
-          {displayText}
+          {getQuestion()}
         </a>
       ) : (
         <span data-testid="question-name" className={className}>
-          {displayText}
+          {getQuestion()}
         </span>
       )}
       {vocalizer && (
@@ -72,7 +73,7 @@ function QuestionDisplay({
           />
         </>
       )}
-    </>
+    </div>
   );
 }
 

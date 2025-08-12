@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import "./WordSelectionModal.css";
 import type { DatabaseRow } from "./database-spec";
 
@@ -16,8 +16,9 @@ function WordSelectionModal({
   const [selectedWord, setSelectedWord] = useState<string>("");
 
   // Sort words alphabetically
-  const sortedWords = [...words].sort((a, b) =>
-    (a.name || "").localeCompare(b.name || ""),
+  const sortedWords = useMemo(
+    () => [...words].sort((a, b) => (a.name || "").localeCompare(b.name || "")),
+    [words],
   );
 
   useEffect(() => {
@@ -25,7 +26,7 @@ function WordSelectionModal({
     if (sortedWords.length > 0 && sortedWords[0].name) {
       setSelectedWord(sortedWords[0].name);
     }
-  }, []);
+  }, [sortedWords]);
 
   const handleSelect = () => {
     const word = sortedWords.find((w) => w.name === selectedWord);

@@ -70,6 +70,7 @@ function HamburgerMenu({
             {MODE_ORDER.map((modeToChoose) => {
               return (
                 <button
+                  key={modeToChoose}
                   className="menu-link"
                   onClick={() => {
                     onSetMode(modeToChoose);

@@ -8,12 +8,14 @@ describe("QuestionDisplay", () => {
     name: "hello",
     hangul: "안녕하세요",
     url: "https://example.com",
+    imageUrl: "",
   };
 
   const mockQuestionWithoutUrl: DatabaseRow = {
     name: "goodbye",
     hangul: "안녕히 가세요",
     url: "",
+    imageUrl: "",
   };
 
   describe("Normal mode", () => {

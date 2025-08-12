@@ -49,6 +49,7 @@ async function downloadDatabase(
     let name = "";
     let hangul = "";
     let url = "";
+    let imageUrl = "";
 
     // Extract Name
     if (
@@ -89,10 +90,20 @@ async function downloadDatabase(
       url = properties.URL.url;
     }
 
+    // Extract Image URL (optional)
+    if (
+      properties["Image URL"] &&
+      properties["Image URL"].type === "url" &&
+      typeof properties["Image URL"].url === "string"
+    ) {
+      imageUrl = properties["Image URL"].url;
+    }
+
     rows.push({
       name,
       hangul,
       url,
+      imageUrl,
     });
   }
 

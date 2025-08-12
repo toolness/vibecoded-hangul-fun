@@ -8,12 +8,14 @@ describe("quizReducer", () => {
     name: "hello",
     hangul: "안녕",
     url: "",
+    imageUrl: "",
   };
 
   const mockQuestion2: DatabaseRow = {
     name: "goodbye",
     hangul: "안녕히",
     url: "",
+    imageUrl: "",
   };
 
   it("should return initial state", () => {
@@ -101,6 +103,7 @@ describe("quizReducer", () => {
         name: "existing",
         hangul: "기존",
         url: "",
+        imageUrl: "",
       };
       const initialState = createInitialState(mockQuestion);
       const stateWithAnswers: QuizState = {
@@ -161,8 +164,18 @@ describe("quizReducer", () => {
     });
 
     it("should preserve answered and incorrect questions", () => {
-      const q1: DatabaseRow = { name: "q1", hangul: "하나", url: "" };
-      const q2: DatabaseRow = { name: "q2", hangul: "둘", url: "" };
+      const q1: DatabaseRow = {
+        name: "q1",
+        hangul: "하나",
+        url: "",
+        imageUrl: "",
+      };
+      const q2: DatabaseRow = {
+        name: "q2",
+        hangul: "둘",
+        url: "",
+        imageUrl: "",
+      };
       const initialState = createInitialState(q1);
       const stateWithAnswers: QuizState = {
         ...initialState,

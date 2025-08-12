@@ -5,8 +5,8 @@ import type { DatabaseRow } from "./database-spec";
 
 describe("HamburgerMenu", () => {
   const mockWords: DatabaseRow[] = [
-    { name: "hello", hangul: "안녕", url: "" },
-    { name: "goodbye", hangul: "안녕히", url: "" },
+    { name: "hello", hangul: "안녕", url: "", imageUrl: "" },
+    { name: "goodbye", hangul: "안녕히", url: "", imageUrl: "" },
   ];
 
   const mockOnSelectWord = vi.fn();

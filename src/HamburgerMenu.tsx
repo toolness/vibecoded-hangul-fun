@@ -4,6 +4,13 @@ import WordSelectionModal from "./WordSelectionModal";
 import type { DatabaseRow } from "./database-spec";
 import type { Mode } from "./quizStateReducer";
 
+const MODE_NAMES: { [k in Mode]: string } = {
+  translate: "Translate",
+  typingtutor: "Typing tutor",
+};
+
+const MODE_ORDER: Mode[] = Object.keys(MODE_NAMES) as Mode[];
+
 interface HamburgerMenuProps {
   words: DatabaseRow[];
   onSelectWord: (word: DatabaseRow) => void;
@@ -60,24 +67,20 @@ function HamburgerMenu({
             <button className="menu-link" onClick={handleChooseWord}>
               Choose word&hellip;
             </button>
-            <button
-              className="menu-link"
-              onClick={() => {
-                onSetMode("translate");
-                setIsMenuOpen(false);
-              }}
-            >
-              {mode === "translate" && "✓ "}Translate mode
-            </button>
-            <button
-              className="menu-link"
-              onClick={() => {
-                onSetMode("typingtutor");
-                setIsMenuOpen(false);
-              }}
-            >
-              {mode === "typingtutor" && "✓ "}Typing tutor mode
-            </button>
+            {MODE_ORDER.map((modeToChoose) => {
+              return (
+                <button
+                  className="menu-link"
+                  onClick={() => {
+                    onSetMode(modeToChoose);
+                    setIsMenuOpen(false);
+                  }}
+                >
+                  {mode === modeToChoose && "✓ "}
+                  {MODE_NAMES[modeToChoose]} mode
+                </button>
+              );
+            })}
           </div>
         </div>
       )}

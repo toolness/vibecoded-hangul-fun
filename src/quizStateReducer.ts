@@ -5,29 +5,66 @@ export type Mode = "translate" | "typingtutor";
 export interface QuizState {
   currentQuestion: DatabaseRow;
   userInput: string;
-  answeredQuestions: Set<DatabaseRow>;
-  incorrectQuestions: Set<DatabaseRow>;
+  remainingQuestions: DatabaseRow[];
+  allQuestions: DatabaseRow[];
+  allQuestionsForMode: DatabaseRow[];
   showAnswer: boolean;
   mode: Mode;
 }
 
+const DUMMY_QUESTION: DatabaseRow = {
+  name: "???",
+  hangul: "???",
+  url: "",
+  imageUrl:
+    "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==",
+};
+
+function filterQuestionsForMode(
+  allQuestions: DatabaseRow[],
+  mode: Mode,
+): DatabaseRow[] {
+  switch (mode) {
+    case "translate":
+      return allQuestions.filter(
+        (question) => question.name && question.hangul,
+      );
+    case "typingtutor":
+      return allQuestions.filter((question) => question.hangul);
+  }
+}
+
+function shuffleInPlace<T>(array: T[]) {
+  // Fisher-Yates shuffle (via GitHub Copilot)
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+
 export const createInitialState = (
-  currentQuestion: DatabaseRow,
-): QuizState => ({
-  currentQuestion,
-  userInput: "",
-  answeredQuestions: new Set(),
-  incorrectQuestions: new Set(),
-  showAnswer: false,
-  mode: "translate",
-});
+  allQuestions: DatabaseRow[],
+  mode: Mode = "translate",
+): QuizState => {
+  const allQuestionsForMode = filterQuestionsForMode(allQuestions, mode);
+  const remainingQuestions = allQuestionsForMode.slice();
+  shuffleInPlace(remainingQuestions);
+  return {
+    currentQuestion: remainingQuestions.pop() ?? DUMMY_QUESTION,
+    userInput: "",
+    remainingQuestions,
+    allQuestions,
+    allQuestionsForMode,
+    showAnswer: false,
+    mode,
+  };
+};
 
 export type QuizAction =
   | { type: "UPDATE_INPUT"; payload: string }
-  | { type: "MARK_CORRECT"; payload: DatabaseRow }
-  | { type: "MARK_INCORRECT"; payload: DatabaseRow }
   | { type: "SHOW_ANSWER" }
-  | { type: "NEXT_QUESTION"; payload: DatabaseRow }
+  | { type: "NEXT_QUESTION" }
+  | { type: "SET_QUESTION"; payload: DatabaseRow }
   | { type: "SET_MODE"; payload: Mode };
 
 export function quizReducer(state: QuizState, action: QuizAction): QuizState {
@@ -35,38 +72,10 @@ export function quizReducer(state: QuizState, action: QuizAction): QuizState {
     case "UPDATE_INPUT":
       return { ...state, userInput: action.payload };
 
-    case "MARK_CORRECT": {
-      const newAnsweredQuestions = new Set(state.answeredQuestions);
-      newAnsweredQuestions.add(action.payload);
-
-      const newIncorrectQuestions = new Set(state.incorrectQuestions);
-      newIncorrectQuestions.delete(action.payload);
-
-      return {
-        ...state,
-        answeredQuestions: newAnsweredQuestions,
-        incorrectQuestions: newIncorrectQuestions,
-      };
-    }
-
-    case "MARK_INCORRECT": {
-      const newAnsweredQuestions = new Set(state.answeredQuestions);
-      newAnsweredQuestions.add(action.payload);
-
-      const newIncorrectQuestions = new Set(state.incorrectQuestions);
-      newIncorrectQuestions.add(action.payload);
-
-      return {
-        ...state,
-        answeredQuestions: newAnsweredQuestions,
-        incorrectQuestions: newIncorrectQuestions,
-      };
-    }
-
     case "SHOW_ANSWER":
       return { ...state, showAnswer: true };
 
-    case "NEXT_QUESTION":
+    case "SET_QUESTION":
       return {
         ...state,
         currentQuestion: action.payload,
@@ -74,11 +83,22 @@ export function quizReducer(state: QuizState, action: QuizAction): QuizState {
         showAnswer: false,
       };
 
+    case "NEXT_QUESTION": {
+      const currentQuestion = state.remainingQuestions.pop();
+      if (currentQuestion) {
+        return {
+          ...state,
+          currentQuestion,
+          userInput: "",
+          showAnswer: false,
+        };
+      } else {
+        return createInitialState(state.allQuestions, state.mode);
+      }
+    }
+
     case "SET_MODE":
-      return {
-        ...state,
-        mode: action.payload,
-      };
+      return createInitialState(state.allQuestions, action.payload);
 
     default:
       return state;

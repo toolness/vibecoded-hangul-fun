@@ -1,6 +1,5 @@
 import "./App.css";
 import { useReducer, useEffect, useState, useRef } from "react";
-import _database from "./database.json";
 import type { DatabaseRow } from "./database-spec";
 import { calculateCorrectKeystrokes } from "./calculateCorrectKeystrokes";
 import { quizReducer, createInitialState, type Mode } from "./quizStateReducer";
@@ -8,54 +7,19 @@ import { useKoreanVocalizer } from "./speech";
 import HamburgerMenu from "./HamburgerMenu";
 import QuestionDisplay from "./QuestionDisplay";
 import Confetti from "./Confetti";
-
-const DATABASE_ROWS: DatabaseRow[] = _database.filter(
-  (row) => row.name && row.hangul,
-);
-
-/**
- * Helper to select a random question from a pool.
- */
-function selectRandomQuestion(pool: DatabaseRow[]) {
-  const randomIndex = Math.floor(Math.random() * pool.length);
-  return pool[randomIndex];
-}
+import databaseRows from "./database.json";
 
 function App() {
   const vocalizer = useKoreanVocalizer();
   const [showConfetti, setShowConfetti] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Helper to get initial random question
-  const getInitialQuestion = () => selectRandomQuestion(DATABASE_ROWS);
-
   // State management
-  const [state, dispatch] = useReducer(
-    quizReducer,
-    createInitialState(getInitialQuestion()),
-  );
-  const {
-    currentQuestion,
-    userInput,
-    answeredQuestions,
-    incorrectQuestions,
-    showAnswer,
-    mode,
-  } = state;
-
-  // Function to select next question
-  const selectNextQuestion = () => {
-    // Prioritize questions that haven't been shown or were answered incorrectly
-    const unansweredOrIncorrect = DATABASE_ROWS.filter((row) => {
-      return !answeredQuestions.has(row) || incorrectQuestions.has(row);
-    });
-
-    // If we have unanswered or incorrect questions, pick from those
-    const pool =
-      unansweredOrIncorrect.length > 0 ? unansweredOrIncorrect : DATABASE_ROWS;
-
-    return selectRandomQuestion(pool);
-  };
+  const [state, dispatch] = useReducer(quizReducer, undefined, () => {
+    return createInitialState(databaseRows, "translate");
+  });
+  const { currentQuestion, userInput, showAnswer, mode, allQuestionsForMode } =
+    state;
 
   const { correct, total } = calculateCorrectKeystrokes(
     currentQuestion.hangul || "",
@@ -81,22 +45,15 @@ function App() {
   };
 
   const handleGiveUp = () => {
-    // Mark as incorrect since user gave up
-    dispatch({ type: "MARK_INCORRECT", payload: currentQuestion });
     dispatch({ type: "SHOW_ANSWER" });
   };
 
   const handleNext = () => {
-    if (isCompletelyCorrect && !showAnswer) {
-      // Mark as answered correctly (remove from incorrect if it was there)
-      dispatch({ type: "MARK_CORRECT", payload: currentQuestion });
-    }
-
     // Reset confetti for next question
     setShowConfetti(false);
 
     // Move to next question
-    dispatch({ type: "NEXT_QUESTION", payload: selectNextQuestion() });
+    dispatch({ type: "NEXT_QUESTION" });
 
     // Focus the input field
     setTimeout(() => {
@@ -108,8 +65,7 @@ function App() {
     // Reset confetti for next question
     setShowConfetti(false);
 
-    // Move to next question without marking as correct or incorrect
-    dispatch({ type: "NEXT_QUESTION", payload: selectNextQuestion() });
+    dispatch({ type: "NEXT_QUESTION" });
 
     // Focus the input field
     setTimeout(() => {
@@ -119,7 +75,7 @@ function App() {
 
   const handleWordSelection = (word: DatabaseRow) => {
     setShowConfetti(false);
-    dispatch({ type: "NEXT_QUESTION", payload: word });
+    dispatch({ type: "SET_QUESTION", payload: word });
 
     // Focus the input field
     setTimeout(() => {
@@ -135,7 +91,7 @@ function App() {
     <main>
       <Confetti show={showConfetti} />
       <HamburgerMenu
-        words={DATABASE_ROWS}
+        words={allQuestionsForMode}
         onSelectWord={handleWordSelection}
         mode={mode}
         onSetMode={handleSetMode}

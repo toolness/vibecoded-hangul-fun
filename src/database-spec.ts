@@ -14,4 +14,10 @@ export interface DatabaseRow {
    * being described. It may be an empty string.
    */
   url: string;
+
+  /**
+   * URL pointing to an image of the word. It may be an
+   * empty string.
+   */
+  imageUrl: string;
 }

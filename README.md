@@ -18,6 +18,7 @@ schema:
 - `Hangul` - Text, contains the Hangul equivalent for the word
 - `URL` - URL, contains an optional link where the user can
   learn more about the word being described.
+- `Image URL` - URL, an optional image representing the word.
 
 ### Environment variables
 

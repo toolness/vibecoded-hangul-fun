@@ -63,7 +63,16 @@ function HamburgerMenu({
             <button
               className="menu-link"
               onClick={() => {
-                onSetMode(mode === "typingtutor" ? "translate" : "typingtutor");
+                onSetMode("translate");
+                setIsMenuOpen(false);
+              }}
+            >
+              {mode === "translate" && "✓ "}Translate mode
+            </button>
+            <button
+              className="menu-link"
+              onClick={() => {
+                onSetMode("typingtutor");
                 setIsMenuOpen(false);
               }}
             >

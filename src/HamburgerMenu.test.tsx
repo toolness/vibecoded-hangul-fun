@@ -43,10 +43,48 @@ describe("HamburgerMenu", () => {
 
     expect(screen.getByText("About")).toBeInTheDocument();
     expect(screen.getByText("Choose word…")).toBeInTheDocument();
+    expect(screen.getByText("✓ Translate mode")).toBeInTheDocument();
     expect(screen.getByText("Typing tutor mode")).toBeInTheDocument();
   });
 
-  it("should show checkmark when typing tutor mode is active", () => {
+  it("should show checkmark next to active mode", () => {
+    const { rerender } = render(
+      <HamburgerMenu
+        words={mockWords}
+        onSelectWord={mockOnSelectWord}
+        mode="translate"
+        onSetMode={mockOnSetMode}
+      />,
+    );
+
+    let hamburgerButton = screen.getByLabelText("Toggle menu");
+    fireEvent.click(hamburgerButton);
+
+    expect(screen.getByText("✓ Translate mode")).toBeInTheDocument();
+    expect(screen.getByText("Typing tutor mode")).toBeInTheDocument();
+    expect(screen.queryByText("✓ Typing tutor mode")).not.toBeInTheDocument();
+
+    // Close menu and rerender with typingtutor mode
+    fireEvent.click(hamburgerButton);
+
+    rerender(
+      <HamburgerMenu
+        words={mockWords}
+        onSelectWord={mockOnSelectWord}
+        mode="typingtutor"
+        onSetMode={mockOnSetMode}
+      />,
+    );
+
+    hamburgerButton = screen.getByLabelText("Toggle menu");
+    fireEvent.click(hamburgerButton);
+
+    expect(screen.getByText("✓ Typing tutor mode")).toBeInTheDocument();
+    expect(screen.getByText("Translate mode")).toBeInTheDocument();
+    expect(screen.queryByText("✓ Translate mode")).not.toBeInTheDocument();
+  });
+
+  it("should call onSetMode with 'translate' when Translate mode is clicked", () => {
     render(
       <HamburgerMenu
         words={mockWords}
@@ -59,28 +97,14 @@ describe("HamburgerMenu", () => {
     const hamburgerButton = screen.getByLabelText("Toggle menu");
     fireEvent.click(hamburgerButton);
 
-    expect(screen.getByText("✓ Typing tutor mode")).toBeInTheDocument();
+    const translateButton = screen.getByText("Translate mode");
+    fireEvent.click(translateButton);
+
+    expect(mockOnSetMode).toHaveBeenCalledTimes(1);
+    expect(mockOnSetMode).toHaveBeenCalledWith("translate");
   });
 
-  it("should not show checkmark when typing tutor mode is inactive", () => {
-    render(
-      <HamburgerMenu
-        words={mockWords}
-        onSelectWord={mockOnSelectWord}
-        mode="translate"
-        onSetMode={mockOnSetMode}
-      />,
-    );
-
-    const hamburgerButton = screen.getByLabelText("Toggle menu");
-    fireEvent.click(hamburgerButton);
-
-    const typingTutorButton = screen.getByText("Typing tutor mode");
-    expect(typingTutorButton.textContent).toBe("Typing tutor mode");
-    expect(typingTutorButton.textContent).not.toContain("✓");
-  });
-
-  it("should call onSetMode when typing tutor mode is clicked", () => {
+  it("should call onSetMode with 'typingtutor' when Typing tutor mode is clicked", () => {
     render(
       <HamburgerMenu
         words={mockWords}
@@ -100,7 +124,7 @@ describe("HamburgerMenu", () => {
     expect(mockOnSetMode).toHaveBeenCalledWith("typingtutor");
   });
 
-  it("should close menu after clicking typing tutor mode", () => {
+  it("should close menu after clicking either mode button", () => {
     render(
       <HamburgerMenu
         words={mockWords}
@@ -113,12 +137,14 @@ describe("HamburgerMenu", () => {
     const hamburgerButton = screen.getByLabelText("Toggle menu");
     fireEvent.click(hamburgerButton);
 
+    expect(screen.getByText("✓ Translate mode")).toBeInTheDocument();
     expect(screen.getByText("Typing tutor mode")).toBeInTheDocument();
 
-    const typingTutorButton = screen.getByText("Typing tutor mode");
-    fireEvent.click(typingTutorButton);
+    const translateButton = screen.getByText("✓ Translate mode");
+    fireEvent.click(translateButton);
 
-    // Menu should close after clicking typing tutor mode
+    // Menu should close after clicking translate mode
+    expect(screen.queryByText("✓ Translate mode")).not.toBeInTheDocument();
     expect(screen.queryByText("Typing tutor mode")).not.toBeInTheDocument();
   });
 });

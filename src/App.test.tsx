@@ -435,9 +435,9 @@ describe("Typing Tutor Mode", () => {
     // Verify it's in typing tutor mode
     expect(screen.getByText("Type this Hangul:")).toBeInTheDocument();
 
-    // Open menu again and toggle off
+    // Open menu again and select translate mode
     await user.click(screen.getByLabelText("Toggle menu"));
-    await user.click(screen.getByText("✓ Typing tutor mode"));
+    await user.click(screen.getByText("Translate mode"));
 
     // Should be back to normal mode
     expect(screen.getByText("Translate to Hangul:")).toBeInTheDocument();

@@ -52,6 +52,10 @@
   align-items: center;
 }
 
+img.question-picture {
+  max-width: 75vw;
+}
+
 .input-section {
   display: flex;
   flex-direction: column;

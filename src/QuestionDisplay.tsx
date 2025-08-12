@@ -38,7 +38,9 @@ function QuestionDisplay({
       case "translate":
         return currentQuestion.name;
       case "picture":
-        return <img src={currentQuestion.imageUrl} />;
+        return (
+          <img className="question-picture" src={currentQuestion.imageUrl} />
+        );
     }
   };
 

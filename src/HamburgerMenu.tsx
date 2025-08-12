@@ -2,19 +2,20 @@ import { useState } from "react";
 import "./HamburgerMenu.css";
 import WordSelectionModal from "./WordSelectionModal";
 import type { DatabaseRow } from "./database-spec";
+import type { Mode } from "./quizStateReducer";
 
 interface HamburgerMenuProps {
   words: DatabaseRow[];
   onSelectWord: (word: DatabaseRow) => void;
-  isTypingTutorMode: boolean;
-  onToggleTypingTutorMode: () => void;
+  mode: Mode;
+  onSetMode: (mode: Mode) => void;
 }
 
 function HamburgerMenu({
   words,
   onSelectWord,
-  isTypingTutorMode,
-  onToggleTypingTutorMode,
+  mode,
+  onSetMode,
 }: HamburgerMenuProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -62,11 +63,11 @@ function HamburgerMenu({
             <button
               className="menu-link"
               onClick={() => {
-                onToggleTypingTutorMode();
+                onSetMode(mode === "typingtutor" ? "translate" : "typingtutor");
                 setIsMenuOpen(false);
               }}
             >
-              {isTypingTutorMode && "✓ "}Typing tutor mode
+              {mode === "typingtutor" && "✓ "}Typing tutor mode
             </button>
           </div>
         </div>

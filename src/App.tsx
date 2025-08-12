@@ -3,7 +3,7 @@ import { useReducer, useEffect, useState, useRef } from "react";
 import _database from "./database.json";
 import type { DatabaseRow } from "./database-spec";
 import { calculateCorrectKeystrokes } from "./calculateCorrectKeystrokes";
-import { quizReducer, createInitialState } from "./quizStateReducer";
+import { quizReducer, createInitialState, type Mode } from "./quizStateReducer";
 import { useKoreanVocalizer } from "./speech";
 import HamburgerMenu from "./HamburgerMenu";
 import QuestionDisplay from "./QuestionDisplay";
@@ -40,7 +40,7 @@ function App() {
     answeredQuestions,
     incorrectQuestions,
     showAnswer,
-    isTypingTutorMode,
+    mode,
   } = state;
 
   // Function to select next question
@@ -127,8 +127,8 @@ function App() {
     }, 0);
   };
 
-  const handleToggleTypingTutorMode = () => {
-    dispatch({ type: "TOGGLE_TYPING_TUTOR_MODE" });
+  const handleSetMode = (newMode: Mode) => {
+    dispatch({ type: "SET_MODE", payload: newMode });
   };
 
   return (
@@ -137,19 +137,21 @@ function App() {
       <HamburgerMenu
         words={DATABASE_ROWS}
         onSelectWord={handleWordSelection}
-        isTypingTutorMode={isTypingTutorMode}
-        onToggleTypingTutorMode={handleToggleTypingTutorMode}
+        mode={mode}
+        onSetMode={handleSetMode}
       />
 
       <div className="quiz-container" data-testid="quiz-container">
         <div className="question-section">
           <h2 className="question-prompt">
-            {isTypingTutorMode ? "Type this Hangul:" : "Translate to Hangul:"}
+            {mode === "typingtutor"
+              ? "Type this Hangul:"
+              : "Translate to Hangul:"}
           </h2>
           <div className="question-name">
             <QuestionDisplay
               currentQuestion={currentQuestion}
-              isTypingTutorMode={isTypingTutorMode}
+              mode={mode}
               vocalizer={vocalizer}
             />
           </div>

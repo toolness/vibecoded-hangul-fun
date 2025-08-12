@@ -26,7 +26,7 @@ describe("quizReducer", () => {
       answeredQuestions: new Set(),
       incorrectQuestions: new Set(),
       showAnswer: false,
-      isTypingTutorMode: false,
+      mode: "translate",
     });
   });
 
@@ -202,25 +202,27 @@ describe("quizReducer", () => {
     });
   });
 
-  describe("TOGGLE_TYPING_TUTOR_MODE", () => {
-    it("should toggle typing tutor mode from false to true", () => {
+  describe("SET_MODE", () => {
+    it("should set mode to typingtutor", () => {
       const initialState = createInitialState(mockQuestion);
       const result = quizReducer(initialState, {
-        type: "TOGGLE_TYPING_TUTOR_MODE",
+        type: "SET_MODE",
+        payload: "typingtutor",
       });
-      expect(result.isTypingTutorMode).toBe(true);
+      expect(result.mode).toBe("typingtutor");
     });
 
-    it("should toggle typing tutor mode from true to false", () => {
+    it("should set mode to translate", () => {
       const initialState = createInitialState(mockQuestion);
       const stateWithTutorMode: QuizState = {
         ...initialState,
-        isTypingTutorMode: true,
+        mode: "typingtutor",
       };
       const result = quizReducer(stateWithTutorMode, {
-        type: "TOGGLE_TYPING_TUTOR_MODE",
+        type: "SET_MODE",
+        payload: "translate",
       });
-      expect(result.isTypingTutorMode).toBe(false);
+      expect(result.mode).toBe("translate");
     });
 
     it("should not affect other state properties", () => {
@@ -232,9 +234,10 @@ describe("quizReducer", () => {
         answeredQuestions: new Set([mockQuestion]),
       };
       const result = quizReducer(stateWithData, {
-        type: "TOGGLE_TYPING_TUTOR_MODE",
+        type: "SET_MODE",
+        payload: "typingtutor",
       });
-      expect(result.isTypingTutorMode).toBe(true);
+      expect(result.mode).toBe("typingtutor");
       expect(result.userInput).toBe("test");
       expect(result.showAnswer).toBe(true);
       expect(result.answeredQuestions.has(mockQuestion)).toBe(true);

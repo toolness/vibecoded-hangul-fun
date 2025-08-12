@@ -1,12 +1,14 @@
 import type { DatabaseRow } from "./database-spec";
 
+export type Mode = "translate" | "typingtutor";
+
 export interface QuizState {
   currentQuestion: DatabaseRow;
   userInput: string;
   answeredQuestions: Set<DatabaseRow>;
   incorrectQuestions: Set<DatabaseRow>;
   showAnswer: boolean;
-  isTypingTutorMode: boolean;
+  mode: Mode;
 }
 
 export const createInitialState = (
@@ -17,7 +19,7 @@ export const createInitialState = (
   answeredQuestions: new Set(),
   incorrectQuestions: new Set(),
   showAnswer: false,
-  isTypingTutorMode: false,
+  mode: "translate",
 });
 
 export type QuizAction =
@@ -26,7 +28,7 @@ export type QuizAction =
   | { type: "MARK_INCORRECT"; payload: DatabaseRow }
   | { type: "SHOW_ANSWER" }
   | { type: "NEXT_QUESTION"; payload: DatabaseRow }
-  | { type: "TOGGLE_TYPING_TUTOR_MODE" };
+  | { type: "SET_MODE"; payload: Mode };
 
 export function quizReducer(state: QuizState, action: QuizAction): QuizState {
   switch (action.type) {
@@ -72,10 +74,10 @@ export function quizReducer(state: QuizState, action: QuizAction): QuizState {
         showAnswer: false,
       };
 
-    case "TOGGLE_TYPING_TUTOR_MODE":
+    case "SET_MODE":
       return {
         ...state,
-        isTypingTutorMode: !state.isTypingTutorMode,
+        mode: action.payload,
       };
 
     default:

@@ -1,17 +1,18 @@
 import { useCallback } from "react";
 import type { DatabaseRow } from "./database-spec";
+import type { Mode } from "./quizStateReducer";
 import SpeakerIcon from "./assets/Speaker_Icon.svg";
 import { type Vocalizer } from "./speech";
 
 interface QuestionDisplayProps {
   currentQuestion: DatabaseRow;
-  isTypingTutorMode: boolean;
+  mode: Mode;
   vocalizer: Vocalizer | null;
 }
 
 function QuestionDisplay({
   currentQuestion,
-  isTypingTutorMode,
+  mode,
   vocalizer,
 }: QuestionDisplayProps) {
   const handleSpeakerPointerDown = useCallback(
@@ -30,17 +31,16 @@ function QuestionDisplay({
     [currentQuestion, vocalizer],
   );
 
-  const displayText = isTypingTutorMode
-    ? currentQuestion.hangul
-    : currentQuestion.name;
+  const displayText =
+    mode === "typingtutor" ? currentQuestion.hangul : currentQuestion.name;
 
   // Always use question-link for links, question-text for non-links
   // Add hangul class when in typing tutor mode
   const className = currentQuestion.url
-    ? isTypingTutorMode
+    ? mode === "typingtutor"
       ? "question-link hangul"
       : "question-link"
-    : isTypingTutorMode
+    : mode === "typingtutor"
       ? "question-text hangul"
       : "question-text";
 
@@ -53,7 +53,7 @@ function QuestionDisplay({
           rel="noopener noreferrer"
           data-testid="question-name"
           className={className}
-          title={isTypingTutorMode ? currentQuestion.name : undefined}
+          title={mode === "typingtutor" ? currentQuestion.name : undefined}
         >
           {displayText}
         </a>

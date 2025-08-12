@@ -10,7 +10,7 @@ describe("HamburgerMenu", () => {
   ];
 
   const mockOnSelectWord = vi.fn();
-  const mockOnToggleTypingTutorMode = vi.fn();
+  const mockOnSetMode = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -21,8 +21,8 @@ describe("HamburgerMenu", () => {
       <HamburgerMenu
         words={mockWords}
         onSelectWord={mockOnSelectWord}
-        isTypingTutorMode={false}
-        onToggleTypingTutorMode={mockOnToggleTypingTutorMode}
+        mode="translate"
+        onSetMode={mockOnSetMode}
       />,
     );
     expect(screen.getByLabelText("Toggle menu")).toBeInTheDocument();
@@ -33,8 +33,8 @@ describe("HamburgerMenu", () => {
       <HamburgerMenu
         words={mockWords}
         onSelectWord={mockOnSelectWord}
-        isTypingTutorMode={false}
-        onToggleTypingTutorMode={mockOnToggleTypingTutorMode}
+        mode="translate"
+        onSetMode={mockOnSetMode}
       />,
     );
 
@@ -51,8 +51,8 @@ describe("HamburgerMenu", () => {
       <HamburgerMenu
         words={mockWords}
         onSelectWord={mockOnSelectWord}
-        isTypingTutorMode={true}
-        onToggleTypingTutorMode={mockOnToggleTypingTutorMode}
+        mode="typingtutor"
+        onSetMode={mockOnSetMode}
       />,
     );
 
@@ -67,8 +67,8 @@ describe("HamburgerMenu", () => {
       <HamburgerMenu
         words={mockWords}
         onSelectWord={mockOnSelectWord}
-        isTypingTutorMode={false}
-        onToggleTypingTutorMode={mockOnToggleTypingTutorMode}
+        mode="translate"
+        onSetMode={mockOnSetMode}
       />,
     );
 
@@ -80,13 +80,13 @@ describe("HamburgerMenu", () => {
     expect(typingTutorButton.textContent).not.toContain("✓");
   });
 
-  it("should call onToggleTypingTutorMode when typing tutor mode is clicked", () => {
+  it("should call onSetMode when typing tutor mode is clicked", () => {
     render(
       <HamburgerMenu
         words={mockWords}
         onSelectWord={mockOnSelectWord}
-        isTypingTutorMode={false}
-        onToggleTypingTutorMode={mockOnToggleTypingTutorMode}
+        mode="translate"
+        onSetMode={mockOnSetMode}
       />,
     );
 
@@ -96,7 +96,8 @@ describe("HamburgerMenu", () => {
     const typingTutorButton = screen.getByText("Typing tutor mode");
     fireEvent.click(typingTutorButton);
 
-    expect(mockOnToggleTypingTutorMode).toHaveBeenCalledTimes(1);
+    expect(mockOnSetMode).toHaveBeenCalledTimes(1);
+    expect(mockOnSetMode).toHaveBeenCalledWith("typingtutor");
   });
 
   it("should close menu after clicking typing tutor mode", () => {
@@ -104,8 +105,8 @@ describe("HamburgerMenu", () => {
       <HamburgerMenu
         words={mockWords}
         onSelectWord={mockOnSelectWord}
-        isTypingTutorMode={false}
-        onToggleTypingTutorMode={mockOnToggleTypingTutorMode}
+        mode="translate"
+        onSetMode={mockOnSetMode}
       />,
     );
 

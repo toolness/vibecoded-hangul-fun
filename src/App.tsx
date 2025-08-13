@@ -12,7 +12,7 @@ import databaseRows from "./database.json";
 const MODE_PROMPT: Record<Mode, string> = {
   typingtutor: "Type this Hangul:",
   translate: "Translate to Hangul:",
-  picture: "Identify this picture using Hangul:",
+  picture: "Identify this picture:",
 };
 
 function App() {

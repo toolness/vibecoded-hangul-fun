@@ -50,6 +50,7 @@ async function downloadDatabase(
     let hangul = "";
     let url = "";
     let imageUrl = "";
+    let category = "";
 
     // Extract Name
     if (
@@ -99,11 +100,23 @@ async function downloadDatabase(
       imageUrl = properties["Image URL"].url;
     }
 
+    // Extract Category (optional)
+    if (
+      properties.Category &&
+      properties.Category.type === "select" &&
+      properties.Category.select &&
+      "name" in properties.Category.select &&
+      typeof properties.Category.select.name === "string"
+    ) {
+      category = properties.Category.select.name;
+    }
+
     rows.push({
       name,
       hangul,
       url,
       imageUrl,
+      category,
     });
   }
 

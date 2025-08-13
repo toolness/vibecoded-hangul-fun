@@ -31,7 +31,7 @@ function App() {
     mode,
     category,
     allQuestions,
-    allQuestionsFiltered: allQuestionsForMode,
+    allQuestionsFiltered,
   } = state;
 
   const { correct, total } = calculateCorrectKeystrokes(
@@ -108,7 +108,7 @@ function App() {
     <main>
       <Confetti show={showConfetti} />
       <HamburgerMenu
-        words={allQuestionsForMode}
+        words={allQuestionsFiltered}
         allQuestions={allQuestions}
         currentCategory={category}
         onSelectWord={handleWordSelection}

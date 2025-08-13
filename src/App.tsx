@@ -51,7 +51,7 @@ function App() {
     dispatch({ type: "UPDATE_INPUT", input: e.target.value });
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && (isCompletelyCorrect || showAnswer)) {
       handleNext();
     }
@@ -135,7 +135,7 @@ function App() {
             type="text"
             value={userInput}
             onChange={handleInputChange}
-            onKeyDown={handleKeyDown}
+            onKeyUp={handleKeyUp}
             data-testid="hangul-input"
             className="hangul-input"
             placeholder="Enter Hangul..."

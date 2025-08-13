@@ -76,17 +76,17 @@ export const createInitialState = (
 };
 
 export type QuizAction =
-  | { type: "UPDATE_INPUT"; payload: string }
+  | { type: "UPDATE_INPUT"; input: string }
   | { type: "SHOW_ANSWER" }
   | { type: "NEXT_QUESTION" }
-  | { type: "SET_QUESTION"; payload: DatabaseRow }
-  | { type: "SET_MODE"; payload: Mode }
+  | { type: "SET_QUESTION"; question: DatabaseRow }
+  | { type: "SET_MODE"; mode: Mode }
   | { type: "SET_CATEGORY"; category: string | undefined };
 
 export function quizReducer(state: QuizState, action: QuizAction): QuizState {
   switch (action.type) {
     case "UPDATE_INPUT":
-      return { ...state, userInput: action.payload };
+      return { ...state, userInput: action.input };
 
     case "SHOW_ANSWER":
       return { ...state, showAnswer: true };
@@ -94,7 +94,7 @@ export function quizReducer(state: QuizState, action: QuizAction): QuizState {
     case "SET_QUESTION":
       return {
         ...state,
-        currentQuestion: action.payload,
+        currentQuestion: action.question,
         userInput: "",
         showAnswer: false,
       };
@@ -120,7 +120,7 @@ export function quizReducer(state: QuizState, action: QuizAction): QuizState {
     case "SET_MODE":
       return createInitialState(
         state.allQuestions,
-        action.payload,
+        action.mode,
         state.category,
       );
 

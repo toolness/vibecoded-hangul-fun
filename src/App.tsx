@@ -48,7 +48,7 @@ function App() {
   }, [isCompletelyCorrect, showAnswer]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    dispatch({ type: "UPDATE_INPUT", payload: e.target.value });
+    dispatch({ type: "UPDATE_INPUT", input: e.target.value });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -88,7 +88,7 @@ function App() {
 
   const handleWordSelection = (word: DatabaseRow) => {
     setShowConfetti(false);
-    dispatch({ type: "SET_QUESTION", payload: word });
+    dispatch({ type: "SET_QUESTION", question: word });
 
     // Focus the input field
     setTimeout(() => {
@@ -97,7 +97,7 @@ function App() {
   };
 
   const handleSetMode = (newMode: Mode) => {
-    dispatch({ type: "SET_MODE", payload: newMode });
+    dispatch({ type: "SET_MODE", mode: newMode });
   };
 
   const handleSetCategory = (newCategory: string | undefined) => {

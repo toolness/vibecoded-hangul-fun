@@ -38,7 +38,7 @@ describe("quizReducer", () => {
       const initialState = createInitialState(mockQuestions);
       const result = quizReducer(initialState, {
         type: "UPDATE_INPUT",
-        payload: "안",
+        input: "안",
       });
       expect(result.userInput).toBe("안");
     });
@@ -48,7 +48,7 @@ describe("quizReducer", () => {
       const stateWithInput: QuizState = { ...initialState, userInput: "test" };
       const result = quizReducer(stateWithInput, {
         type: "UPDATE_INPUT",
-        payload: "",
+        input: "",
       });
       expect(result.userInput).toBe("");
     });
@@ -59,7 +59,7 @@ describe("quizReducer", () => {
       const state = createInitialState(mockQuestions);
       const result = quizReducer(state, {
         type: "SET_QUESTION",
-        payload: mockQuestion2,
+        question: mockQuestion2,
       });
       expect(result.currentQuestion).toBe(mockQuestion2);
       expect(result.userInput).toBe("");
@@ -75,7 +75,7 @@ describe("quizReducer", () => {
       };
       const result = quizReducer(stateWithData, {
         type: "SET_QUESTION",
-        payload: mockQuestion,
+        question: mockQuestion,
       });
       expect(result.currentQuestion).toBe(mockQuestion);
       expect(result.userInput).toBe("");
@@ -177,7 +177,7 @@ describe("quizReducer", () => {
       const initialState = createInitialState(mockQuestions);
       const result = quizReducer(initialState, {
         type: "SET_MODE",
-        payload: "typingtutor",
+        mode: "typingtutor",
       });
       expect(result.mode).toBe("typingtutor");
     });
@@ -186,7 +186,7 @@ describe("quizReducer", () => {
       const initialState = createInitialState(mockQuestions, "typingtutor");
       const result = quizReducer(initialState, {
         type: "SET_MODE",
-        payload: "translate",
+        mode: "translate",
       });
       expect(result.mode).toBe("translate");
     });
@@ -200,7 +200,7 @@ describe("quizReducer", () => {
       };
       const result = quizReducer(stateWithData, {
         type: "SET_MODE",
-        payload: "typingtutor",
+        mode: "typingtutor",
       });
       expect(result.mode).toBe("typingtutor");
       // State should be reset
@@ -218,7 +218,7 @@ describe("quizReducer", () => {
       // User types incorrect answer
       state = quizReducer(state, {
         type: "UPDATE_INPUT",
-        payload: "가나",
+        input: "가나",
       });
 
       expect(state.userInput).toBe("가나");

@@ -26,7 +26,7 @@ describe("quizReducer", () => {
     expect(initialState.showAnswer).toBe(false);
     expect(initialState.mode).toBe("translate");
     expect(initialState.allQuestions).toEqual(mockQuestions);
-    expect(initialState.allQuestionsForMode).toEqual(mockQuestions);
+    expect(initialState.allQuestionsFiltered).toEqual(mockQuestions);
     // Current question should be one of the mock questions
     expect(mockQuestions).toContainEqual(initialState.currentQuestion);
     // Remaining questions should have the other question
@@ -155,7 +155,7 @@ describe("quizReducer", () => {
       });
 
       // Should have reset with all questions
-      expect(result.allQuestionsForMode.length).toBe(2);
+      expect(result.allQuestionsFiltered.length).toBe(2);
       expect(result.remainingQuestions.length).toBe(1);
       expect(questions).toContainEqual(result.currentQuestion);
     });
@@ -207,7 +207,7 @@ describe("quizReducer", () => {
       expect(result.userInput).toBe("");
       expect(result.showAnswer).toBe(false);
       // Should have new shuffled questions
-      expect(result.allQuestionsForMode).toEqual(mockQuestions);
+      expect(result.allQuestionsFiltered).toEqual(mockQuestions);
     });
   });
 

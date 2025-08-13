@@ -22,10 +22,15 @@ function App() {
 
   // State management
   const [state, dispatch] = useReducer(quizReducer, undefined, () => {
-    return createInitialState(databaseRows, "translate");
+    return createInitialState(databaseRows, "translate", undefined);
   });
-  const { currentQuestion, userInput, showAnswer, mode, allQuestionsForMode } =
-    state;
+  const {
+    currentQuestion,
+    userInput,
+    showAnswer,
+    mode,
+    allQuestionsFiltered: allQuestionsForMode,
+  } = state;
 
   const { correct, total } = calculateCorrectKeystrokes(
     currentQuestion.hangul || "",

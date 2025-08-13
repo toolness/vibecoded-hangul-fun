@@ -7,7 +7,8 @@ export interface QuizState {
   userInput: string;
   remainingQuestions: DatabaseRow[];
   allQuestions: DatabaseRow[];
-  allQuestionsForMode: DatabaseRow[];
+  allQuestionsFiltered: DatabaseRow[];
+  category: string | undefined;
   showAnswer: boolean;
   mode: Mode;
 }
@@ -49,16 +50,26 @@ function shuffleInPlace<T>(array: T[]) {
 export const createInitialState = (
   allQuestions: DatabaseRow[],
   mode: Mode = "translate",
+  category: string | undefined = undefined,
 ): QuizState => {
-  const allQuestionsForMode = filterQuestionsForMode(allQuestions, mode);
-  const remainingQuestions = allQuestionsForMode.slice();
+  const allQuestionsFiltered = filterQuestionsForMode(
+    allQuestions,
+    mode,
+  ).filter((question) => {
+    if (!category) {
+      return true;
+    }
+    return question.category === category;
+  });
+  const remainingQuestions = allQuestionsFiltered.slice();
   shuffleInPlace(remainingQuestions);
   return {
     currentQuestion: remainingQuestions.pop() ?? DUMMY_QUESTION,
     userInput: "",
     remainingQuestions,
     allQuestions,
-    allQuestionsForMode,
+    allQuestionsFiltered,
+    category,
     showAnswer: false,
     mode,
   };
@@ -69,7 +80,8 @@ export type QuizAction =
   | { type: "SHOW_ANSWER" }
   | { type: "NEXT_QUESTION" }
   | { type: "SET_QUESTION"; payload: DatabaseRow }
-  | { type: "SET_MODE"; payload: Mode };
+  | { type: "SET_MODE"; payload: Mode }
+  | { type: "SET_CATEGORY"; category: string | undefined };
 
 export function quizReducer(state: QuizState, action: QuizAction): QuizState {
   switch (action.type) {
@@ -97,12 +109,27 @@ export function quizReducer(state: QuizState, action: QuizAction): QuizState {
           showAnswer: false,
         };
       } else {
-        return createInitialState(state.allQuestions, state.mode);
+        return createInitialState(
+          state.allQuestions,
+          state.mode,
+          state.category,
+        );
       }
     }
 
     case "SET_MODE":
-      return createInitialState(state.allQuestions, action.payload);
+      return createInitialState(
+        state.allQuestions,
+        action.payload,
+        state.category,
+      );
+
+    case "SET_CATEGORY":
+      return createInitialState(
+        state.allQuestions,
+        state.mode,
+        action.category,
+      );
 
     default:
       return state;

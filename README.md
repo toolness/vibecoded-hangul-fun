@@ -19,6 +19,8 @@ schema:
 - `URL` - URL, contains an optional link where the user can
   learn more about the word being described.
 - `Image URL` - URL, an optional image representing the word.
+- `Category` - Select, an optional tag representing a
+  category for the word, such as "History" or "Place".
 
 ### Environment variables
 

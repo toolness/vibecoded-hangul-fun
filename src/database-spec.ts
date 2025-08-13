@@ -20,4 +20,10 @@ export interface DatabaseRow {
    * empty string.
    */
   imageUrl: string;
+
+  /**
+   * Optional category for the word. It may be an empty
+   * string.
+   */
+  category?: string;
 }

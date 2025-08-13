@@ -78,6 +78,7 @@ export function useKoreanVocalizer(): Vocalizer | null {
         "voiceschanged",
         handleVoicesChanged,
       );
+      handleVoicesChanged();
       return () => {
         window.removeEventListener("load", handleVoicesChanged);
         window.speechSynthesis.removeEventListener(
@@ -86,7 +87,7 @@ export function useKoreanVocalizer(): Vocalizer | null {
         );
       };
     }
-  });
+  }, []);
 
   const vocalizer: Vocalizer | null = useMemo(() => {
     if (!bestKoreanVoice) {

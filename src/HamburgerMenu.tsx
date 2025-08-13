@@ -1,6 +1,7 @@
 import { useState } from "react";
 import "./HamburgerMenu.css";
 import WordSelectionModal from "./WordSelectionModal";
+import CategorySelectionModal from "./CategorySelectionModal";
 import type { DatabaseRow } from "./database-spec";
 import type { Mode } from "./quizStateReducer";
 
@@ -14,19 +15,26 @@ const MODE_ORDER: Mode[] = Object.keys(MODE_NAMES) as Mode[];
 
 interface HamburgerMenuProps {
   words: DatabaseRow[];
+  allQuestions: DatabaseRow[];
+  currentCategory: string | undefined;
   onSelectWord: (word: DatabaseRow) => void;
+  onSelectCategory: (category: string | undefined) => void;
   mode: Mode;
   onSetMode: (mode: Mode) => void;
 }
 
 function HamburgerMenu({
   words,
+  allQuestions,
+  currentCategory,
   onSelectWord,
+  onSelectCategory,
   mode,
   onSetMode,
 }: HamburgerMenuProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -35,6 +43,16 @@ function HamburgerMenu({
   const handleChooseWord = () => {
     setIsMenuOpen(false);
     setIsModalOpen(true);
+  };
+
+  const handleChooseCategory = () => {
+    setIsMenuOpen(false);
+    setIsCategoryModalOpen(true);
+  };
+
+  const handleCategorySelected = (category: string | undefined) => {
+    onSelectCategory(category);
+    setIsCategoryModalOpen(false);
   };
 
   const handleWordSelected = (word: DatabaseRow) => {
@@ -65,6 +83,9 @@ function HamburgerMenu({
             >
               About
             </a>
+            <button className="menu-link" onClick={handleChooseCategory}>
+              Choose category&hellip;
+            </button>
             <button className="menu-link" onClick={handleChooseWord}>
               Choose word&hellip;
             </button>
@@ -92,6 +113,15 @@ function HamburgerMenu({
           words={words}
           onSelectWord={handleWordSelected}
           onClose={() => setIsModalOpen(false)}
+        />
+      )}
+
+      {isCategoryModalOpen && (
+        <CategorySelectionModal
+          allQuestions={allQuestions}
+          currentCategory={currentCategory}
+          onSelectCategory={handleCategorySelected}
+          onClose={() => setIsCategoryModalOpen(false)}
         />
       )}
     </div>

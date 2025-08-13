@@ -11,6 +11,7 @@ describe("HamburgerMenu", () => {
 
   const mockOnSelectWord = vi.fn();
   const mockOnSetMode = vi.fn();
+  const mockOnSelectCategory = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -20,7 +21,10 @@ describe("HamburgerMenu", () => {
     render(
       <HamburgerMenu
         words={mockWords}
+        allQuestions={mockWords}
+        currentCategory={undefined}
         onSelectWord={mockOnSelectWord}
+        onSelectCategory={mockOnSelectCategory}
         mode="translate"
         onSetMode={mockOnSetMode}
       />,
@@ -32,7 +36,10 @@ describe("HamburgerMenu", () => {
     render(
       <HamburgerMenu
         words={mockWords}
+        allQuestions={mockWords}
+        currentCategory={undefined}
         onSelectWord={mockOnSelectWord}
+        onSelectCategory={mockOnSelectCategory}
         mode="translate"
         onSetMode={mockOnSetMode}
       />,
@@ -42,6 +49,7 @@ describe("HamburgerMenu", () => {
     fireEvent.click(hamburgerButton);
 
     expect(screen.getByText("About")).toBeInTheDocument();
+    expect(screen.getByText("Choose category…")).toBeInTheDocument();
     expect(screen.getByText("Choose word…")).toBeInTheDocument();
     expect(screen.getByText("✓ Translate mode")).toBeInTheDocument();
     expect(screen.getByText("Typing tutor mode")).toBeInTheDocument();
@@ -51,7 +59,10 @@ describe("HamburgerMenu", () => {
     const { rerender } = render(
       <HamburgerMenu
         words={mockWords}
+        allQuestions={mockWords}
+        currentCategory={undefined}
         onSelectWord={mockOnSelectWord}
+        onSelectCategory={mockOnSelectCategory}
         mode="translate"
         onSetMode={mockOnSetMode}
       />,
@@ -70,7 +81,10 @@ describe("HamburgerMenu", () => {
     rerender(
       <HamburgerMenu
         words={mockWords}
+        allQuestions={mockWords}
+        currentCategory={undefined}
         onSelectWord={mockOnSelectWord}
+        onSelectCategory={mockOnSelectCategory}
         mode="typingtutor"
         onSetMode={mockOnSetMode}
       />,
@@ -88,7 +102,10 @@ describe("HamburgerMenu", () => {
     render(
       <HamburgerMenu
         words={mockWords}
+        allQuestions={mockWords}
+        currentCategory={undefined}
         onSelectWord={mockOnSelectWord}
+        onSelectCategory={mockOnSelectCategory}
         mode="typingtutor"
         onSetMode={mockOnSetMode}
       />,
@@ -108,7 +125,10 @@ describe("HamburgerMenu", () => {
     render(
       <HamburgerMenu
         words={mockWords}
+        allQuestions={mockWords}
+        currentCategory={undefined}
         onSelectWord={mockOnSelectWord}
+        onSelectCategory={mockOnSelectCategory}
         mode="translate"
         onSetMode={mockOnSetMode}
       />,
@@ -128,7 +148,10 @@ describe("HamburgerMenu", () => {
     render(
       <HamburgerMenu
         words={mockWords}
+        allQuestions={mockWords}
+        currentCategory={undefined}
         onSelectWord={mockOnSelectWord}
+        onSelectCategory={mockOnSelectCategory}
         mode="translate"
         onSetMode={mockOnSetMode}
       />,

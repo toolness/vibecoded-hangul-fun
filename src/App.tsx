@@ -29,6 +29,8 @@ function App() {
     userInput,
     showAnswer,
     mode,
+    category,
+    allQuestions,
     allQuestionsFiltered: allQuestionsForMode,
   } = state;
 
@@ -98,12 +100,19 @@ function App() {
     dispatch({ type: "SET_MODE", payload: newMode });
   };
 
+  const handleSetCategory = (newCategory: string | undefined) => {
+    dispatch({ type: "SET_CATEGORY", category: newCategory });
+  };
+
   return (
     <main>
       <Confetti show={showConfetti} />
       <HamburgerMenu
         words={allQuestionsForMode}
+        allQuestions={allQuestions}
+        currentCategory={category}
         onSelectWord={handleWordSelection}
+        onSelectCategory={handleSetCategory}
         mode={mode}
         onSetMode={handleSetMode}
       />

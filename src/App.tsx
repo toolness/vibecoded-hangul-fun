@@ -15,6 +15,8 @@ const MODE_PROMPT: Record<Mode, string> = {
   picture: "Identify this picture:",
 };
 
+const INITIAL_MODE: Mode = "picture";
+
 function App() {
   const vocalizer = useKoreanVocalizer();
   const [showConfetti, setShowConfetti] = useState(false);
@@ -22,7 +24,7 @@ function App() {
 
   // State management
   const [state, dispatch] = useReducer(quizReducer, undefined, () => {
-    return createInitialState(databaseRows, "translate", undefined);
+    return createInitialState(databaseRows, INITIAL_MODE, undefined);
   });
   const {
     currentQuestion,

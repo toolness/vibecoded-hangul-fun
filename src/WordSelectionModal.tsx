@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import Select from "react-select";
 import type { SingleValue } from "react-select";
 import "./WordSelectionModal.css";
@@ -21,8 +21,6 @@ function WordSelectionModal({
   onSelectWord,
   onClose,
 }: WordSelectionModalProps) {
-  const [selectedOption, setSelectedOption] = useState<WordOption | null>(null);
-
   // Convert words to React-Select options and sort alphabetically
   const options = useMemo(
     () =>
@@ -35,13 +33,6 @@ function WordSelectionModal({
         })),
     [words],
   );
-
-  useEffect(() => {
-    // Set initial selection to first word
-    if (options.length > 0) {
-      setSelectedOption(options[0]);
-    }
-  }, [options]);
 
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
@@ -74,7 +65,7 @@ function WordSelectionModal({
           <Select
             className="word-select"
             classNamePrefix="word-select"
-            value={selectedOption}
+            value={null}
             onChange={handleChange}
             options={options}
             placeholder="Search for a word..."
@@ -90,7 +81,7 @@ function WordSelectionModal({
               menu: (base) => ({
                 ...base,
                 position: "relative",
-                marginTop: "8px",
+                marginTop: "0",
                 marginBottom: "8px",
               }),
               menuList: (base) => ({

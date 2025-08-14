@@ -91,6 +91,7 @@
 .word-select__option {
   padding: 0.5rem 1rem !important;
   font-size: 1rem;
+  text-align: left !important;
 }
 
 .word-select__option--is-focused {
@@ -105,7 +106,6 @@
 .word-select__placeholder {
   color: #999;
 }
-
 
 @media (max-width: 640px) {
   .modal-container {

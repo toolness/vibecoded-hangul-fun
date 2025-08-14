@@ -1,6 +1,14 @@
 import { useState, useEffect, useMemo } from "react";
+import Select from "react-select";
+import type { SingleValue } from "react-select";
 import "./WordSelectionModal.css";
 import type { DatabaseRow } from "./database-spec";
+
+interface WordOption {
+  value: string;
+  label: string;
+  data: DatabaseRow;
+}
 
 interface WordSelectionModalProps {
   words: DatabaseRow[];
@@ -13,31 +21,38 @@ function WordSelectionModal({
   onSelectWord,
   onClose,
 }: WordSelectionModalProps) {
-  const [selectedWord, setSelectedWord] = useState<string>("");
+  const [selectedOption, setSelectedOption] = useState<WordOption | null>(null);
 
-  // Sort words alphabetically
-  const sortedWords = useMemo(
-    () => [...words].sort((a, b) => (a.name || "").localeCompare(b.name || "")),
+  // Convert words to React-Select options and sort alphabetically
+  const options = useMemo(
+    () =>
+      [...words]
+        .sort((a, b) => (a.name || "").localeCompare(b.name || ""))
+        .map((word) => ({
+          value: word.name || "",
+          label: word.name || "",
+          data: word,
+        })),
     [words],
   );
 
   useEffect(() => {
     // Set initial selection to first word
-    if (sortedWords.length > 0 && sortedWords[0].name) {
-      setSelectedWord(sortedWords[0].name);
+    if (options.length > 0) {
+      setSelectedOption(options[0]);
     }
-  }, [sortedWords]);
+  }, [options]);
 
-  const handleSelect = () => {
-    const word = sortedWords.find((w) => w.name === selectedWord);
-    if (word) {
-      onSelectWord(word);
+  const handleBackdropClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
       onClose();
     }
   };
 
-  const handleBackdropClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
+  const handleChange = (newValue: SingleValue<WordOption>) => {
+    if (newValue) {
+      // Immediately select and close when a word is chosen
+      onSelectWord(newValue.data);
       onClose();
     }
   };
@@ -56,21 +71,34 @@ function WordSelectionModal({
           </button>
         </div>
         <div className="modal-body">
-          <select
+          <Select
             className="word-select"
-            value={selectedWord}
-            onChange={(e) => setSelectedWord(e.target.value)}
-            size={10}
-          >
-            {sortedWords.map((word) => (
-              <option key={word.name} value={word.name}>
-                {word.name}
-              </option>
-            ))}
-          </select>
-          <button className="select-button" onClick={handleSelect}>
-            Select
-          </button>
+            classNamePrefix="word-select"
+            value={selectedOption}
+            onChange={handleChange}
+            options={options}
+            placeholder="Search for a word..."
+            isClearable={false}
+            isSearchable={true}
+            autoFocus={true}
+            menuIsOpen={true}
+            styles={{
+              control: (base) => ({
+                ...base,
+                minHeight: "40px",
+              }),
+              menu: (base) => ({
+                ...base,
+                position: "relative",
+                marginTop: "8px",
+                marginBottom: "8px",
+              }),
+              menuList: (base) => ({
+                ...base,
+                maxHeight: "300px",
+              }),
+            }}
+          />
         </div>
       </div>
     </div>

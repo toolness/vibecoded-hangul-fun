@@ -14,7 +14,10 @@ function Confetti({ show }: ConfettiProps) {
       const timer = setTimeout(() => {
         setIsVisible(false);
       }, 2000);
-      return () => clearTimeout(timer);
+      return () => {
+        setIsVisible(false);
+        clearTimeout(timer);
+      };
     }
   }, [show]);
 

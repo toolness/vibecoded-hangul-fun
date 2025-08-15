@@ -38,8 +38,16 @@ function QuestionDisplay({
       case "translate":
         return currentQuestion.name;
       case "picture":
+        // Set `key` to force a full unmount/remount of the
+        // image; otherwise some browsers will leave the old
+        // image in place until the new one is fully loaded,
+        // which can be confusing on slower network connections.
         return (
-          <img className="question-picture" src={currentQuestion.imageUrl} />
+          <img
+            key={currentQuestion.imageUrl}
+            className="question-picture"
+            src={currentQuestion.imageUrl}
+          />
         );
     }
   };

@@ -1,5 +1,6 @@
 import { Client } from "@notionhq/client";
-import { writeFileSync } from "fs";
+import { writeFileSync, existsSync, mkdirSync } from "fs";
+import { join } from "path";
 import dotenv from "dotenv";
 import { type DatabaseRow } from "./src/database-spec.ts";
 
@@ -18,16 +19,29 @@ if (!NOTION_DB_ID) {
 }
 
 const DB_JSON_FILENAME = "src/database.json";
+const IMAGES_DIR = "src/assets/database";
+
+type ImageFile = {
+  type?: string;
+  name?: string;
+  file?: { url: string; expiry_time?: string };
+  external?: { url: string };
+};
+
+type DatabaseEntry = {
+  row: DatabaseRow;
+  imageFiles: ImageFile[];
+};
 
 async function downloadDatabase(
   notion: Client,
   id: string,
-): Promise<DatabaseRow[]> {
+): Promise<DatabaseEntry[]> {
   const response = await notion.databases.query({
     database_id: id,
   });
 
-  const rows: DatabaseRow[] = [];
+  const entries: DatabaseEntry[] = [];
 
   for (const page of response.results) {
     if (!("properties" in page)) {
@@ -51,6 +65,7 @@ async function downloadDatabase(
     let url = "";
     let imageUrl = "";
     let category = "";
+    let imageFiles: ImageFile[] = [];
 
     // Extract Name
     if (
@@ -111,16 +126,40 @@ async function downloadDatabase(
       category = properties.Category.select.name;
     }
 
-    rows.push({
+    // Extract Image files (optional)
+    if (
+      properties.Image &&
+      properties.Image.type === "files" &&
+      Array.isArray(properties.Image.files)
+    ) {
+      imageFiles = properties.Image.files;
+    }
+
+    const row: DatabaseRow = {
       name,
       hangul,
       url,
       imageUrl,
       category,
+    };
+
+    entries.push({
+      row,
+      imageFiles,
     });
   }
 
-  return rows;
+  return entries;
+}
+
+async function downloadImage(url: string, filename: string): Promise<void> {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to download image: ${response.statusText}`);
+  }
+  const buffer = await response.arrayBuffer();
+  const filepath = join(IMAGES_DIR, filename);
+  writeFileSync(filepath, Buffer.from(buffer));
 }
 
 const run = async () => {
@@ -128,7 +167,61 @@ const run = async () => {
 
   console.log("Downloading database...");
 
-  const rows = await downloadDatabase(notion, NOTION_DB_ID);
+  const entries = await downloadDatabase(notion, NOTION_DB_ID);
+
+  // Ensure images directory exists
+  if (!existsSync(IMAGES_DIR)) {
+    mkdirSync(IMAGES_DIR, { recursive: true });
+  }
+
+  // Download images if Image column exists
+  const rows: DatabaseRow[] = [];
+  for (let i = 0; i < entries.length; i++) {
+    const { row, imageFiles } = entries[i];
+
+    if (imageFiles.length > 0) {
+      const imageFile = imageFiles[0];
+      let imageUrl = "";
+      let filename = "";
+
+      if (imageFile.type === "file" && imageFile.file) {
+        imageUrl = imageFile.file.url;
+        // Extract filename from URL or use a default
+        const urlParts = imageUrl.split("/");
+        const originalName = urlParts[urlParts.length - 1].split("?")[0];
+        // Use sanitized name based on row name
+        const sanitizedName = row.name
+          .replace(/[^a-zA-Z0-9]/g, "_")
+          .toLowerCase();
+        const extension = originalName.split(".").pop() || "jpg";
+        filename = `${sanitizedName}_${i}.${extension}`;
+      } else if (imageFile.type === "external" && imageFile.external) {
+        imageUrl = imageFile.external.url;
+        // For external URLs, try to extract extension or default to jpg
+        const urlParts = imageUrl.split("/");
+        const lastPart = urlParts[urlParts.length - 1].split("?")[0];
+        const sanitizedName = row.name
+          .replace(/[^a-zA-Z0-9]/g, "_")
+          .toLowerCase();
+        const extension = lastPart.includes(".")
+          ? lastPart.split(".").pop()
+          : "jpg";
+        filename = `${sanitizedName}_${i}.${extension}`;
+      }
+
+      if (imageUrl && filename) {
+        try {
+          console.log(`Downloading image for "${row.name}"...`);
+          await downloadImage(imageUrl, filename);
+          row.image = filename;
+        } catch (error) {
+          console.error(`Failed to download image for "${row.name}":`, error);
+        }
+      }
+    }
+
+    rows.push(row);
+  }
 
   writeFileSync(DB_JSON_FILENAME, JSON.stringify(rows, null, 2));
 

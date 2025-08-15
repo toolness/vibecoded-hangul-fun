@@ -26,4 +26,10 @@ export interface DatabaseRow {
    * string.
    */
   category?: string;
+
+  /**
+   * Optional local image filename (relative to assets/database).
+   * It may be an empty string.
+   */
+  image?: string;
 }

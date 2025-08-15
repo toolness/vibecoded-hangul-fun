@@ -372,8 +372,8 @@ describe("UI Styling", () => {
 });
 
 describe("Typing Tutor Mode", () => {
-  test("displays 'Translate to Hangul:' in normal mode", () => {
-    render(<App />);
+  test("displays 'Translate to Hangul:' in translate mode", () => {
+    render(<App initialMode="translate" />);
     expect(screen.getByText("Translate to Hangul:")).toBeInTheDocument();
   });
 
@@ -413,13 +413,13 @@ describe("Typing Tutor Mode", () => {
     expect(hasKoreanCharacters).toBe(true);
   });
 
-  test("shows romanized version in normal mode", () => {
-    render(<App />);
+  test("shows romanized version in translate mode", () => {
+    render(<App initialMode="translate" />);
 
     const questionElement = screen.getByTestId("question-name");
     const questionText = questionElement.textContent || "";
 
-    // Should show English text in normal mode
+    // Should show English text in translate mode
     const hasLatinCharacters = /[a-zA-Z]/.test(questionText);
     expect(hasLatinCharacters).toBe(true);
   });

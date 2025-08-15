@@ -15,16 +15,14 @@ const MODE_PROMPT: Record<Mode, string> = {
   picture: "Identify this picture:",
 };
 
-const INITIAL_MODE: Mode = "picture";
-
-function App() {
+function App({ initialMode = "picture" }: { initialMode?: Mode }) {
   const vocalizer = useKoreanVocalizer();
   const [showConfetti, setShowConfetti] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // State management
   const [state, dispatch] = useReducer(quizReducer, undefined, () => {
-    return createInitialState(databaseRows, INITIAL_MODE, undefined);
+    return createInitialState(databaseRows, initialMode, undefined);
   });
   const {
     currentQuestion,

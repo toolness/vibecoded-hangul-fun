@@ -33,7 +33,8 @@ function HamburgerMenu({
   onSetMode,
 }: HamburgerMenuProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isWordSelectionModalOpen, setIsWordSelectionModalOpen] =
+    useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
 
   const toggleMenu = () => {
@@ -42,7 +43,7 @@ function HamburgerMenu({
 
   const handleChooseWord = () => {
     setIsMenuOpen(false);
-    setIsModalOpen(true);
+    setIsWordSelectionModalOpen(true);
   };
 
   const handleChooseCategory = () => {
@@ -57,7 +58,7 @@ function HamburgerMenu({
 
   const handleWordSelected = (word: DatabaseRow) => {
     onSelectWord(word);
-    setIsModalOpen(false);
+    setIsWordSelectionModalOpen(false);
   };
 
   return (
@@ -108,11 +109,11 @@ function HamburgerMenu({
         </div>
       )}
 
-      {isModalOpen && (
+      {isWordSelectionModalOpen && (
         <WordSelectionModal
           words={words}
           onSelectWord={handleWordSelected}
-          onClose={() => setIsModalOpen(false)}
+          onClose={() => setIsWordSelectionModalOpen(false)}
         />
       )}
 

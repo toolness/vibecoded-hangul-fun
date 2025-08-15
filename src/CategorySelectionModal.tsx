@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import "./WordSelectionModal.css";
 import "./CategorySelectionModal.css";
 import type { DatabaseRow } from "./database-spec";
@@ -26,6 +26,20 @@ function CategorySelectionModal({
     });
     return Array.from(categorySet).sort();
   }, [allQuestions]);
+
+  // Handle ESC key to close modal
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [onClose]);
 
   const handleCategoryClick = (category: string | undefined) => {
     onSelectCategory(category);

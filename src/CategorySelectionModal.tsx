@@ -1,5 +1,6 @@
-import { useState, useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import "./WordSelectionModal.css";
+import "./CategorySelectionModal.css";
 import type { DatabaseRow } from "./database-spec";
 
 interface CategorySelectionModalProps {
@@ -15,10 +16,6 @@ function CategorySelectionModal({
   onSelectCategory,
   onClose,
 }: CategorySelectionModalProps) {
-  const [selectedCategory, setSelectedCategory] = useState<string | undefined>(
-    currentCategory,
-  );
-
   // Extract unique categories from all questions
   const categories = useMemo(() => {
     const categorySet = new Set<string>();
@@ -30,13 +27,8 @@ function CategorySelectionModal({
     return Array.from(categorySet).sort();
   }, [allQuestions]);
 
-  useEffect(() => {
-    // Set initial selection to current category or "All"
-    setSelectedCategory(currentCategory);
-  }, [currentCategory]);
-
-  const handleSelect = () => {
-    onSelectCategory(selectedCategory);
+  const handleCategoryClick = (category: string | undefined) => {
+    onSelectCategory(category);
     onClose();
   };
 
@@ -60,22 +52,23 @@ function CategorySelectionModal({
           </button>
         </div>
         <div className="modal-body">
-          <select
-            className="word-select"
-            value={selectedCategory || ""}
-            onChange={(e) => setSelectedCategory(e.target.value || undefined)}
-            size={10}
-          >
-            <option value="">All categories</option>
+          <div className="category-pills-container">
+            <button
+              className={`category-pill ${currentCategory === undefined ? "category-pill--selected" : ""}`}
+              onClick={() => handleCategoryClick(undefined)}
+            >
+              All categories
+            </button>
             {categories.map((category) => (
-              <option key={category} value={category}>
+              <button
+                key={category}
+                className={`category-pill ${currentCategory === category ? "category-pill--selected" : ""}`}
+                onClick={() => handleCategoryClick(category)}
+              >
                 {category}
-              </option>
+              </button>
             ))}
-          </select>
-          <button className="select-button" onClick={handleSelect}>
-            Select
-          </button>
+          </div>
         </div>
       </div>
     </div>

@@ -25,6 +25,7 @@ dist-ssr
 
 .env
 src/database.json
+src/assets/database/*
 download.js
 
 .claude

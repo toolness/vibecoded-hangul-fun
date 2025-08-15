@@ -34,7 +34,7 @@ function filterQuestionsForMode(
       return allQuestions.filter((question) => question.hangul);
     case "picture":
       return allQuestions.filter(
-        (question) => question.hangul && question.imageUrl,
+        (question) => question.hangul && (question.imageUrl || question.image),
       );
   }
 }

@@ -10,6 +10,19 @@ interface QuestionDisplayProps {
   vocalizer: Vocalizer | null;
 }
 
+function QuestionPicture({ question }: { question: DatabaseRow }) {
+  let src = question.imageUrl;
+  if (!src && question.image) {
+    src = new URL(`./assets/database/${question.image}`, import.meta.url).href;
+  }
+  if (!src) {
+    // Generally this should never happen, as we should have pre-filtered questions
+    // that have an image.
+    return null;
+  }
+  return <img className="question-picture" src={src} />;
+}
+
 function QuestionDisplay({
   currentQuestion,
   mode,
@@ -43,10 +56,9 @@ function QuestionDisplay({
         // image in place until the new one is fully loaded,
         // which can be confusing on slower network connections.
         return (
-          <img
-            key={currentQuestion.imageUrl}
-            className="question-picture"
-            src={currentQuestion.imageUrl}
+          <QuestionPicture
+            key={currentQuestion.name}
+            question={currentQuestion}
           />
         );
     }

@@ -153,12 +153,20 @@ async function downloadDatabase(
 }
 
 async function downloadImage(url: string, filename: string): Promise<void> {
+  const filepath = join(IMAGES_DIR, filename);
+  if (existsSync(filepath)) {
+    // For now, don't download files that already exist.
+    // In the future we can use last-modified timestamps or something
+    // to make this smarter.
+    console.log(`Skipping ${filename} because it already exists.`);
+    return;
+  }
+  console.log(`Downloading ${filename}...`);
   const response = await fetch(url);
   if (!response.ok) {
     throw new Error(`Failed to download image: ${response.statusText}`);
   }
   const buffer = await response.arrayBuffer();
-  const filepath = join(IMAGES_DIR, filename);
   writeFileSync(filepath, Buffer.from(buffer));
 }
 
@@ -193,25 +201,22 @@ const run = async () => {
         const sanitizedName = row.name
           .replace(/[^a-zA-Z0-9]/g, "_")
           .toLowerCase();
-        const extension = originalName.split(".").pop() || "jpg";
-        filename = `${sanitizedName}_${i}.${extension}`;
+        let extension = originalName.split(".").pop();
+        if (extension) {
+          filename = `${sanitizedName}.${extension}`;
+        } else {
+          console.warn(
+            `WARNING: Unable to determine file extension for row ${row.name}.`,
+          );
+        }
       } else if (imageFile.type === "external" && imageFile.external) {
-        imageUrl = imageFile.external.url;
-        // For external URLs, try to extract extension or default to jpg
-        const urlParts = imageUrl.split("/");
-        const lastPart = urlParts[urlParts.length - 1].split("?")[0];
-        const sanitizedName = row.name
-          .replace(/[^a-zA-Z0-9]/g, "_")
-          .toLowerCase();
-        const extension = lastPart.includes(".")
-          ? lastPart.split(".").pop()
-          : "jpg";
-        filename = `${sanitizedName}_${i}.${extension}`;
+        console.warn(
+          `WARNING: Unsupported image file type "external" for row "${row.name}".`,
+        );
       }
 
       if (imageUrl && filename) {
         try {
-          console.log(`Downloading image for "${row.name}"...`);
           await downloadImage(imageUrl, filename);
           row.image = filename;
         } catch (error) {

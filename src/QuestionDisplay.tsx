@@ -43,6 +43,7 @@ function QuestionDisplay({
       e.preventDefault();
 
       if (audioRef.current) {
+        audioRef.current.currentTime = 0;
         audioRef.current.play();
       } else if (vocalizer) {
         vocalizer(currentQuestion.hangul);

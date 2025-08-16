@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 import type { DatabaseRow } from "./database-spec";
 import type { Mode } from "./quizStateReducer";
 import SpeakerIcon from "./assets/Speaker_Icon.svg";
@@ -29,6 +29,8 @@ function QuestionDisplay({
   mode,
   vocalizer,
 }: QuestionDisplayProps) {
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const showSpeakerIcon = Boolean(vocalizer || currentQuestion.audio);
   const handleSpeakerPointerDown = useCallback(
     (e: React.PointerEvent) => {
       // Preventing the default behavior will ensure that
@@ -40,7 +42,11 @@ function QuestionDisplay({
       // to translate it more accurately).
       e.preventDefault();
 
-      vocalizer?.(currentQuestion.hangul);
+      if (audioRef.current) {
+        audioRef.current.play();
+      } else if (vocalizer) {
+        vocalizer(currentQuestion.hangul);
+      }
     },
     [currentQuestion, vocalizer],
   );
@@ -86,7 +92,21 @@ function QuestionDisplay({
           {getQuestion()}
         </span>
       )}
-      {vocalizer && (
+      {currentQuestion.audio ? (
+        <audio
+          // Not sure if we need key but who knows if some browsers
+          // behave strangely when only the src is changed, so
+          // let's do a full unmount/remount just in case.
+          key={currentQuestion.audio}
+          ref={audioRef}
+          // Pronunciations aren't expected to be large and
+          // we want them to be ready for playback as soon as
+          // the user asks for them, so always preload them.
+          preload="auto"
+          src={getAssetUrl(currentQuestion.audio).href}
+        />
+      ) : undefined}
+      {showSpeakerIcon && (
         <>
           {" "}
           <img

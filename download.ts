@@ -19,9 +19,14 @@ if (!NOTION_DB_ID) {
 }
 
 const DB_JSON_FILENAME = "src/database.json";
-const IMAGES_DIR = "src/assets/database";
+const ASSETS_DIR = "src/assets/database";
 
-type ImageFile = {
+/**
+ * Ideally we'd reuse this from the Notion SDK
+ * but its auto-generated types make this
+ * virtually impossible.
+ */
+type File = {
   type?: string;
   name?: string;
   file?: { url: string; expiry_time?: string };
@@ -30,7 +35,8 @@ type ImageFile = {
 
 type DatabaseEntry = {
   row: DatabaseRow;
-  imageFiles: ImageFile[];
+  imageFiles: File[];
+  audioFiles: File[];
 };
 
 async function downloadDatabase(
@@ -65,7 +71,8 @@ async function downloadDatabase(
     let url = "";
     let imageUrl = "";
     let category = "";
-    let imageFiles: ImageFile[] = [];
+    let imageFiles: File[] = [];
+    let audioFiles: File[] = [];
 
     // Extract Name
     if (
@@ -135,6 +142,15 @@ async function downloadDatabase(
       imageFiles = properties.Image.files;
     }
 
+    // Extract Audio files (optional)
+    if (
+      properties.Audio &&
+      properties.Audio.type === "files" &&
+      Array.isArray(properties.Audio.files)
+    ) {
+      audioFiles = properties.Audio.files;
+    }
+
     const row: DatabaseRow = {
       name,
       hangul,
@@ -146,14 +162,15 @@ async function downloadDatabase(
     entries.push({
       row,
       imageFiles,
+      audioFiles,
     });
   }
 
   return entries;
 }
 
-async function downloadImage(url: string, filename: string): Promise<void> {
-  const filepath = join(IMAGES_DIR, filename);
+async function downloadFile(url: string, filename: string): Promise<void> {
+  const filepath = join(ASSETS_DIR, filename);
   if (existsSync(filepath)) {
     // For now, don't download files that already exist.
     // In the future we can use last-modified timestamps or something
@@ -164,7 +181,7 @@ async function downloadImage(url: string, filename: string): Promise<void> {
   console.log(`Downloading ${filename}...`);
   const response = await fetch(url);
   if (!response.ok) {
-    throw new Error(`Failed to download image: ${response.statusText}`);
+    throw new Error(`Failed to download file: ${response.statusText}`);
   }
   const buffer = await response.arrayBuffer();
   writeFileSync(filepath, Buffer.from(buffer));
@@ -177,54 +194,19 @@ const run = async () => {
 
   const entries = await downloadDatabase(notion, NOTION_DB_ID);
 
-  // Ensure images directory exists
-  if (!existsSync(IMAGES_DIR)) {
-    mkdirSync(IMAGES_DIR, { recursive: true });
+  // Ensure assets directory exists
+  if (!existsSync(ASSETS_DIR)) {
+    mkdirSync(ASSETS_DIR, { recursive: true });
   }
 
-  // Download images if Image column exists
+  // Download assets
   const rows: DatabaseRow[] = [];
   for (let i = 0; i < entries.length; i++) {
-    const { row, imageFiles } = entries[i];
-
-    if (imageFiles.length > 0) {
-      const imageFile = imageFiles[0];
-      let imageUrl = "";
-      let filename = "";
-
-      if (imageFile.type === "file" && imageFile.file) {
-        imageUrl = imageFile.file.url;
-        // Extract filename from URL or use a default
-        const urlParts = imageUrl.split("/");
-        const originalName = urlParts[urlParts.length - 1].split("?")[0];
-        // Use sanitized name based on row name
-        const sanitizedName = row.name
-          .replace(/[^a-zA-Z0-9]/g, "_")
-          .toLowerCase();
-        let extension = originalName.split(".").pop();
-        if (extension) {
-          filename = `${sanitizedName}.${extension}`;
-        } else {
-          console.warn(
-            `WARNING: Unable to determine file extension for row ${row.name}.`,
-          );
-        }
-      } else if (imageFile.type === "external" && imageFile.external) {
-        console.warn(
-          `WARNING: Unsupported image file type "external" for row "${row.name}".`,
-        );
-      }
-
-      if (imageUrl && filename) {
-        try {
-          await downloadImage(imageUrl, filename);
-          row.image = filename;
-        } catch (error) {
-          console.error(`Failed to download image for "${row.name}":`, error);
-        }
-      }
-    }
-
+    const { row, imageFiles, audioFiles } = entries[i];
+    // Use sanitized name based on row name
+    const baseName = row.name.replace(/[^a-zA-Z0-9]/g, "_").toLowerCase();
+    row.image = await maybeDownloadFirstFile(imageFiles, "image", baseName);
+    row.audio = await maybeDownloadFirstFile(audioFiles, "audio", baseName);
     rows.push(row);
   }
 
@@ -232,5 +214,48 @@ const run = async () => {
 
   console.log(`Wrote ${DB_JSON_FILENAME}.`);
 };
+
+async function maybeDownloadFirstFile(
+  files: File[],
+  label: string,
+  baseName: string,
+): Promise<string | undefined> {
+  if (files.length === 0) {
+    return;
+  }
+  const fullLabel = `${label} "${baseName}"`;
+  const file = files[0];
+  let url = "";
+  let filename = "";
+
+  if (file.type === "file" && file.file) {
+    url = file.file.url;
+    // Extract filename from URL or use a default
+    const urlParts = url.split("/");
+    const originalName = urlParts[urlParts.length - 1].split("?")[0];
+    const extension = originalName.split(".").pop();
+    if (extension) {
+      filename = `${baseName}.${extension}`;
+    } else {
+      console.warn(
+        `WARNING: Unable to determine file extension for ${fullLabel}.`,
+      );
+    }
+  } else if (file.type === "external" && file.external) {
+    console.warn(
+      `WARNING: Unsupported image file type "external" for ${fullLabel}.`,
+    );
+  }
+
+  if (url && filename) {
+    try {
+      await downloadFile(url, filename);
+      return filename;
+    } catch (error) {
+      console.error(`Failed to download file for ${fullLabel}:`, error);
+      throw error;
+    }
+  }
+}
 
 await run();

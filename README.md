@@ -21,6 +21,9 @@ schema:
 - `Image URL` - URL, an optional image representing the word.
 - `Image` - An optional image file representing the word, used
   as an alternative to image URL.
+- `Audio` - An optional audio file recording the pronounciation
+  of the word, used as an alternative to the browser's
+  built-in text-to-speech functionality.
 - `Category` - Select, an optional tag representing a
   category for the word, such as "History" or "Place".
 

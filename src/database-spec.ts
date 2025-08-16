@@ -32,4 +32,10 @@ export interface DatabaseRow {
    * It may be an empty string.
    */
   image?: string;
+
+  /**
+   * Optional local audio filename (relative to assets/database).
+   * It may be an empty string.
+   */
+  audio?: string;
 }

@@ -3,6 +3,7 @@ import type { DatabaseRow } from "./database-spec";
 import type { Mode } from "./quizStateReducer";
 import SpeakerIcon from "./assets/Speaker_Icon.svg";
 import { type Vocalizer } from "./speech";
+import { getAssetUrl } from "./assets";
 
 interface QuestionDisplayProps {
   currentQuestion: DatabaseRow;
@@ -13,7 +14,7 @@ interface QuestionDisplayProps {
 function QuestionPicture({ question }: { question: DatabaseRow }) {
   let src = question.imageUrl;
   if (!src && question.image) {
-    src = new URL(`./assets/database/${question.image}`, import.meta.url).href;
+    src = getAssetUrl(question.image).href;
   }
   if (!src) {
     // Generally this should never happen, as we should have pre-filtered questions

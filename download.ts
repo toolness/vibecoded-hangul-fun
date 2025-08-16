@@ -3,6 +3,7 @@ import { writeFileSync, existsSync, mkdirSync } from "fs";
 import { join } from "path";
 import dotenv from "dotenv";
 import { type DatabaseRow } from "./src/database-spec.ts";
+import { ASSETS_DIR } from "./src/assets.ts";
 
 dotenv.config();
 
@@ -19,7 +20,6 @@ if (!NOTION_DB_ID) {
 }
 
 const DB_JSON_FILENAME = "src/database.json";
-const ASSETS_DIR = "src/assets/database";
 
 /**
  * Ideally we'd reuse this from the Notion SDK

@@ -7,11 +7,16 @@ import "@testing-library/jest-dom";
 // Mock the database to have predictable test data
 vi.mock("./database.json", () => ({
   default: [
-    { name: "hello", hangul: "안녕하세요", url: "" },
-    { name: "goodbye", hangul: "안녕히 가세요", url: "https://example.com" },
-    { name: "thank you", hangul: "감사합니다", url: "" },
-    { name: "sorry", hangul: "죄송합니다", url: "" },
-    { name: "yes", hangul: "네", url: "" },
+    { id: "test-1", name: "hello", hangul: "안녕하세요" },
+    {
+      id: "test-2",
+      name: "goodbye",
+      hangul: "안녕히 가세요",
+      url: "https://example.com",
+    },
+    { id: "test-3", name: "thank you", hangul: "감사합니다" },
+    { id: "test-4", name: "sorry", hangul: "죄송합니다" },
+    { id: "test-5", name: "yes", hangul: "네" },
   ],
 }));
 

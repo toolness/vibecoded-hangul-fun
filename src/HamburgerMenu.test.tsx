@@ -5,13 +5,11 @@ import type { DatabaseRow } from "./database-spec";
 
 describe("HamburgerMenu", () => {
   const mockWords: DatabaseRow[] = [
-    { id: "test-id-1", name: "hello", hangul: "안녕", url: "", imageUrl: "" },
+    { id: "test-id-1", name: "hello", hangul: "안녕" },
     {
       id: "test-id-2",
       name: "goodbye",
       hangul: "안녕히",
-      url: "",
-      imageUrl: "",
     },
   ];
 

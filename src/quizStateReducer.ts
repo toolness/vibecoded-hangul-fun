@@ -17,7 +17,6 @@ const DUMMY_QUESTION: DatabaseRow = {
   id: "dummy-question-id",
   name: "???",
   hangul: "???",
-  url: "",
   imageUrl:
     "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==",
 };

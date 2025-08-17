@@ -8,16 +8,12 @@ describe("quizReducer", () => {
     id: "test-id-1",
     name: "hello",
     hangul: "안녕",
-    url: "",
-    imageUrl: "",
   };
 
   const mockQuestion2: DatabaseRow = {
     id: "test-id-2",
     name: "goodbye",
     hangul: "안녕히",
-    url: "",
-    imageUrl: "",
   };
 
   const mockQuestions = [mockQuestion, mockQuestion2];
@@ -116,22 +112,16 @@ describe("quizReducer", () => {
         id: "test-id-q1",
         name: "q1",
         hangul: "하나",
-        url: "",
-        imageUrl: "",
       };
       const q2: DatabaseRow = {
         id: "test-id-q2",
         name: "q2",
         hangul: "둘",
-        url: "",
-        imageUrl: "",
       };
       const q3: DatabaseRow = {
         id: "test-id-q3",
         name: "q3",
         hangul: "셋",
-        url: "",
-        imageUrl: "",
       };
       const questions = [q1, q2, q3];
       const initialState = createInitialState(questions);

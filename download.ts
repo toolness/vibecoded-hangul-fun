@@ -151,7 +151,15 @@ async function downloadDatabase(
       audioFiles = properties.Audio.files;
     }
 
-    // TODO: Extract minimal pairs.
+    // Extract Minimal pairs (optional)
+    let minimalPairs: string[] = [];
+    if (
+      properties["Minimal pairs"] &&
+      properties["Minimal pairs"].type === "relation" &&
+      Array.isArray(properties["Minimal pairs"].relation)
+    ) {
+      minimalPairs = properties["Minimal pairs"].relation.map((r) => r.id);
+    }
 
     const row: DatabaseRow = {
       id: page.id,
@@ -160,6 +168,7 @@ async function downloadDatabase(
       url,
       imageUrl,
       category,
+      minimalPairs: minimalPairs.length > 0 ? minimalPairs : undefined,
     };
 
     entries.push({

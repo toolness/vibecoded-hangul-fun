@@ -5,6 +5,7 @@ import type { DatabaseRow } from "./database-spec";
 
 describe("quizReducer", () => {
   const mockQuestion: DatabaseRow = {
+    id: "test-id-1",
     name: "hello",
     hangul: "안녕",
     url: "",
@@ -12,6 +13,7 @@ describe("quizReducer", () => {
   };
 
   const mockQuestion2: DatabaseRow = {
+    id: "test-id-2",
     name: "goodbye",
     hangul: "안녕히",
     url: "",
@@ -111,18 +113,21 @@ describe("quizReducer", () => {
   describe("NEXT_QUESTION", () => {
     it("should move to next question from remaining questions", () => {
       const q1: DatabaseRow = {
+        id: "test-id-q1",
         name: "q1",
         hangul: "하나",
         url: "",
         imageUrl: "",
       };
       const q2: DatabaseRow = {
+        id: "test-id-q2",
         name: "q2",
         hangul: "둘",
         url: "",
         imageUrl: "",
       };
       const q3: DatabaseRow = {
+        id: "test-id-q3",
         name: "q3",
         hangul: "셋",
         url: "",

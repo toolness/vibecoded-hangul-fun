@@ -14,6 +14,7 @@ export interface QuizState {
 }
 
 const DUMMY_QUESTION: DatabaseRow = {
+  id: "dummy-question-id",
   name: "???",
   hangul: "???",
   url: "",

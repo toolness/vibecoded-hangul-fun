@@ -5,6 +5,7 @@ import type { DatabaseRow } from "./database-spec";
 
 describe("QuestionDisplay", () => {
   const mockQuestionWithUrl: DatabaseRow = {
+    id: "test-id-1",
     name: "hello",
     hangul: "안녕하세요",
     url: "https://example.com",
@@ -12,6 +13,7 @@ describe("QuestionDisplay", () => {
   };
 
   const mockQuestionWithoutUrl: DatabaseRow = {
+    id: "test-id-2",
     name: "goodbye",
     hangul: "안녕히 가세요",
     url: "",

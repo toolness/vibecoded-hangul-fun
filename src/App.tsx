@@ -48,6 +48,16 @@ function App({ initialMode = "picture" }: { initialMode?: Mode }) {
     }
   }, [isCompletelyCorrect, showAnswer]);
 
+  useEffect(() => {
+    // Reset confetti for next question
+    setShowConfetti(false);
+
+    // Focus the input field
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 0);
+  }, [currentQuestion, mode]);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     dispatch({ type: "UPDATE_INPUT", input: e.target.value });
   };
@@ -63,38 +73,15 @@ function App({ initialMode = "picture" }: { initialMode?: Mode }) {
   };
 
   const handleNext = () => {
-    // Reset confetti for next question
-    setShowConfetti(false);
-
-    // Move to next question
     dispatch({ type: "NEXT_QUESTION" });
-
-    // Focus the input field
-    setTimeout(() => {
-      inputRef.current?.focus();
-    }, 0);
   };
 
   const handleSkip = () => {
-    // Reset confetti for next question
-    setShowConfetti(false);
-
     dispatch({ type: "NEXT_QUESTION" });
-
-    // Focus the input field
-    setTimeout(() => {
-      inputRef.current?.focus();
-    }, 0);
   };
 
   const handleWordSelection = (word: DatabaseRow) => {
-    setShowConfetti(false);
     dispatch({ type: "SET_QUESTION", question: word });
-
-    // Focus the input field
-    setTimeout(() => {
-      inputRef.current?.focus();
-    }, 0);
   };
 
   const handleSetMode = (newMode: Mode) => {

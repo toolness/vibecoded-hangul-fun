@@ -75,7 +75,7 @@ describe("App State Management", () => {
 
   test("input field receives focus after clicking Skip", async () => {
     const user = userEvent.setup();
-    render(<App />);
+    render(<App initialMode="typingtutor" />);
 
     // Click skip
     await user.click(screen.getByText("Skip"));
@@ -89,7 +89,7 @@ describe("App State Management", () => {
 
   test("input field receives focus after clicking Next", async () => {
     const user = userEvent.setup();
-    render(<App />);
+    render(<App initialMode="typingtutor" />);
 
     // Give up to show Next button
     await user.click(screen.getByText("Give up"));

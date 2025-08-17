@@ -106,7 +106,18 @@ type AnswererProps = {
 };
 
 function MinimalPairAnswerer({ state, dispatch }: AnswererProps) {
+  const [selectedChoice, setSelectedChoice] = useState<DatabaseRow | null>(
+    null,
+  );
+  const [showConfetti, setShowConfetti] = useState(false);
+
   const handleSkip = () => {
+    dispatch({ type: "NEXT_QUESTION" });
+  };
+
+  const handleNext = () => {
+    setSelectedChoice(null);
+    setShowConfetti(false);
     dispatch({ type: "NEXT_QUESTION" });
   };
 
@@ -130,32 +141,62 @@ function MinimalPairAnswerer({ state, dispatch }: AnswererProps) {
     return choices;
   }, [allQuestionsFiltered, currentQuestion]);
 
+  const hasAnswered = selectedChoice !== null;
+
+  useEffect(() => {
+    setSelectedChoice(null);
+    setShowConfetti(false);
+  }, [currentQuestion]);
+
+  const handleChoiceClick = (choice: DatabaseRow) => {
+    if (hasAnswered) return;
+
+    setSelectedChoice(choice);
+    if (choice === currentQuestion) {
+      setShowConfetti(true);
+    }
+  };
+
+  const getButtonClassName = (choice: DatabaseRow) => {
+    if (!hasAnswered) {
+      return "button choice-button";
+    }
+    if (choice === currentQuestion) {
+      return "button choice-button choice-correct";
+    }
+    if (choice === selectedChoice) {
+      return "button choice-button choice-wrong";
+    }
+    return "button choice-button";
+  };
+
   return (
     <>
-      {/* TODO: Style this list to not look horrible. */}
-      <ul>
+      <Confetti show={showConfetti} />
+
+      <div className="choices-grid">
         {choices.map((choice) => (
-          <>
-            <button
-              onClick={() => {
-                if (choice === currentQuestion) {
-                  // TODO: Hooray they guessed right!  Show confetti, highlight the user's choice in green, and show the next button.
-                } else {
-                  // TODO: Alas they were wrong, highlight the user's choice in red, the correct answer in green, and show the "next" button.
-                }
-              }}
-              className="button"
-            >
-              {choice.hangul} ({choice.name})
-            </button>
-          </>
+          <button
+            key={choice.id}
+            onClick={() => handleChoiceClick(choice)}
+            className={getButtonClassName(choice)}
+            disabled={hasAnswered}
+          >
+            {choice.hangul} ({choice.name})
+          </button>
         ))}
-      </ul>
+      </div>
+
       <div className="button-section">
-        {/** TODO: Only show this if the user hasn't answered yet */}
-        <button onClick={handleSkip} className="button button-skip">
-          Skip
-        </button>
+        {hasAnswered ? (
+          <button onClick={handleNext} className="button button-next">
+            Next
+          </button>
+        ) : (
+          <button onClick={handleSkip} className="button button-skip">
+            Skip
+          </button>
+        )}
       </div>
     </>
   );

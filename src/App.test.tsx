@@ -1,33 +1,39 @@
-import { expect, test, describe, vi } from "vitest";
+import { expect, test, describe } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import App from "./App";
 import "@testing-library/jest-dom";
+import type { Mode } from "./quizStateReducer";
 
-// Mock the database to have predictable test data
-vi.mock("./database.json", () => ({
-  default: [
-    { id: "test-1", name: "hello", hangul: "안녕하세요" },
-    {
-      id: "test-2",
-      name: "goodbye",
-      hangul: "안녕히 가세요",
-      url: "https://example.com",
-    },
-    { id: "test-3", name: "thank you", hangul: "감사합니다" },
-    { id: "test-4", name: "sorry", hangul: "죄송합니다" },
-    { id: "test-5", name: "yes", hangul: "네" },
-  ],
-}));
+function TestApp(props: { initialMode?: Mode }) {
+  return (
+    <App
+      initialMode={props.initialMode ?? "picture"}
+      initialRows={[
+        { id: "test-1", name: "hello", hangul: "안녕하세요", image: "hi.png" },
+        {
+          id: "test-2",
+          name: "goodbye",
+          hangul: "안녕히 가세요",
+          url: "https://example.com",
+          image: "bye.png",
+        },
+        { id: "test-3", name: "thank you", hangul: "감사합니다" },
+        { id: "test-4", name: "sorry", hangul: "죄송합니다" },
+        { id: "test-5", name: "yes", hangul: "네" },
+      ]}
+    />
+  );
+}
 
 describe("App State Management", () => {
   test("renders without crashing", () => {
-    render(<App />);
+    render(<TestApp />);
     expect(screen.getByRole("main")).toBeInTheDocument();
   });
 
   test("initializes with a question", () => {
-    render(<App />);
+    render(<TestApp />);
     // Should show a question (name) and input field
     expect(screen.getByTestId("question-name")).toBeInTheDocument();
     expect(screen.getByTestId("hangul-input")).toBeInTheDocument();
@@ -35,7 +41,7 @@ describe("App State Management", () => {
 
   test("tracks user input", async () => {
     const user = userEvent.setup();
-    render(<App />);
+    render(<TestApp />);
 
     const input = screen.getByTestId("hangul-input") as HTMLInputElement;
     await user.type(input, "한글");
@@ -44,18 +50,18 @@ describe("App State Management", () => {
   });
 
   test("shows give up button", () => {
-    render(<App />);
+    render(<TestApp />);
     expect(screen.getByText("Give up")).toBeInTheDocument();
   });
 
   test("shows skip button", () => {
-    render(<App />);
+    render(<TestApp />);
     expect(screen.getByText("Skip")).toBeInTheDocument();
   });
 
   test("skip button moves to next question without revealing answer", async () => {
     const user = userEvent.setup();
-    render(<App />);
+    render(<TestApp />);
 
     // Click skip
     await user.click(screen.getByText("Skip"));
@@ -75,7 +81,7 @@ describe("App State Management", () => {
 
   test("input field receives focus after clicking Skip", async () => {
     const user = userEvent.setup();
-    render(<App initialMode="typingtutor" />);
+    render(<TestApp />);
 
     // Click skip
     await user.click(screen.getByText("Skip"));
@@ -89,7 +95,7 @@ describe("App State Management", () => {
 
   test("input field receives focus after clicking Next", async () => {
     const user = userEvent.setup();
-    render(<App initialMode="typingtutor" />);
+    render(<TestApp />);
 
     // Give up to show Next button
     await user.click(screen.getByText("Give up"));
@@ -106,7 +112,7 @@ describe("App State Management", () => {
 
   test("tracks answered questions", async () => {
     const user = userEvent.setup();
-    render(<App />);
+    render(<TestApp />);
 
     // Should have a way to check if questions are being tracked
     // This will be tested more thoroughly when we implement the full logic
@@ -122,7 +128,7 @@ describe("App State Management", () => {
 describe("Question Selection Logic", () => {
   test("selects a new question when clicking next", async () => {
     const user = userEvent.setup();
-    render(<App />);
+    render(<TestApp />);
 
     // Give up and click next
     await user.click(screen.getByText("Give up"));
@@ -135,7 +141,7 @@ describe("Question Selection Logic", () => {
 
   test("prioritizes unanswered questions", async () => {
     const user = userEvent.setup();
-    render(<App />);
+    render(<TestApp />);
 
     // Mark several questions as answered by giving up and clicking next multiple times
     for (let i = 0; i < 3; i++) {
@@ -149,7 +155,7 @@ describe("Question Selection Logic", () => {
 
   test("shows questions that were previously incorrect", async () => {
     const user = userEvent.setup();
-    render(<App />);
+    render(<TestApp />);
 
     // Type wrong answer and mark as incorrect
     const input = screen.getByTestId("hangul-input") as HTMLInputElement;
@@ -169,7 +175,7 @@ describe("Question Selection Logic", () => {
 describe("URL Display", () => {
   test("displays name as link when URL is present", async () => {
     const user = userEvent.setup();
-    render(<App />);
+    render(<TestApp />);
 
     // Keep clicking next until we find the "goodbye" question which has a URL
     let foundLink = false;
@@ -189,7 +195,7 @@ describe("URL Display", () => {
   });
 
   test("displays name as text when URL is not present", () => {
-    render(<App />);
+    render(<TestApp />);
 
     const element = screen.getByTestId("question-name");
     // If it's not a link, it should be a span
@@ -202,7 +208,7 @@ describe("URL Display", () => {
 describe("Keyboard Accessibility", () => {
   test("Enter key advances to next question when answer is correct", async () => {
     const user = userEvent.setup();
-    render(<App />);
+    render(<TestApp />);
 
     // Find a predictable question
     let found = false;
@@ -233,7 +239,7 @@ describe("Keyboard Accessibility", () => {
 
   test("Enter key advances when answer is shown", async () => {
     const user = userEvent.setup();
-    render(<App />);
+    render(<TestApp />);
 
     // Give up to show the answer
     await user.click(screen.getByText("Give up"));
@@ -254,7 +260,7 @@ describe("Keyboard Accessibility", () => {
 
   test("Enter key does nothing when answer is incorrect", async () => {
     const user = userEvent.setup();
-    render(<App />);
+    render(<TestApp />);
 
     const input = screen.getByTestId("hangul-input") as HTMLInputElement;
 
@@ -274,7 +280,7 @@ describe("Keyboard Accessibility", () => {
 describe("Real-time Character Validation", () => {
   test("shows character accuracy feedback", async () => {
     const user = userEvent.setup();
-    render(<App />);
+    render(<TestApp />);
 
     // Find a predictable question (let's try to get "yes" = "네")
     let found = false;
@@ -303,7 +309,7 @@ describe("Real-time Character Validation", () => {
 
   test("shows next button when answer is completely correct", async () => {
     const user = userEvent.setup();
-    render(<App />);
+    render(<TestApp />);
 
     // Find a predictable question
     let found = false;
@@ -331,7 +337,7 @@ describe("Real-time Character Validation", () => {
 
   test("tracks correct answers differently from incorrect ones", async () => {
     const user = userEvent.setup();
-    render(<App />);
+    render(<TestApp />);
 
     // Find a predictable question
     let found = false;
@@ -362,14 +368,14 @@ describe("Real-time Character Validation", () => {
 
 describe("UI Styling", () => {
   test("quiz container has proper structure", () => {
-    render(<App />);
+    render(<TestApp />);
 
     // Check for quiz container
     expect(screen.getByTestId("quiz-container")).toBeInTheDocument();
   });
 
   test("input field has proper size attributes", () => {
-    render(<App />);
+    render(<TestApp />);
 
     const input = screen.getByTestId("hangul-input") as HTMLInputElement;
     expect(input.className).toContain("hangul-input");
@@ -378,13 +384,13 @@ describe("UI Styling", () => {
 
 describe("Typing Tutor Mode", () => {
   test("displays 'Translate to Hangul:' in translate mode", () => {
-    render(<App initialMode="translate" />);
+    render(<TestApp initialMode="translate" />);
     expect(screen.getByText("Translate to Hangul:")).toBeInTheDocument();
   });
 
   test("toggles to typing tutor mode when menu option is clicked", async () => {
     const user = userEvent.setup();
-    render(<App />);
+    render(<TestApp />);
 
     // Open hamburger menu
     const hamburgerButton = screen.getByLabelText("Toggle menu");
@@ -401,7 +407,7 @@ describe("Typing Tutor Mode", () => {
 
   test("displays Hangul directly in typing tutor mode", async () => {
     const user = userEvent.setup();
-    render(<App />);
+    render(<TestApp />);
 
     // Enable typing tutor mode
     const hamburgerButton = screen.getByLabelText("Toggle menu");
@@ -419,7 +425,7 @@ describe("Typing Tutor Mode", () => {
   });
 
   test("shows romanized version in translate mode", () => {
-    render(<App initialMode="translate" />);
+    render(<TestApp initialMode="translate" />);
 
     const questionElement = screen.getByTestId("question-name");
     const questionText = questionElement.textContent || "";
@@ -431,7 +437,7 @@ describe("Typing Tutor Mode", () => {
 
   test("toggling back from typing tutor mode restores normal display", async () => {
     const user = userEvent.setup();
-    render(<App />);
+    render(<TestApp />);
 
     // Enable typing tutor mode
     await user.click(screen.getByLabelText("Toggle menu"));
@@ -451,7 +457,7 @@ describe("Typing Tutor Mode", () => {
 
   test("checkmark appears in menu when typing tutor mode is active", async () => {
     const user = userEvent.setup();
-    render(<App />);
+    render(<TestApp />);
 
     // Enable typing tutor mode
     await user.click(screen.getByLabelText("Toggle menu"));
@@ -464,7 +470,7 @@ describe("Typing Tutor Mode", () => {
 
   test("answer validation works the same in typing tutor mode", async () => {
     const user = userEvent.setup();
-    render(<App />);
+    render(<TestApp />);
 
     // Enable typing tutor mode
     const hamburgerButton = screen.getByLabelText("Toggle menu");

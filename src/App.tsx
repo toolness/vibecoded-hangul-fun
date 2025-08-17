@@ -7,7 +7,6 @@ import { useKoreanVocalizer } from "./speech";
 import HamburgerMenu from "./HamburgerMenu";
 import QuestionDisplay from "./QuestionDisplay";
 import Confetti from "./Confetti";
-import databaseRows from "./database.json";
 
 const MODE_PROMPT: Record<Mode, string> = {
   typingtutor: "Type this Hangul:",
@@ -16,14 +15,20 @@ const MODE_PROMPT: Record<Mode, string> = {
   minimalpair: "Which word is being spoken?",
 };
 
-function App({ initialMode = "picture" }: { initialMode?: Mode }) {
+function App({
+  initialMode,
+  initialRows,
+}: {
+  initialMode: Mode;
+  initialRows: DatabaseRow[];
+}) {
   const vocalizer = useKoreanVocalizer();
   const [showConfetti, setShowConfetti] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // State management
   const [state, dispatch] = useReducer(quizReducer, undefined, () => {
-    return createInitialState(databaseRows, initialMode, undefined);
+    return createInitialState(initialRows, initialMode, undefined);
   });
   const {
     currentQuestion,

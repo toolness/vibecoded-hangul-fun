@@ -3,6 +3,9 @@
  * its Hangul equivalent, and any additional metadata.
  */
 export interface DatabaseRow {
+  /** Unique ID for this row (UUID). */
+  id: string;
+
   /** The English/romanized text. */
   name: string;
 
@@ -38,4 +41,9 @@ export interface DatabaseRow {
    * It may be an empty string.
    */
   audio?: string;
+
+  /**
+   * UUIDs of rows that constitute a minimal pair with this one.
+   */
+  minimalPairs?: string[];
 }

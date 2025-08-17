@@ -16,6 +16,8 @@ schema:
 
 - `Name` - Text, contains the English/romanized word
 - `Hangul` - Text, contains the Hangul equivalent for the word
+- `Minimal pairs` - Self-relation linking to other words that
+  consitute a [minimal pair][] with this one.
 - `URL` - URL, contains an optional link where the user can
   learn more about the word being described.
 - `Image URL` - URL, an optional image representing the word.
@@ -26,6 +28,8 @@ schema:
   built-in text-to-speech functionality.
 - `Category` - Select, an optional tag representing a
   category for the word, such as "History" or "Place".
+
+[minimal pair]: https://en.wikipedia.org/wiki/Minimal_pair
 
 ### Environment variables
 

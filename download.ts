@@ -151,7 +151,10 @@ async function downloadDatabase(
       audioFiles = properties.Audio.files;
     }
 
+    // TODO: Extract minimal pairs.
+
     const row: DatabaseRow = {
+      id: page.id,
       name,
       hangul,
       url,

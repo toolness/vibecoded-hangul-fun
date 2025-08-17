@@ -16,13 +16,13 @@ export interface DatabaseRow {
    * URL for where the user can learn more about the entity
    * being described. It may be an empty string.
    */
-  url: string;
+  url?: string;
 
   /**
    * URL pointing to an image of the word. It may be an
    * empty string.
    */
-  imageUrl: string;
+  imageUrl?: string;
 
   /**
    * Optional category for the word. It may be an empty

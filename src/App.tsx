@@ -20,6 +20,8 @@ import { useKoreanVocalizer } from "./speech";
 import HamburgerMenu from "./HamburgerMenu";
 import QuestionDisplay from "./QuestionDisplay";
 import Confetti from "./Confetti";
+import { Pronouncer } from "./Pronouncer";
+import { getAssetUrl } from "./assets";
 
 const MODE_PROMPT: Record<Mode, string> = {
   typingtutor: "Type this Hangul:",
@@ -87,7 +89,7 @@ function App({
           </div>
         </div>
 
-        <Answerer state={state} dispatch={dispatch} />
+        <Answerer state={state} dispatch={dispatch} vocalizer={vocalizer} />
       </div>
     </main>
   );
@@ -103,9 +105,10 @@ const ANSWERERS: { [k in Mode]: React.FC<AnswererProps> } = {
 type AnswererProps = {
   state: QuizState;
   dispatch: ActionDispatch<[action: QuizAction]>;
+  vocalizer?: ReturnType<typeof useKoreanVocalizer>;
 };
 
-function MinimalPairAnswerer({ state, dispatch }: AnswererProps) {
+function MinimalPairAnswerer({ state, dispatch, vocalizer }: AnswererProps) {
   const [selectedChoice, setSelectedChoice] = useState<DatabaseRow | null>(
     null,
   );
@@ -183,6 +186,15 @@ function MinimalPairAnswerer({ state, dispatch }: AnswererProps) {
             disabled={hasAnswered}
           >
             {choice.hangul} ({choice.name})
+            {hasAnswered && (
+              <Pronouncer
+                audioUrl={
+                  choice.audio ? getAssetUrl(choice.audio).href : undefined
+                }
+                hangul={choice.hangul}
+                vocalizer={vocalizer || null}
+              />
+            )}
           </button>
         ))}
       </div>

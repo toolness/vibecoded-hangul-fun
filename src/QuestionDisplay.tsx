@@ -1,4 +1,3 @@
-import { useCallback, useRef } from "react";
 import type { DatabaseRow } from "./database-spec";
 import type { Mode } from "./quizStateReducer";
 import { type Vocalizer } from "./speech";

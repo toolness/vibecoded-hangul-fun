@@ -91,6 +91,7 @@ function HamburgerMenu({
             <button className="menu-link" onClick={handleChooseWord}>
               Choose word&hellip;
             </button>
+            <hr className="menu-divider" />
             {MODE_ORDER.map((modeToChoose) => {
               return (
                 <button

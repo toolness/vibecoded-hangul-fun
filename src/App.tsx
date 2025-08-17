@@ -60,6 +60,8 @@ function App({
     dispatch({ type: "SET_CATEGORY", category: newCategory });
   };
 
+  const Answerer = ANSWERERS[mode];
+
   return (
     <main>
       <HamburgerMenu
@@ -84,16 +86,42 @@ function App({
           </div>
         </div>
 
-        <Answer state={state} dispatch={dispatch} />
+        <Answerer state={state} dispatch={dispatch} />
       </div>
     </main>
   );
 }
 
-function Answer(props: {
+const ANSWERERS: { [k in Mode]: React.FC<AnswererProps> } = {
+  translate: TypingModeAnswerer,
+  typingtutor: TypingModeAnswerer,
+  picture: TypingModeAnswerer,
+  minimalpair: MinimalPairAnswerer,
+};
+
+type AnswererProps = {
   state: QuizState;
   dispatch: ActionDispatch<[action: QuizAction]>;
-}) {
+};
+
+function MinimalPairAnswerer({ state, dispatch }: AnswererProps) {
+  const handleSkip = () => {
+    dispatch({ type: "NEXT_QUESTION" });
+  };
+
+  return (
+    <>
+      <p>{`TODO: Implement minimal pair answerer for ${state.currentQuestion.name}`}</p>
+      <div className="button-section">
+        <button onClick={handleSkip} className="button button-skip">
+          Skip
+        </button>
+      </div>
+    </>
+  );
+}
+
+function TypingModeAnswerer(props: AnswererProps) {
   const { state, dispatch } = props;
   const [showConfetti, setShowConfetti] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);

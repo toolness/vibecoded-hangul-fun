@@ -9,6 +9,7 @@ const MODE_NAMES: { [k in Mode]: string } = {
   translate: "Translate",
   typingtutor: "Typing tutor",
   picture: "Picture",
+  minimalpair: "Minimal pair",
 };
 
 const MODE_ORDER: Mode[] = Object.keys(MODE_NAMES) as Mode[];

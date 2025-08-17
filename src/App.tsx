@@ -13,6 +13,7 @@ const MODE_PROMPT: Record<Mode, string> = {
   typingtutor: "Type this Hangul:",
   translate: "Translate to Hangul:",
   picture: "Identify this picture:",
+  minimalpair: "Which word is being spoken?",
 };
 
 function App({ initialMode = "picture" }: { initialMode?: Mode }) {

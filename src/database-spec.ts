@@ -44,6 +44,7 @@ export interface DatabaseRow {
 
   /**
    * UUIDs of rows that constitute a minimal pair with this one.
+   * If defined, the array will never be empty.
    */
   minimalPairs?: string[];
 }

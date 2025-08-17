@@ -1,8 +1,20 @@
 import "./App.css";
-import { useReducer, useEffect, useState, useRef } from "react";
+import {
+  useReducer,
+  useEffect,
+  useState,
+  useRef,
+  type ActionDispatch,
+} from "react";
 import type { DatabaseRow } from "./database-spec";
 import { calculateCorrectKeystrokes } from "./calculateCorrectKeystrokes";
-import { quizReducer, createInitialState, type Mode } from "./quizStateReducer";
+import {
+  quizReducer,
+  createInitialState,
+  type Mode,
+  type QuizState,
+  type QuizAction,
+} from "./quizStateReducer";
 import { useKoreanVocalizer } from "./speech";
 import HamburgerMenu from "./HamburgerMenu";
 import QuestionDisplay from "./QuestionDisplay";
@@ -23,8 +35,6 @@ function App({
   initialRows: DatabaseRow[];
 }) {
   const vocalizer = useKoreanVocalizer();
-  const [showConfetti, setShowConfetti] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
 
   // State management
   const [state, dispatch] = useReducer(quizReducer, undefined, () => {
@@ -32,13 +42,63 @@ function App({
   });
   const {
     currentQuestion,
-    userInput,
-    showAnswer,
     mode,
     category,
     allQuestions,
     allQuestionsFiltered,
   } = state;
+
+  const handleWordSelection = (word: DatabaseRow) => {
+    dispatch({ type: "SET_QUESTION", question: word });
+  };
+
+  const handleSetMode = (newMode: Mode) => {
+    dispatch({ type: "SET_MODE", mode: newMode });
+  };
+
+  const handleSetCategory = (newCategory: string | undefined) => {
+    dispatch({ type: "SET_CATEGORY", category: newCategory });
+  };
+
+  return (
+    <main>
+      <HamburgerMenu
+        words={allQuestionsFiltered}
+        allQuestions={allQuestions}
+        currentCategory={category}
+        onSelectWord={handleWordSelection}
+        onSelectCategory={handleSetCategory}
+        mode={mode}
+        onSetMode={handleSetMode}
+      />
+
+      <div className="quiz-container" data-testid="quiz-container">
+        <div className="question-section">
+          <h2 className="question-prompt">{MODE_PROMPT[mode]}</h2>
+          <div className="question-name">
+            <QuestionDisplay
+              currentQuestion={currentQuestion}
+              mode={mode}
+              vocalizer={vocalizer}
+            />
+          </div>
+        </div>
+
+        <Answer state={state} dispatch={dispatch} />
+      </div>
+    </main>
+  );
+}
+
+function Answer(props: {
+  state: QuizState;
+  dispatch: ActionDispatch<[action: QuizAction]>;
+}) {
+  const { state, dispatch } = props;
+  const [showConfetti, setShowConfetti] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const { currentQuestion, userInput, showAnswer, mode } = state;
 
   const { correct, total } = calculateCorrectKeystrokes(
     currentQuestion.hangul || "",
@@ -63,6 +123,10 @@ function App({
     }, 0);
   }, [currentQuestion, mode]);
 
+  const handleGiveUp = () => {
+    dispatch({ type: "SHOW_ANSWER" });
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     dispatch({ type: "UPDATE_INPUT", input: e.target.value });
   };
@@ -73,10 +137,6 @@ function App({
     }
   };
 
-  const handleGiveUp = () => {
-    dispatch({ type: "SHOW_ANSWER" });
-  };
-
   const handleNext = () => {
     dispatch({ type: "NEXT_QUESTION" });
   };
@@ -85,91 +145,54 @@ function App({
     dispatch({ type: "NEXT_QUESTION" });
   };
 
-  const handleWordSelection = (word: DatabaseRow) => {
-    dispatch({ type: "SET_QUESTION", question: word });
-  };
-
-  const handleSetMode = (newMode: Mode) => {
-    dispatch({ type: "SET_MODE", mode: newMode });
-  };
-
-  const handleSetCategory = (newCategory: string | undefined) => {
-    dispatch({ type: "SET_CATEGORY", category: newCategory });
-  };
-
   return (
-    <main>
+    <>
       <Confetti show={showConfetti} />
-      <HamburgerMenu
-        words={allQuestionsFiltered}
-        allQuestions={allQuestions}
-        currentCategory={category}
-        onSelectWord={handleWordSelection}
-        onSelectCategory={handleSetCategory}
-        mode={mode}
-        onSetMode={handleSetMode}
-      />
 
-      <div className="quiz-container" data-testid="quiz-container">
-        <div className="question-section">
-          <h2 className="question-prompt">{MODE_PROMPT[mode]}</h2>
-          <div className="question-name">
-            <QuestionDisplay
-              currentQuestion={currentQuestion}
-              mode={mode}
-              vocalizer={vocalizer}
-            />
+      <div className="input-section">
+        <input
+          ref={inputRef}
+          type="text"
+          value={userInput}
+          onChange={handleInputChange}
+          onKeyUp={handleKeyUp}
+          data-testid="hangul-input"
+          className="hangul-input"
+          placeholder="Enter Hangul..."
+          autoFocus
+        />
+
+        {userInput && !showAnswer && (
+          <div data-testid="character-feedback" className="character-feedback">
+            {correct}/{total} keystrokes correct
           </div>
-        </div>
+        )}
 
-        <div className="input-section">
-          <input
-            ref={inputRef}
-            type="text"
-            value={userInput}
-            onChange={handleInputChange}
-            onKeyUp={handleKeyUp}
-            data-testid="hangul-input"
-            className="hangul-input"
-            placeholder="Enter Hangul..."
-            autoFocus
-          />
-
-          {userInput && !showAnswer && (
-            <div
-              data-testid="character-feedback"
-              className="character-feedback"
-            >
-              {correct}/{total} keystrokes correct
-            </div>
-          )}
-
-          {showAnswer && (
-            <div data-testid="correct-answer" className="correct-answer">
-              <strong>Answer:</strong>{" "}
-              <span className="hangul-answer">{currentQuestion.hangul}</span>
-            </div>
-          )}
-        </div>
-
-        <div className="button-section">
-          {showAnswer || isCompletelyCorrect ? (
-            <button onClick={handleNext} className="button button-next">
-              Next
-            </button>
-          ) : (
-            <>
-              <button onClick={handleSkip} className="button button-skip">
-                Skip
-              </button>
-              <button onClick={handleGiveUp} className="button button-giveup">
-                Give up
-              </button>
-            </>
-          )}
-        </div>
+        {showAnswer && (
+          <div data-testid="correct-answer" className="correct-answer">
+            <strong>Answer:</strong>{" "}
+            <span className="hangul-answer">{currentQuestion.hangul}</span>
+          </div>
+        )}
       </div>
-    </main>
+
+      <div className="button-section">
+        {showAnswer || isCompletelyCorrect ? (
+          <button onClick={handleNext} className="button button-next">
+            Next
+          </button>
+        ) : (
+          <>
+            <button onClick={handleSkip} className="button button-skip">
+              Skip
+            </button>
+            <button onClick={handleGiveUp} className="button button-giveup">
+              Give up
+            </button>
+          </>
+        )}
+      </div>
+    </>
   );
 }
 

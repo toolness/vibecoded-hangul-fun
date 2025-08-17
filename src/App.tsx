@@ -5,6 +5,7 @@ import {
   useState,
   useRef,
   type ActionDispatch,
+  useMemo,
 } from "react";
 import type { DatabaseRow } from "./database-spec";
 import { calculateCorrectKeystrokes } from "./calculateCorrectKeystrokes";
@@ -109,10 +110,49 @@ function MinimalPairAnswerer({ state, dispatch }: AnswererProps) {
     dispatch({ type: "NEXT_QUESTION" });
   };
 
+  const { currentQuestion, allQuestionsFiltered } = state;
+
+  const choices = useMemo(() => {
+    const minimalPairIds = new Set(currentQuestion.minimalPairs ?? []);
+    const choices = allQuestionsFiltered.filter(
+      (question) =>
+        question === currentQuestion || minimalPairIds.has(question.id),
+    );
+    choices.sort((a, b) => {
+      if (a.name < b.name) {
+        return -1;
+      }
+      if (a.name > b.name) {
+        return 1;
+      }
+      return 0;
+    });
+    return choices;
+  }, [allQuestionsFiltered, currentQuestion]);
+
   return (
     <>
-      <p>{`TODO: Implement minimal pair answerer for ${state.currentQuestion.name}`}</p>
+      {/* TODO: Style this list to not look horrible. */}
+      <ul>
+        {choices.map((choice) => (
+          <>
+            <button
+              onClick={() => {
+                if (choice === currentQuestion) {
+                  // TODO: Hooray they guessed right!  Show confetti, highlight the user's choice in green, and show the next button.
+                } else {
+                  // TODO: Alas they were wrong, highlight the user's choice in red, the correct answer in green, and show the "next" button.
+                }
+              }}
+              className="button"
+            >
+              {choice.hangul} ({choice.name})
+            </button>
+          </>
+        ))}
+      </ul>
       <div className="button-section">
+        {/** TODO: Only show this if the user hasn't answered yet */}
         <button onClick={handleSkip} className="button button-skip">
           Skip
         </button>

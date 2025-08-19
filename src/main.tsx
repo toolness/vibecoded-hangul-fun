@@ -9,3 +9,6 @@ createRoot(document.getElementById("root")!).render(
     <App initialMode="picture" initialRows={databaseRows} />
   </StrictMode>,
 );
+
+const buildDate = new Date(__BUILD_DATE__);
+console.log(`App built on: ${buildDate.toLocaleString()}`);

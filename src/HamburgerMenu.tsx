@@ -2,6 +2,7 @@ import { useState } from "react";
 import "./HamburgerMenu.css";
 import WordSelectionModal from "./WordSelectionModal";
 import CategorySelectionModal from "./CategorySelectionModal";
+import AboutModal from "./AboutModal";
 import type { DatabaseRow } from "./database-spec";
 import type { Mode } from "./quizStateReducer";
 
@@ -37,6 +38,7 @@ function HamburgerMenu({
   const [isWordSelectionModalOpen, setIsWordSelectionModalOpen] =
     useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -50,6 +52,11 @@ function HamburgerMenu({
   const handleChooseCategory = () => {
     setIsMenuOpen(false);
     setIsCategoryModalOpen(true);
+  };
+
+  const handleAbout = () => {
+    setIsMenuOpen(false);
+    setIsAboutModalOpen(true);
   };
 
   const handleCategorySelected = (category: string | undefined) => {
@@ -77,14 +84,9 @@ function HamburgerMenu({
       {isMenuOpen && (
         <div className="menu-dropdown">
           <div className="menu-content">
-            <a
-              href="https://github.com/toolness/vibecoded-hangul-fun"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="menu-link"
-            >
+            <button className="menu-link" onClick={handleAbout}>
               About
-            </a>
+            </button>
             <button className="menu-link" onClick={handleChooseCategory}>
               Choose category&hellip;
             </button>
@@ -126,6 +128,10 @@ function HamburgerMenu({
           onSelectCategory={handleCategorySelected}
           onClose={() => setIsCategoryModalOpen(false)}
         />
+      )}
+
+      {isAboutModalOpen && (
+        <AboutModal onClose={() => setIsAboutModalOpen(false)} />
       )}
     </div>
   );

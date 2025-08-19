@@ -1,0 +1,13 @@
+.about-modal {
+  max-width: 350px;
+}
+
+.about-modal .modal-body {
+  text-align: center;
+}
+
+.about-modal .modal-body p {
+  margin: 0;
+  font-size: 1rem;
+  color: #333;
+}

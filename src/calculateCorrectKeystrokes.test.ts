@@ -13,6 +13,12 @@ describe("calculateCorrectJamos", () => {
     expect(result.total).toBe(6);
   });
 
+  it("should work with compound consonants", () => {
+    const result = calculateCorrectKeystrokes("빛깔", "빛ㄲ");
+    expect(result.correct).toBe(4);
+    expect(result.total).toBe(6);
+  });
+
   it("should count partial matches from the beginning", () => {
     const result = calculateCorrectKeystrokes("안녕", "안");
     expect(result.correct).toBe(3); // ㅇㅏㄴ

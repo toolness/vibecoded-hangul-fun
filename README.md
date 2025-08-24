@@ -18,6 +18,9 @@ schema:
 - `Hangul` - Text, contains the Hangul equivalent for the word
 - `Minimal pairs` - Self-relation linking to other words that
   consitute a [minimal pair][] with this one.
+- `Is translation?` - Checkbox. If false, `Name` represents a
+  Hangul romanization (e.g. "Seoul"), otherwise it represents
+  an English translation of the word (e.g. "Art").
 - `URL` - URL, contains an optional link where the user can
   learn more about the word being described.
 - `Image URL` - URL, an optional image representing the word.

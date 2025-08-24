@@ -13,6 +13,13 @@ export interface DatabaseRow {
   hangul: string;
 
   /**
+   * If false/undefined, `name` represents a Hangul romanization
+   * (e.g. "Seoul"), otherwise it represents an English translation
+   * of the word (e.g. "Art").
+   */
+  isTranslation?: boolean;
+
+  /**
    * URL for where the user can learn more about the entity
    * being described. It may be an empty string.
    */

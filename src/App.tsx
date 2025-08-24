@@ -210,6 +210,10 @@ function MinimalPairAnswerer({ state, dispatch, vocalizer }: AnswererProps) {
           </button>
         )}
       </div>
+
+      {hasAnswered && currentQuestion.notes && (
+        <div className="notes-section">{currentQuestion.notes}</div>
+      )}
     </>
   );
 }
@@ -313,6 +317,10 @@ function TypingModeAnswerer(props: AnswererProps) {
           </>
         )}
       </div>
+
+      {(showAnswer || isCompletelyCorrect) && currentQuestion.notes && (
+        <div className="notes-section">{currentQuestion.notes}</div>
+      )}
     </>
   );
 }

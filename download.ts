@@ -2,6 +2,7 @@ import { Client } from "@notionhq/client";
 import { writeFileSync, existsSync, mkdirSync } from "fs";
 import { join } from "path";
 import dotenv from "dotenv";
+import Queue from "queue";
 import { type DatabaseRow } from "./src/database-spec.ts";
 import { ASSETS_DIR } from "./src/assets.ts";
 
@@ -242,15 +243,36 @@ const run = async () => {
     mkdirSync(ASSETS_DIR, { recursive: true });
   }
 
-  // Download assets
+  // Create a queue with concurrency of 5
+  const downloadQueue = new Queue({ concurrency: 5, autostart: false });
+
+  // Prepare rows and queue all downloads
   const rows: DatabaseRow[] = [];
-  for (let i = 0; i < entries.length; i++) {
-    const { row, imageFiles, audioFiles } = entries[i];
+
+  for (const { row, imageFiles, audioFiles } of entries) {
     // Use sanitized name based on row name
     const baseName = row.name.replace(/[^a-zA-Z0-9]/g, "_").toLowerCase();
-    row.image = await maybeDownloadFirstFile(imageFiles, "image", baseName);
-    row.audio = await maybeDownloadFirstFile(audioFiles, "audio", baseName);
+
+    // Queue image download
+    if (imageFiles.length > 0) {
+      downloadQueue.push(async () => {
+        row.image = await maybeDownloadFirstFile(imageFiles, "image", baseName);
+      });
+    }
+
+    // Queue audio download
+    if (audioFiles.length > 0) {
+      downloadQueue.push(async () => {
+        row.audio = await maybeDownloadFirstFile(audioFiles, "audio", baseName);
+      });
+    }
+
     rows.push(row);
+  }
+
+  // Start processing and wait for all downloads to complete
+  if (downloadQueue.length > 0) {
+    await downloadQueue.start();
   }
 
   writeFileSync(DB_JSON_FILENAME, JSON.stringify(rows, null, 2));

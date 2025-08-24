@@ -11,7 +11,7 @@ export function Pronouncer(props: {
   const audioRef = useRef<HTMLAudioElement>(null);
   const showSpeakerIcon = Boolean(vocalizer || audioUrl);
   const handleSpeakerPointerDown = useCallback(
-    (e: React.PointerEvent) => {
+    (e: React.PointerEvent | React.KeyboardEvent) => {
       // Preventing the default behavior will ensure that
       // focus from the text field isn't lost if the user
       // is currently on it. Hopefully this won't cancel
@@ -58,7 +58,7 @@ export function Pronouncer(props: {
             onKeyDown={(e) => {
               if (e.key === "Enter" || e.key === " ") {
                 e.preventDefault();
-                handleSpeakerPointerDown(e as any);
+                handleSpeakerPointerDown(e);
               }
             }}
           />

@@ -71,6 +71,7 @@ async function downloadDatabase(
     let url = "";
     let imageUrl = "";
     let category = "";
+    let notes = "";
     let imageFiles: File[] = [];
     let audioFiles: File[] = [];
 
@@ -133,6 +134,16 @@ async function downloadDatabase(
       category = properties.Category.select.name;
     }
 
+    // Extract Notes (optional)
+    if (
+      properties.Notes &&
+      properties.Notes.type === "rich_text" &&
+      Array.isArray(properties.Notes.rich_text) &&
+      properties.Notes.rich_text.length > 0
+    ) {
+      notes = properties.Notes.rich_text.map((t) => t.plain_text).join("");
+    }
+
     // Check Disabled flag (optional) - skip if true
     if (
       properties.Disabled &&
@@ -177,6 +188,7 @@ async function downloadDatabase(
       url,
       imageUrl,
       category,
+      notes,
       minimalPairs: minimalPairs.length > 0 ? minimalPairs : undefined,
     };
 

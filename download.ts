@@ -133,6 +133,15 @@ async function downloadDatabase(
       category = properties.Category.select.name;
     }
 
+    // Check Disabled flag (optional) - skip if true
+    if (
+      properties.Disabled &&
+      properties.Disabled.type === "checkbox" &&
+      properties.Disabled.checkbox === true
+    ) {
+      continue;
+    }
+
     // Extract Image files (optional)
     if (
       properties.Image &&

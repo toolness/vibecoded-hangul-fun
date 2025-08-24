@@ -28,6 +28,9 @@ schema:
   built-in text-to-speech functionality.
 - `Category` - Select, an optional tag representing a
   category for the word, such as "History" or "Place".
+- `Disabled` - Checkbox, a boolean indicating whether to
+  include this word in the app at all. This is essentially
+  a way to "soft delete" a row.
 
 [minimal pair]: https://en.wikipedia.org/wiki/Minimal_pair
 

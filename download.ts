@@ -72,6 +72,7 @@ async function downloadDatabase(
     let imageUrl = "";
     let category = "";
     let notes = "";
+    let isTranslation = false;
     let imageFiles: File[] = [];
     let audioFiles: File[] = [];
 
@@ -144,6 +145,14 @@ async function downloadDatabase(
       notes = properties.Notes.rich_text.map((t) => t.plain_text).join("");
     }
 
+    // Extract Is translation? checkbox
+    if (
+      properties["Is translation?"] &&
+      properties["Is translation?"].type === "checkbox"
+    ) {
+      isTranslation = properties["Is translation?"].checkbox === true;
+    }
+
     // Check Disabled flag (optional) - skip if true
     if (
       properties.Disabled &&
@@ -185,6 +194,7 @@ async function downloadDatabase(
       id: page.id,
       name,
       hangul,
+      isTranslation,
       url,
       imageUrl,
       category,

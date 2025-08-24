@@ -31,6 +31,11 @@ export interface DatabaseRow {
   category?: string;
 
   /**
+   * Pronunciation notes. It may be an empty string.
+   */
+  notes?: string;
+
+  /**
    * Optional local image filename (relative to assets/database).
    * It may be an empty string.
    */

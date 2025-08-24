@@ -28,6 +28,7 @@ schema:
   built-in text-to-speech functionality.
 - `Category` - Select, an optional tag representing a
   category for the word, such as "History" or "Place".
+- `Notes` - Text, contains optional pronunciation notes.
 - `Disabled` - Checkbox, a boolean indicating whether to
   include this word in the app at all. This is essentially
   a way to "soft delete" a row.

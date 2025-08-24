@@ -28,7 +28,11 @@ function filterQuestionsForMode(
   switch (mode) {
     case "translate":
       return allQuestions.filter(
-        (question) => question.name && question.hangul,
+        (question) =>
+          question.name &&
+          question.hangul &&
+          // Only include romanized names.
+          !question.isTranslation,
       );
     case "typingtutor":
       return allQuestions.filter((question) => question.hangul);

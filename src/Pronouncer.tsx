@@ -53,7 +53,14 @@ export function Pronouncer(props: {
           <img
             src={SpeakerIcon}
             className="speaker-icon"
+            tabIndex={0}
             onPointerDown={handleSpeakerPointerDown}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                handleSpeakerPointerDown(e as any);
+              }
+            }}
           />
         </>
       )}

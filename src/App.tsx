@@ -27,6 +27,7 @@ const MODE_PROMPT: Record<Mode, string> = {
   typingtutor: "Type this Hangul:",
   translate: "Translate to Hangul:",
   picture: "Identify this picture:",
+  reversepicture: "What does this word represent?",
   minimalpair: "Which word is being spoken?",
 };
 
@@ -99,6 +100,7 @@ const ANSWERERS: { [k in Mode]: React.FC<AnswererProps> } = {
   translate: TypingModeAnswerer,
   typingtutor: TypingModeAnswerer,
   picture: TypingModeAnswerer,
+  reversepicture: ReversePictureAnswerer,
   minimalpair: MinimalPairAnswerer,
 };
 
@@ -107,6 +109,73 @@ type AnswererProps = {
   dispatch: ActionDispatch<[action: QuizAction]>;
   vocalizer?: ReturnType<typeof useKoreanVocalizer>;
 };
+
+function ReversePictureAnswerer({ state, dispatch, vocalizer }: AnswererProps) {
+  const [showAnswer, setShowAnswer] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
+
+  const { currentQuestion } = state;
+
+  useEffect(() => {
+    setShowAnswer(false);
+    setShowConfetti(false);
+  }, [currentQuestion]);
+
+  const handleGiveUp = () => {
+    setShowAnswer(true);
+    setShowConfetti(true);
+  };
+
+  const handleSkip = () => {
+    dispatch({ type: "NEXT_QUESTION" });
+  };
+
+  const handleNext = () => {
+    dispatch({ type: "NEXT_QUESTION" });
+  };
+
+  let imageUrl = currentQuestion.imageUrl;
+  if (!imageUrl && currentQuestion.image) {
+    imageUrl = getAssetUrl(currentQuestion.image).href;
+  }
+
+  return (
+    <>
+      <Confetti show={showConfetti} />
+
+      <div className="input-section">
+        {showAnswer && imageUrl && (
+          <img
+            className="question-picture"
+            src={imageUrl}
+            alt={currentQuestion.name}
+          />
+        )}
+      </div>
+
+      <div className="button-section">
+        {showAnswer ? (
+          <button onClick={handleNext} className="button button-next">
+            Next
+          </button>
+        ) : (
+          <>
+            <button onClick={handleSkip} className="button button-skip">
+              Skip
+            </button>
+            <button onClick={handleGiveUp} className="button button-giveup">
+              Show picture
+            </button>
+          </>
+        )}
+      </div>
+
+      {showAnswer && currentQuestion.notes && (
+        <div className="notes-section">{currentQuestion.notes}</div>
+      )}
+    </>
+  );
+}
 
 function MinimalPairAnswerer({ state, dispatch, vocalizer }: AnswererProps) {
   const [selectedChoice, setSelectedChoice] = useState<DatabaseRow | null>(

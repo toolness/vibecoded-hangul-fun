@@ -1,6 +1,11 @@
 import type { DatabaseRow } from "./database-spec";
 
-export type Mode = "translate" | "typingtutor" | "picture" | "minimalpair";
+export type Mode =
+  | "translate"
+  | "typingtutor"
+  | "picture"
+  | "minimalpair"
+  | "reversepicture";
 
 export interface QuizState {
   currentQuestion: DatabaseRow;
@@ -37,6 +42,10 @@ function filterQuestionsForMode(
     case "typingtutor":
       return allQuestions.filter((question) => question.hangul);
     case "picture":
+      return allQuestions.filter(
+        (question) => question.hangul && (question.imageUrl || question.image),
+      );
+    case "reversepicture":
       return allQuestions.filter(
         (question) => question.hangul && (question.imageUrl || question.image),
       );

@@ -45,6 +45,8 @@ function QuestionDisplay({
             question={currentQuestion}
           />
         );
+      case "reversepicture":
+        return currentQuestion.hangul;
     }
   };
 

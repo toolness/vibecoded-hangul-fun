@@ -10,6 +10,7 @@ const MODE_NAMES: { [k in Mode]: string } = {
   translate: "Translate",
   typingtutor: "Typing tutor",
   picture: "Picture",
+  reversepicture: "Reverse picture",
   minimalpair: "Minimal pair",
 };
 

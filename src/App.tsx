@@ -112,18 +112,15 @@ type AnswererProps = {
 
 function ReversePictureAnswerer({ state, dispatch, vocalizer }: AnswererProps) {
   const [showAnswer, setShowAnswer] = useState(false);
-  const [showConfetti, setShowConfetti] = useState(false);
 
   const { currentQuestion } = state;
 
   useEffect(() => {
     setShowAnswer(false);
-    setShowConfetti(false);
   }, [currentQuestion]);
 
   const handleGiveUp = () => {
     setShowAnswer(true);
-    setShowConfetti(true);
   };
 
   const handleSkip = () => {
@@ -141,8 +138,6 @@ function ReversePictureAnswerer({ state, dispatch, vocalizer }: AnswererProps) {
 
   return (
     <>
-      <Confetti show={showConfetti} />
-
       <div className="input-section">
         {showAnswer && imageUrl && (
           <img

@@ -138,7 +138,7 @@ function ReversePictureAnswerer({ state, dispatch, vocalizer }: AnswererProps) {
 
   return (
     <>
-      <div className="input-section">
+      <div>
         {showAnswer && imageUrl && (
           <img
             className="question-picture"

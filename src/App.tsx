@@ -110,7 +110,7 @@ type AnswererProps = {
   vocalizer?: ReturnType<typeof useKoreanVocalizer>;
 };
 
-function ReversePictureAnswerer({ state, dispatch, vocalizer }: AnswererProps) {
+function ReversePictureAnswerer({ state, dispatch }: AnswererProps) {
   const [showAnswer, setShowAnswer] = useState(false);
 
   const { currentQuestion } = state;

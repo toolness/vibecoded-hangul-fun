@@ -3,7 +3,7 @@ import { writeFileSync, existsSync, mkdirSync } from "fs";
 import { join } from "path";
 import dotenv from "dotenv";
 import Queue from "queue";
-import { type DatabaseRow } from "./src/database-spec.ts";
+import { type DatabaseRow, type WordPicture } from "./src/database-spec.ts";
 import { ASSETS_DIR } from "./src/assets.ts";
 
 dotenv.config();
@@ -191,13 +191,22 @@ async function downloadDatabase(
       minimalPairs = properties["Minimal pairs"].relation.map((r) => r.id);
     }
 
+    // Convert imageUrl to WordPicture format
+    let picture: WordPicture | undefined;
+    if (imageUrl) {
+      picture = {
+        type: "remote-image",
+        url: imageUrl,
+      };
+    }
+
     const row: DatabaseRow = {
       id: page.id,
       name,
       hangul,
       isTranslation,
       url,
-      imageUrl,
+      picture,
       category,
       notes,
       minimalPairs: minimalPairs.length > 0 ? minimalPairs : undefined,
@@ -256,7 +265,17 @@ const run = async () => {
     // Queue image download
     if (imageFiles.length > 0) {
       downloadQueue.push(async () => {
-        row.image = await maybeDownloadFirstFile(imageFiles, "image", baseName);
+        const filename = await maybeDownloadFirstFile(
+          imageFiles,
+          "image",
+          baseName,
+        );
+        if (filename) {
+          row.picture = {
+            type: "local-image",
+            filename,
+          };
+        }
       });
     }
 

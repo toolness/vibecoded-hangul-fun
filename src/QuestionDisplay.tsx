@@ -11,9 +11,13 @@ interface QuestionDisplayProps {
 }
 
 function QuestionPicture({ question }: { question: DatabaseRow }) {
-  let src = question.imageUrl;
-  if (!src && question.image) {
-    src = getAssetUrl(question.image).href;
+  let src: string | undefined;
+  if (question.picture) {
+    if (question.picture.type === "remote-image") {
+      src = question.picture.url;
+    } else if (question.picture.type === "local-image") {
+      src = getAssetUrl(question.picture.filename).href;
+    }
   }
   if (!src) {
     // Generally this should never happen, as we should have pre-filtered questions

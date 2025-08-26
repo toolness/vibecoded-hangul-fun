@@ -131,9 +131,13 @@ function ReversePictureAnswerer({ state, dispatch }: AnswererProps) {
     dispatch({ type: "NEXT_QUESTION" });
   };
 
-  let imageUrl = currentQuestion.imageUrl;
-  if (!imageUrl && currentQuestion.image) {
-    imageUrl = getAssetUrl(currentQuestion.image).href;
+  let imageUrl: string | undefined;
+  if (currentQuestion.picture) {
+    if (currentQuestion.picture.type === "remote-image") {
+      imageUrl = currentQuestion.picture.url;
+    } else if (currentQuestion.picture.type === "local-image") {
+      imageUrl = getAssetUrl(currentQuestion.picture.filename).href;
+    }
   }
 
   return (

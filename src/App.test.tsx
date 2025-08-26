@@ -10,13 +10,18 @@ function TestApp(props: { initialMode?: Mode }) {
     <App
       initialMode={props.initialMode ?? "picture"}
       initialRows={[
-        { id: "test-1", name: "hello", hangul: "안녕하세요", image: "hi.png" },
+        {
+          id: "test-1",
+          name: "hello",
+          hangul: "안녕하세요",
+          picture: { type: "local-image", filename: "hi.png" },
+        },
         {
           id: "test-2",
           name: "goodbye",
           hangul: "안녕히 가세요",
           url: "https://example.com",
-          image: "bye.png",
+          picture: { type: "local-image", filename: "bye.png" },
         },
         { id: "test-3", name: "thank you", hangul: "감사합니다" },
         { id: "test-4", name: "sorry", hangul: "죄송합니다" },

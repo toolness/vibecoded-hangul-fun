@@ -22,8 +22,10 @@ const DUMMY_QUESTION: DatabaseRow = {
   id: "dummy-question-id",
   name: "???",
   hangul: "???",
-  imageUrl:
-    "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==",
+  picture: {
+    type: "remote-image",
+    url: "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==",
+  },
 };
 
 function filterQuestionsForMode(
@@ -43,11 +45,11 @@ function filterQuestionsForMode(
       return allQuestions.filter((question) => question.hangul);
     case "picture":
       return allQuestions.filter(
-        (question) => question.hangul && (question.imageUrl || question.image),
+        (question) => question.hangul && question.picture,
       );
     case "reversepicture":
       return allQuestions.filter(
-        (question) => question.hangul && (question.imageUrl || question.image),
+        (question) => question.hangul && question.picture,
       );
     case "minimalpair":
       return allQuestions.filter(

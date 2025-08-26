@@ -17,6 +17,20 @@ describe("QuestionDisplay", () => {
     hangul: "안녕히 가세요",
   };
 
+  const mockQuestionWithEmoji: DatabaseRow = {
+    id: "test-id-3",
+    name: "smile",
+    hangul: "미소",
+    picture: { type: "emojis", emojis: "😊" },
+  };
+
+  const mockQuestionWithImage: DatabaseRow = {
+    id: "test-id-4",
+    name: "cat",
+    hangul: "고양이",
+    picture: { type: "local-image", filename: "cat.png" },
+  };
+
   describe("Normal mode", () => {
     it("should display romanized text as a link when URL is available", () => {
       render(
@@ -84,6 +98,37 @@ describe("QuestionDisplay", () => {
       expect(span.tagName).toBe("SPAN");
       expect(span).toHaveTextContent("안녕히 가세요");
       expect(span).toHaveClass("question-text");
+    });
+  });
+
+  describe("Picture mode", () => {
+    it("should display emoji when picture type is emoji", () => {
+      render(
+        <QuestionDisplay
+          currentQuestion={mockQuestionWithEmoji}
+          mode="picture"
+          vocalizer={null}
+        />,
+      );
+
+      const emojiElement = screen.getByText("😊");
+      expect(emojiElement).toHaveClass("question-picture");
+      expect(emojiElement).toHaveClass("question-emojis");
+      expect(emojiElement.tagName).toBe("SPAN");
+    });
+
+    it("should display image when picture type is local-image", () => {
+      render(
+        <QuestionDisplay
+          currentQuestion={mockQuestionWithImage}
+          mode="picture"
+          vocalizer={null}
+        />,
+      );
+
+      const imageElement = screen.getByRole("img");
+      expect(imageElement).toHaveClass("question-picture");
+      expect(imageElement).toHaveAttribute("src");
     });
   });
 

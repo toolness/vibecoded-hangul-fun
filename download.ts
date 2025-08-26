@@ -71,6 +71,7 @@ async function downloadDatabase(
     let hangul = "";
     let url = "";
     let imageUrl = "";
+    let emojis = "";
     let category = "";
     let notes = "";
     let isTranslation = false;
@@ -123,6 +124,16 @@ async function downloadDatabase(
       typeof properties["Image URL"].url === "string"
     ) {
       imageUrl = properties["Image URL"].url;
+    }
+
+    // Extract Emojis (optional)
+    if (
+      properties.Emojis &&
+      properties.Emojis.type === "rich_text" &&
+      Array.isArray(properties.Emojis.rich_text) &&
+      properties.Emojis.rich_text.length > 0
+    ) {
+      emojis = properties.Emojis.rich_text.map((t) => t.plain_text).join("");
     }
 
     // Extract Category (optional)
@@ -191,9 +202,14 @@ async function downloadDatabase(
       minimalPairs = properties["Minimal pairs"].relation.map((r) => r.id);
     }
 
-    // Convert imageUrl to WordPicture format
+    // Convert to WordPicture format - prioritize emojis, then imageUrl
     let picture: WordPicture | undefined;
-    if (imageUrl) {
+    if (emojis) {
+      picture = {
+        type: "emojis",
+        emojis,
+      };
+    } else if (imageUrl) {
       picture = {
         type: "remote-image",
         url: imageUrl,

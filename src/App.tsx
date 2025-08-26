@@ -131,26 +131,38 @@ function ReversePictureAnswerer({ state, dispatch }: AnswererProps) {
     dispatch({ type: "NEXT_QUESTION" });
   };
 
-  let imageUrl: string | undefined;
-  if (currentQuestion.picture) {
+  const renderPicture = () => {
+    if (!currentQuestion.picture) return null;
+
+    if (currentQuestion.picture.type === "emojis") {
+      return (
+        <span className="question-picture question-emojis">
+          {currentQuestion.picture.emojis}
+        </span>
+      );
+    }
+
+    let imageUrl: string | undefined;
     if (currentQuestion.picture.type === "remote-image") {
       imageUrl = currentQuestion.picture.url;
     } else if (currentQuestion.picture.type === "local-image") {
       imageUrl = getAssetUrl(currentQuestion.picture.filename).href;
     }
-  }
+
+    if (!imageUrl) return null;
+
+    return (
+      <img
+        className="question-picture"
+        src={imageUrl}
+        alt={currentQuestion.name}
+      />
+    );
+  };
 
   return (
     <>
-      <div>
-        {showAnswer && imageUrl && (
-          <img
-            className="question-picture"
-            src={imageUrl}
-            alt={currentQuestion.name}
-          />
-        )}
-      </div>
+      <div>{showAnswer && renderPicture()}</div>
 
       <div className="button-section">
         {showAnswer ? (

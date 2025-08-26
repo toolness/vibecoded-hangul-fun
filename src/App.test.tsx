@@ -26,6 +26,12 @@ function TestApp(props: { initialMode?: Mode }) {
         { id: "test-3", name: "thank you", hangul: "감사합니다" },
         { id: "test-4", name: "sorry", hangul: "죄송합니다" },
         { id: "test-5", name: "yes", hangul: "네" },
+        {
+          id: "test-6",
+          name: "smile",
+          hangul: "미소",
+          picture: { type: "emojis", emojis: "😊" },
+        },
       ]}
     />
   );

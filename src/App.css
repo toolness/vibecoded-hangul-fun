@@ -57,6 +57,12 @@ img.question-picture {
   max-height: 33vh;
 }
 
+span.question-emojis {
+  font-size: 5rem;
+  display: block;
+  text-align: center;
+}
+
 .input-section {
   display: flex;
   flex-direction: column;

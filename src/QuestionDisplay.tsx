@@ -11,17 +11,28 @@ interface QuestionDisplayProps {
 }
 
 function QuestionPicture({ question }: { question: DatabaseRow }) {
-  let src: string | undefined;
-  if (question.picture) {
-    if (question.picture.type === "remote-image") {
-      src = question.picture.url;
-    } else if (question.picture.type === "local-image") {
-      src = getAssetUrl(question.picture.filename).href;
-    }
-  }
-  if (!src) {
+  if (!question.picture) {
     // Generally this should never happen, as we should have pre-filtered questions
-    // that have an image.
+    // that have a picture.
+    return null;
+  }
+
+  if (question.picture.type === "emojis") {
+    return (
+      <span className="question-picture question-emojis">
+        {question.picture.emojis}
+      </span>
+    );
+  }
+
+  let src: string | undefined;
+  if (question.picture.type === "remote-image") {
+    src = question.picture.url;
+  } else if (question.picture.type === "local-image") {
+    src = getAssetUrl(question.picture.filename).href;
+  }
+
+  if (!src) {
     return null;
   }
   return <img className="question-picture" src={src} />;

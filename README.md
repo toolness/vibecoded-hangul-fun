@@ -26,6 +26,9 @@ schema:
 - `Image URL` - URL, an optional image representing the word.
 - `Image` - An optional image file representing the word, used
   as an alternative to image URL.
+- `Emojis` - Text, an emoji (or sequence of emojis) that pictorially
+  represents the word. This can be used as an alternative to
+  the image.
 - `Audio` - An optional audio file recording the pronounciation
   of the word, used as an alternative to the browser's
   built-in text-to-speech functionality.

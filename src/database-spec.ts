@@ -17,6 +17,14 @@ export type WordPicture =
        */
       type: "local-image";
       filename: string;
+    }
+  | {
+      type: "emojis";
+      /**
+       * The emoji (or sequence of emojis) that represent the word
+       * pictorially. Should never be an empty string.
+       */
+      emojis: string;
     };
 
 /**

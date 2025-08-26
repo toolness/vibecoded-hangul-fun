@@ -1,4 +1,25 @@
 /**
+ * Defines the picture that represents a word.
+ */
+export type WordPicture =
+  | {
+      type: "remote-image";
+      /**
+       * Absolute URL pointing to an image of the word. Should
+       * never be an empty string.
+       */
+      url: string;
+    }
+  | {
+      /**
+       * Optional local image filename (relative to assets/database).
+       * Should never be an empty string.
+       */
+      type: "local-image";
+      filename: string;
+    };
+
+/**
  * Represents a row describing an English/romanized word,
  * its Hangul equivalent, and any additional metadata.
  */
@@ -26,10 +47,9 @@ export interface DatabaseRow {
   url?: string;
 
   /**
-   * URL pointing to an image of the word. It may be an
-   * empty string.
+   * The picture that represents the word, if any.
    */
-  imageUrl?: string;
+  picture?: WordPicture;
 
   /**
    * Optional category for the word. It may be an empty
@@ -41,12 +61,6 @@ export interface DatabaseRow {
    * Pronunciation notes. It may be an empty string.
    */
   notes?: string;
-
-  /**
-   * Optional local image filename (relative to assets/database).
-   * It may be an empty string.
-   */
-  image?: string;
 
   /**
    * Optional local audio filename (relative to assets/database).

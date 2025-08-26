@@ -2,11 +2,15 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.tsx";
-import databaseRows from "./database.json";
+import { getAssetUrl } from "./assets.ts";
+
+const DATABASE_JSON_URL = getAssetUrl("database.json");
+
+const databaseJson = await (await fetch(DATABASE_JSON_URL)).json();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <App initialMode="picture" initialRows={databaseRows} />
+    <App initialMode="picture" initialRows={databaseJson} />
   </StrictMode>,
 );
 

@@ -20,7 +20,7 @@ if (!NOTION_DB_ID) {
   throw new Error("Please define NOTION_DB_ID!");
 }
 
-const DB_JSON_FILENAME = "src/database.json";
+const DB_JSON_FILENAME = "src/assets/database/database.json";
 
 /**
  * Ideally we'd reuse this from the Notion SDK

@@ -342,7 +342,8 @@ function TypingModeAnswerer(props: AnswererProps) {
       // Need to prevent default or Chrome on Android, in particular, will
       // not clear the input when we move to the next word.
       e.preventDefault();
-      // WTF IS GOING ON WITH CHROME ON ANDROID??????????????????????????????
+      // Chrome on Android is extremely weird and we need this setTimeout
+      // to ensure input is cleared.
       setTimeout(() => {
         handleNext();
       }, 100);

@@ -298,6 +298,7 @@ function TypingModeAnswerer(props: AnswererProps) {
   const { state, dispatch } = props;
   const [showConfetti, setShowConfetti] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const shouldNotFocusInputRef = useRef<boolean>(false);
 
   const { currentQuestion, userInput, showAnswer, mode } = state;
 
@@ -319,9 +320,13 @@ function TypingModeAnswerer(props: AnswererProps) {
     setShowConfetti(false);
 
     // Focus the input field
-    setTimeout(() => {
-      inputRef.current?.focus();
-    }, 0);
+    if (shouldNotFocusInputRef.current) {
+      shouldNotFocusInputRef.current = false;
+    } else {
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 0);
+    }
   }, [currentQuestion, mode]);
 
   const handleGiveUp = () => {
@@ -349,6 +354,14 @@ function TypingModeAnswerer(props: AnswererProps) {
   };
 
   const handleSkip = () => {
+    // Don't focus the input when we move to the next question,
+    // b/c on mobile this makes the keyboard pop up, and the user
+    // might not want that disruption if they're just flipping
+    // through cards. Also, for keyboard-only users on desktop,
+    // this keeps the focus on the "skip" button, which makes it
+    // easy to flip through cards quickly be continuously pressing
+    // enter.
+    shouldNotFocusInputRef.current = true;
     dispatch({ type: "NEXT_QUESTION" });
   };
 

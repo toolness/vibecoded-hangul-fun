@@ -334,6 +334,9 @@ function TypingModeAnswerer(props: AnswererProps) {
 
   const handleKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && (isCompletelyCorrect || showAnswer)) {
+      // Need to prevent default or Chrome on Android, in particular, will
+      // not clear the input when we move to the next word.
+      e.preventDefault();
       handleNext();
     }
   };

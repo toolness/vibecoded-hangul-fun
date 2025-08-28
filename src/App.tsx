@@ -297,6 +297,7 @@ function MinimalPairAnswerer({ state, dispatch, vocalizer }: AnswererProps) {
 function TypingModeAnswerer(props: AnswererProps) {
   const { state, dispatch } = props;
   const [showConfetti, setShowConfetti] = useState(false);
+  const nextButtonRef = useRef<HTMLButtonElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const shouldNotFocusInputRef = useRef<boolean>(false);
 
@@ -331,6 +332,9 @@ function TypingModeAnswerer(props: AnswererProps) {
 
   const handleGiveUp = () => {
     dispatch({ type: "SHOW_ANSWER" });
+    setTimeout(() => {
+      nextButtonRef.current?.focus();
+    }, 0);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -399,7 +403,11 @@ function TypingModeAnswerer(props: AnswererProps) {
 
       <div className="button-section">
         {showAnswer || isCompletelyCorrect ? (
-          <button onClick={handleNext} className="button button-next">
+          <button
+            ref={nextButtonRef}
+            onClick={handleNext}
+            className="button button-next"
+          >
             Next
           </button>
         ) : (

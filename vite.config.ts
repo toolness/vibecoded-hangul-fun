@@ -7,6 +7,7 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
+      registerType: "autoUpdate",
       // This is needed to cache all our images, mp3s, etc.
       // Taken from: https://adueck.github.io/blog/caching-everything-for-totally-offline-pwa-vite-react/
       workbox: {

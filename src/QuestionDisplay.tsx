@@ -25,17 +25,12 @@ function QuestionPicture({ question }: { question: DatabaseRow }) {
     );
   }
 
-  let src: string | undefined;
-  if (question.picture.type === "remote-image") {
-    src = question.picture.url;
-  } else if (question.picture.type === "local-image") {
-    src = getAssetUrl(question.picture.filename).href;
+  if (question.picture.type === "local-image") {
+    const src = getAssetUrl(question.picture.filename).href;
+    return <img className="question-picture" src={src} />;
   }
 
-  if (!src) {
-    return null;
-  }
-  return <img className="question-picture" src={src} />;
+  return null;
 }
 
 function QuestionDisplay({

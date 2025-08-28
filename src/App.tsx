@@ -142,22 +142,18 @@ function ReversePictureAnswerer({ state, dispatch }: AnswererProps) {
       );
     }
 
-    let imageUrl: string | undefined;
-    if (currentQuestion.picture.type === "remote-image") {
-      imageUrl = currentQuestion.picture.url;
-    } else if (currentQuestion.picture.type === "local-image") {
-      imageUrl = getAssetUrl(currentQuestion.picture.filename).href;
+    if (currentQuestion.picture.type === "local-image") {
+      const imageUrl = getAssetUrl(currentQuestion.picture.filename).href;
+      return (
+        <img
+          className="question-picture"
+          src={imageUrl}
+          alt={currentQuestion.name}
+        />
+      );
     }
 
-    if (!imageUrl) return null;
-
-    return (
-      <img
-        className="question-picture"
-        src={imageUrl}
-        alt={currentQuestion.name}
-      />
-    );
+    return null;
   };
 
   return (

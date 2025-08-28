@@ -3,14 +3,6 @@
  */
 export type WordPicture =
   | {
-      type: "remote-image";
-      /**
-       * Absolute URL pointing to an image of the word. Should
-       * never be an empty string.
-       */
-      url: string;
-    }
-  | {
       /**
        * Optional local image filename (relative to assets/database).
        * Should never be an empty string.

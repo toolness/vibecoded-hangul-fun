@@ -23,8 +23,8 @@ const DUMMY_QUESTION: DatabaseRow = {
   name: "???",
   hangul: "???",
   picture: {
-    type: "remote-image",
-    url: "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==",
+    type: "emojis",
+    emojis: "❓",
   },
 };
 

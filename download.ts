@@ -38,6 +38,7 @@ type DatabaseEntry = {
   row: DatabaseRow;
   imageFiles: File[];
   audioFiles: File[];
+  imageUrl?: string;
 };
 
 async function downloadDatabase(
@@ -202,17 +203,12 @@ async function downloadDatabase(
       minimalPairs = properties["Minimal pairs"].relation.map((r) => r.id);
     }
 
-    // Convert to WordPicture format - prioritize emojis, then imageUrl
+    // Convert to WordPicture format - prioritize emojis
     let picture: WordPicture | undefined;
     if (emojis) {
       picture = {
         type: "emojis",
         emojis,
-      };
-    } else if (imageUrl) {
-      picture = {
-        type: "remote-image",
-        url: imageUrl,
       };
     }
 
@@ -232,6 +228,7 @@ async function downloadDatabase(
       row,
       imageFiles,
       audioFiles,
+      imageUrl,
     });
   }
 
@@ -274,11 +271,11 @@ const run = async () => {
   // Prepare rows and queue all downloads
   const rows: DatabaseRow[] = [];
 
-  for (const { row, imageFiles, audioFiles } of entries) {
+  for (const { row, imageFiles, audioFiles, imageUrl } of entries) {
     // Use sanitized name based on row name
     const baseName = row.name.replace(/[^a-zA-Z0-9]/g, "_").toLowerCase();
 
-    // Queue image download
+    // Queue image download from files
     if (imageFiles.length > 0) {
       downloadQueue.push(async () => {
         const filename = await maybeDownloadFirstFile(
@@ -291,6 +288,36 @@ const run = async () => {
             type: "local-image",
             filename,
           };
+        }
+      });
+    }
+    // Queue remote image URL download if no file but has imageUrl
+    else if (imageUrl && !row.picture) {
+      downloadQueue.push(async () => {
+        try {
+          // Determine file extension from URL or default to jpg
+          let extension = "jpg";
+          const urlParts = imageUrl.split(".");
+          const lastPart = urlParts[urlParts.length - 1].split("?")[0];
+          if (
+            ["jpg", "jpeg", "png", "gif", "webp", "svg"].includes(
+              lastPart.toLowerCase(),
+            )
+          ) {
+            extension = lastPart.toLowerCase();
+          }
+          const filename = `${baseName}.${extension}`;
+          await downloadFile(imageUrl, filename);
+          row.picture = {
+            type: "local-image",
+            filename,
+          };
+        } catch (error) {
+          console.error(
+            `Failed to download remote image for "${row.name}":`,
+            error,
+          );
+          throw error;
         }
       });
     }

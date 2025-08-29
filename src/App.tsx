@@ -326,6 +326,11 @@ function TypingModeAnswerer(props: AnswererProps) {
     } else {
       setTimeout(() => {
         inputRef.current?.focus();
+        inputRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+          inline: "center",
+        });
       }, 0);
     }
   }, [currentQuestion, mode]);

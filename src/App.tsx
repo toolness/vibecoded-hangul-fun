@@ -22,6 +22,7 @@ import QuestionDisplay from "./QuestionDisplay";
 import Confetti from "./Confetti";
 import { Pronouncer } from "./Pronouncer";
 import { getAssetUrl } from "./assets";
+import { WordPicture } from "./WordPicture";
 
 const MODE_PROMPT: Record<Mode, string> = {
   typingtutor: "Type this Hangul:",
@@ -131,34 +132,11 @@ function ReversePictureAnswerer({ state, dispatch }: AnswererProps) {
     dispatch({ type: "NEXT_QUESTION" });
   };
 
-  const renderPicture = () => {
-    if (!currentQuestion.picture) return null;
-
-    if (currentQuestion.picture.type === "emojis") {
-      return (
-        <span className="question-picture question-emojis">
-          {currentQuestion.picture.emojis}
-        </span>
-      );
-    }
-
-    if (currentQuestion.picture.type === "local-image") {
-      const imageUrl = getAssetUrl(currentQuestion.picture.filename).href;
-      return (
-        <img
-          className="question-picture"
-          src={imageUrl}
-          alt={currentQuestion.name}
-        />
-      );
-    }
-
-    return null;
-  };
-
   return (
     <>
-      <div>{showAnswer && renderPicture()}</div>
+      <div>
+        {showAnswer && <WordPicture picture={currentQuestion.picture} />}
+      </div>
 
       <div className="button-section">
         {showAnswer ? (

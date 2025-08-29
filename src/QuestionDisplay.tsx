@@ -3,34 +3,12 @@ import type { Mode } from "./quizStateReducer";
 import { type Vocalizer } from "./speech";
 import { getAssetUrl } from "./assets";
 import { Pronouncer } from "./Pronouncer";
+import { WordPicture } from "./WordPicture";
 
 interface QuestionDisplayProps {
   currentQuestion: DatabaseRow;
   mode: Mode;
   vocalizer: Vocalizer | null;
-}
-
-function QuestionPicture({ question }: { question: DatabaseRow }) {
-  if (!question.picture) {
-    // Generally this should never happen, as we should have pre-filtered questions
-    // that have a picture.
-    return null;
-  }
-
-  if (question.picture.type === "emojis") {
-    return (
-      <span className="question-picture question-emojis">
-        {question.picture.emojis}
-      </span>
-    );
-  }
-
-  if (question.picture.type === "local-image") {
-    const src = getAssetUrl(question.picture.filename).href;
-    return <img className="question-picture" src={src} />;
-  }
-
-  return null;
 }
 
 function QuestionDisplay({
@@ -50,9 +28,9 @@ function QuestionDisplay({
         // image in place until the new one is fully loaded,
         // which can be confusing on slower network connections.
         return (
-          <QuestionPicture
+          <WordPicture
             key={currentQuestion.name}
-            question={currentQuestion}
+            picture={currentQuestion.picture}
           />
         );
       case "reversepicture":

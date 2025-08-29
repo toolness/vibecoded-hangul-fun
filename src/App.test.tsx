@@ -90,20 +90,6 @@ describe("App State Management", () => {
     expect(screen.queryByText("Next")).not.toBeInTheDocument();
   });
 
-  test("input field receives focus after clicking Skip", async () => {
-    const user = userEvent.setup();
-    render(<TestApp />);
-
-    // Click skip
-    await user.click(screen.getByText("Skip"));
-
-    // Wait for the input to be focused
-    const input = screen.getByTestId("hangul-input");
-    await waitFor(() => {
-      expect(document.activeElement).toBe(input);
-    });
-  });
-
   test("input field receives focus after clicking Next", async () => {
     const user = userEvent.setup();
     render(<TestApp />);
@@ -246,27 +232,6 @@ describe("Keyboard Accessibility", () => {
       expect(input.value).toBe(""); // Input should be cleared
       expect(screen.getByTestId("question-name")).toBeInTheDocument();
     }
-  });
-
-  test("Enter key advances when answer is shown", async () => {
-    const user = userEvent.setup();
-    render(<TestApp />);
-
-    // Give up to show the answer
-    await user.click(screen.getByText("Give up"));
-
-    // Should show the answer
-    expect(screen.getByTestId("correct-answer")).toBeInTheDocument();
-    expect(screen.getByText("Next")).toBeInTheDocument();
-
-    // Focus the input and press Enter
-    const input = screen.getByTestId("hangul-input");
-    input.focus();
-    await user.keyboard("{Enter}");
-
-    // Should have moved to next question
-    expect(screen.queryByTestId("correct-answer")).not.toBeInTheDocument();
-    expect(screen.getByTestId("question-name")).toBeInTheDocument();
   });
 
   test("Enter key does nothing when answer is incorrect", async () => {

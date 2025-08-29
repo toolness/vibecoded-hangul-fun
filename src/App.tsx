@@ -304,11 +304,15 @@ function TypingModeAnswerer(props: AnswererProps) {
     } else {
       setTimeout(() => {
         inputRef.current?.focus();
-        inputRef.current?.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-          inline: "center",
-        });
+        // scrollIntoView() isn't part of the testing framework, so check for
+        // existence.
+        if (inputRef.current?.scrollIntoView) {
+          inputRef.current?.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+            inline: "center",
+          });
+        }
       }, 0);
     }
   }, [currentQuestion, mode]);

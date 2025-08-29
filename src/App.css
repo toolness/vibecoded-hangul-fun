@@ -157,8 +157,13 @@ span.question-emojis {
 }
 
 @media (max-width: 640px) {
+  #root {
+    padding: 0.25rem;
+  }
+
   .quiz-container {
     padding: 1rem;
+    gap: 1.5rem;
   }
 
   .question-name {
@@ -167,6 +172,7 @@ span.question-emojis {
 
   .hangul-input {
     font-size: 1.5rem;
+    padding: 0.5rem;
   }
 }
 

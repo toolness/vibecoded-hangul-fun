@@ -23,16 +23,15 @@ function QuestionDisplay({
       case "translate":
         return currentQuestion.name;
       case "picture":
-        // Set `key` to force a full unmount/remount of the
-        // image; otherwise some browsers will leave the old
-        // image in place until the new one is fully loaded,
-        // which can be confusing on slower network connections.
-        return (
-          <WordPicture
-            key={currentQuestion.name}
-            picture={currentQuestion.picture}
-          />
-        );
+        // I used to provide a `key` here to force a full
+        // re-mount, because in the case of images, the old
+        // image would still be showing while the new one is
+        // loading. However, I later made the app a PWA so
+        // latency isn't really an issue anymore, and having
+        // the old image show for a split-second is better than
+        // making it disappear entirely, as the latter causes
+        // more layout instability.
+        return <WordPicture picture={currentQuestion.picture} />;
       case "reversepicture":
         return currentQuestion.hangul;
     }

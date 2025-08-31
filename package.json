@@ -6,6 +6,7 @@
   "scripts": {
     "ci": "npm run typecheck && prettier . --check && npm run test",
     "download": "node --experimental-transform-types download.ts",
+    "anki": "node --experimental-transform-types anki.ts",
     "typecheck": "tsc -b && npm run lint",
     "test": "vitest run",
     "test:watch": "vitest watch",
@@ -25,6 +26,7 @@
     "@types/node": "^24.0.10",
     "@types/react-select": "^5.0.0",
     "canvas-confetti": "^1.9.3",
+    "csv-stringify": "^6.6.0",
     "dotenv": "^17.0.1",
     "gh-pages": "^6.3.0",
     "prettier": "^3.6.2",

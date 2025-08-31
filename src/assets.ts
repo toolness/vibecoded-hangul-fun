@@ -5,6 +5,12 @@
 export const ASSETS_DIR = "src/assets/database";
 
 /**
+ * Where the DB is stored, relative to the repository root. This
+ * will contain an array of `DatabaseRow` objects.
+ */
+export const DB_JSON_ASSET_FILENAME = `${ASSETS_DIR}/database.json`;
+
+/**
  * Given an asset filename, returns the URL to it,
  * for use at runtime (in the browser).
  */

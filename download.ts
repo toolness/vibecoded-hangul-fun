@@ -3,12 +3,8 @@ import { writeFileSync, existsSync, mkdirSync } from "fs";
 import { join } from "path";
 import dotenv from "dotenv";
 import Queue from "queue";
-import {
-  DB_JSON_FILENAME,
-  type DatabaseRow,
-  type WordPicture,
-} from "./src/database-spec.ts";
-import { ASSETS_DIR } from "./src/assets.ts";
+import { type DatabaseRow, type WordPicture } from "./src/database-spec.ts";
+import { ASSETS_DIR, DB_JSON_ASSET_FILENAME } from "./src/assets.ts";
 
 dotenv.config();
 
@@ -339,9 +335,9 @@ const run = async () => {
     await downloadQueue.start();
   }
 
-  writeFileSync(DB_JSON_FILENAME, JSON.stringify(rows, null, 2));
+  writeFileSync(DB_JSON_ASSET_FILENAME, JSON.stringify(rows, null, 2));
 
-  console.log(`Wrote ${DB_JSON_FILENAME}.`);
+  console.log(`Wrote ${DB_JSON_ASSET_FILENAME}.`);
 };
 
 async function maybeDownloadFirstFile(

@@ -1,4 +1,10 @@
 /**
+ * Where the DB is stored, relative to the repository root. This
+ * will contain an array of {@link DatabaseRow} objects.
+ */
+export const DB_JSON_FILENAME = "src/assets/database/database.json";
+
+/**
  * Defines the picture that represents a word.
  */
 export type WordPicture =

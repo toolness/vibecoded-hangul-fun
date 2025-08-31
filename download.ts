@@ -3,7 +3,11 @@ import { writeFileSync, existsSync, mkdirSync } from "fs";
 import { join } from "path";
 import dotenv from "dotenv";
 import Queue from "queue";
-import { type DatabaseRow, type WordPicture } from "./src/database-spec.ts";
+import {
+  DB_JSON_FILENAME,
+  type DatabaseRow,
+  type WordPicture,
+} from "./src/database-spec.ts";
 import { ASSETS_DIR } from "./src/assets.ts";
 
 dotenv.config();
@@ -19,8 +23,6 @@ const NOTION_DB_ID = process.env.NOTION_DB_ID;
 if (!NOTION_DB_ID) {
   throw new Error("Please define NOTION_DB_ID!");
 }
-
-const DB_JSON_FILENAME = "src/assets/database/database.json";
 
 /**
  * Ideally we'd reuse this from the Notion SDK

@@ -1,41 +1,23 @@
-import { useEffect, useState } from "react";
-import "./Confetti.css";
+import { useEffect } from "react";
+import confetti from "canvas-confetti";
 
 interface ConfettiProps {
   show: boolean;
 }
 
 function Confetti({ show }: ConfettiProps) {
-  const [isVisible, setIsVisible] = useState(false);
-
   useEffect(() => {
     if (show) {
-      setIsVisible(true);
-      const timer = setTimeout(() => {
-        setIsVisible(false);
-      }, 2000);
-      return () => {
-        setIsVisible(false);
-        clearTimeout(timer);
-      };
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ["#ff0000", "#00ff00", "#0000ff", "#ffff00", "#ff00ff"],
+      });
     }
   }, [show]);
 
-  if (!isVisible) return null;
-
-  const confettiPieces = Array.from({ length: 50 }, (_, i) => (
-    <div
-      key={i}
-      className="confetti-piece"
-      style={{
-        left: `${Math.random() * 100}%`,
-        animationDelay: `${Math.random() * 0.5}s`,
-        backgroundColor: `hsl(${Math.random() * 360}, 70%, 50%)`,
-      }}
-    />
-  ));
-
-  return <div className="confetti-container">{confettiPieces}</div>;
+  return null;
 }
 
 export default Confetti;

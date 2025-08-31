@@ -60,6 +60,16 @@ npm run download
 
 This will put the database JSON in `src/database.json`.
 
+### Importing into Anki
+
+To import the downloaded database into Anki, run `npm run anki`.
+
+This will actually copy all the pictures and images into your
+Anki installation's media collection. It will also write a CSV
+that you can import into Anki.
+
+See [`anki.ts`](./anki.ts) for more details.
+
 ### Type checking
 
 If you make changes to the codebase, be sure to run `npm run typecheck`

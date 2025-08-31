@@ -143,8 +143,9 @@ const run = async () => {
   );
 
   const csv = [PREAMBLE, encodedRows].join("\n");
-  writeFileSync(CSV_OUTFILE, csv, { encoding: "utf-8" });
-  console.log(`Wrote ${CSV_OUTFILE}.`);
+  const outfile = path.join(getDesktopDir(), CSV_OUTFILE);
+  writeFileSync(outfile, csv, { encoding: "utf-8" });
+  console.log(`Wrote ${outfile}.`);
 };
 
 // https://stackoverflow.com/a/57448862
@@ -190,6 +191,20 @@ function convertToTag(value: string) {
 function loadDatabase(): DatabaseRow[] {
   const data = readFileSync(getAssetFilePath(DB_JSON_ASSET), "utf-8");
   return JSON.parse(data) as DatabaseRow[];
+}
+
+function getDesktopDir(): string {
+  // Implemented by Github Copilot.
+  const platform = process.platform;
+  if (platform === "darwin") {
+    // macOS
+    return `${process.env.HOME}/Desktop`;
+  } else if (platform === "win32") {
+    // Windows
+    return `${process.env.USERPROFILE}\\Desktop`;
+  } else {
+    throw new Error("Unsupported OS for desktop directory");
+  }
 }
 
 function getRootAnkiDir(): string {

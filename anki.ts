@@ -95,7 +95,7 @@ const run = async () => {
       throw new Error(`Anki directory does not exist: ${dir}`);
     }
   }
-  console.log("Root Anki dir is:", rootAnkiDir);
+  console.log("Media will be copied to:", collectionMediaDir);
   const dbRows = loadDatabase();
   const csvRows: CsvRow[] = [];
 
@@ -105,15 +105,15 @@ const run = async () => {
       if (rowCount >= MAX_ROWS) {
         break;
       }
-      const prefixedPicture = `${MEDIA_FILENAME_PREFIX}${row.picture.filename}`;
+      const destPicture = `${MEDIA_FILENAME_PREFIX}${row.picture.filename}`;
       copyFileIfChangedSync(
         getAssetFilePath(row.picture.filename),
-        path.join(collectionMediaDir, prefixedPicture),
+        path.join(collectionMediaDir, destPicture),
       );
-      const prefixedAudio = `${MEDIA_FILENAME_PREFIX}${row.audio}`;
+      const destAudio = `${MEDIA_FILENAME_PREFIX}${row.audio}`;
       copyFileIfChangedSync(
         getAssetFilePath(row.audio),
-        path.join(collectionMediaDir, prefixedAudio),
+        path.join(collectionMediaDir, destAudio),
       );
       rowCount += 1;
       csvRows.push({
@@ -122,9 +122,9 @@ const run = async () => {
         deckName: DECK_NAME,
         tags: row.category ? [row.category] : [],
         hangul: row.hangul,
-        picture: prefixedPicture,
+        picture: destPicture,
         notes: row.notes ?? "",
-        audio: prefixedAudio,
+        audio: destAudio,
       });
     }
   }

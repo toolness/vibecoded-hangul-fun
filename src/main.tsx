@@ -2,9 +2,9 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.tsx";
-import { getAssetUrl } from "./assets.ts";
+import { DB_JSON_ASSET, getAssetUrl } from "./assets.ts";
 
-const DATABASE_JSON_URL = getAssetUrl("database.json");
+const DATABASE_JSON_URL = getAssetUrl(DB_JSON_ASSET);
 
 const databaseJson = await (await fetch(DATABASE_JSON_URL)).json();
 

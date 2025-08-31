@@ -5,10 +5,10 @@
 export const ASSETS_DIR = "src/assets/database";
 
 /**
- * Where the DB is stored, relative to the repository root. This
+ * Where the DB is stored, relative to {@link ASSETS_DIR}. This
  * will contain an array of `DatabaseRow` objects.
  */
-export const DB_JSON_ASSET_FILENAME = `${ASSETS_DIR}/database.json`;
+export const DB_JSON_ASSET = `database.json`;
 
 /**
  * Given an asset filename, returns the URL to it,
@@ -19,4 +19,12 @@ export function getAssetUrl(filename: string): URL {
   // too complicated!  For more details see:
   // https://vite.dev/guide/assets
   return new URL(`./assets/database/${filename}`, import.meta.url);
+}
+
+/**
+ * Given an asset filename, returns the relative path to it
+ * from the repository root.
+ */
+export function getAssetFilePath(filename: string): string {
+  return `${ASSETS_DIR}/${filename}`;
 }

@@ -150,15 +150,17 @@ const run = async () => {
 
 // https://stackoverflow.com/a/57448862
 // https://docs.ankiweb.net/importing/text-files.html#html
-const escapeHTML = (str) =>
+const escapeHTML = (str: string) =>
   str.replace(
     /[&<>]/g,
     (tag) =>
+      // The "UNKNOWN" below should never show up b/c the regexp should
+      // only match the stuff in the record above
       ({
         "&": "&amp;",
         "<": "&lt;",
         ">": "&gt;",
-      })[tag],
+      })[tag] ?? "UNKNOWN",
   );
 
 /**

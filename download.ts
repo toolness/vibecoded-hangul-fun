@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import Queue from "queue";
 import { type DatabaseRow, type WordPicture } from "./src/database-spec.ts";
 import { ASSETS_DIR, DB_JSON_ASSET, getAssetFilePath } from "./src/assets.ts";
+import { parseArgs } from "util";
 
 dotenv.config();
 
@@ -233,13 +234,20 @@ async function downloadDatabase(
   return entries;
 }
 
-async function downloadFile(url: string, filename: string): Promise<void> {
+async function downloadFile(args: {
+  url: string;
+  filename: string;
+  overwrite: boolean;
+}): Promise<void> {
+  const { url, filename, overwrite } = args;
   const filepath = join(ASSETS_DIR, filename);
-  if (existsSync(filepath)) {
+  if (existsSync(filepath) && !overwrite) {
     // For now, don't download files that already exist.
     // In the future we can use last-modified timestamps or something
     // to make this smarter.
-    console.log(`Skipping ${filename} because it already exists.`);
+    console.log(
+      `Skipping ${filename}, it already exists (use --overwrite to override).`,
+    );
     return;
   }
   console.log(`Downloading ${filename}...`);
@@ -252,6 +260,17 @@ async function downloadFile(url: string, filename: string): Promise<void> {
 }
 
 const run = async () => {
+  const args = parseArgs({
+    options: {
+      overwrite: {
+        type: "boolean",
+        default: false,
+      },
+    },
+  });
+  const {
+    values: { overwrite },
+  } = args;
   const notion = new Client({ auth: NOTION_API_KEY });
 
   console.log("Downloading database...");
@@ -276,11 +295,12 @@ const run = async () => {
     // Queue image download from files
     if (imageFiles.length > 0) {
       downloadQueue.push(async () => {
-        const filename = await maybeDownloadFirstFile(
-          imageFiles,
-          "image",
+        const filename = await maybeDownloadFirstFile({
+          files: imageFiles,
+          label: "image",
           baseName,
-        );
+          overwrite,
+        });
         if (filename) {
           row.picture = {
             type: "local-image",
@@ -305,7 +325,7 @@ const run = async () => {
             extension = lastPart.toLowerCase();
           }
           const filename = `${baseName}.${extension}`;
-          await downloadFile(imageUrl, filename);
+          await downloadFile({ url: imageUrl, filename, overwrite });
           row.picture = {
             type: "local-image",
             filename,
@@ -323,7 +343,12 @@ const run = async () => {
     // Queue audio download
     if (audioFiles.length > 0) {
       downloadQueue.push(async () => {
-        row.audio = await maybeDownloadFirstFile(audioFiles, "audio", baseName);
+        row.audio = await maybeDownloadFirstFile({
+          files: audioFiles,
+          label: "audio",
+          baseName,
+          overwrite,
+        });
       });
     }
 
@@ -342,11 +367,13 @@ const run = async () => {
   console.log(`Wrote ${dbPath}.`);
 };
 
-async function maybeDownloadFirstFile(
-  files: File[],
-  label: string,
-  baseName: string,
-): Promise<string | undefined> {
+async function maybeDownloadFirstFile(args: {
+  files: File[];
+  label: string;
+  baseName: string;
+  overwrite: boolean;
+}): Promise<string | undefined> {
+  const { files, label, baseName, overwrite } = args;
   if (files.length === 0) {
     return;
   }
@@ -376,7 +403,7 @@ async function maybeDownloadFirstFile(
 
   if (url && filename) {
     try {
-      await downloadFile(url, filename);
+      await downloadFile({ url, filename, overwrite });
       return filename;
     } catch (error) {
       console.error(`Failed to download file for ${fullLabel}:`, error);

@@ -5,12 +5,40 @@ import { copyFileSync, existsSync, readFileSync, writeFileSync } from "fs";
 import { stringify } from "csv-stringify/sync";
 import path from "path";
 import { createHash } from "crypto";
+import { parseArgs, type ParseArgsOptionsConfig } from "util";
 
-const ANKI_USER = `User 1`;
-const NOTE_TYPE = `Atul's Picture Words`;
-const DECK_NAME = `Atul's Korean Words`;
-const MEDIA_FILENAME_PREFIX = `atul-`;
-const CSV_OUTFILE = `atuls-anki-deck.csv`;
+const CLI_ARGS = {
+  /** The Anki user (used to find Anki directory to put static assets). */
+  ankiUser: {
+    type: "string",
+    default: `User 1`,
+  },
+  /** The Anki note type to populate the relevant CSV column with. */
+  noteType: {
+    type: "string",
+    default: `Atul's Picture Words`,
+  },
+  /** The Anki deck to add the notes to. */
+  deckName: {
+    type: "string",
+    default: `Atul's Korean Words`,
+  },
+  /**
+   * When copying images/audio to the user's Anki collection media
+   * dir, prefix them with this string.
+   */
+  mediaPrefix: {
+    type: "string",
+    default: "atul-",
+  },
+  /**
+   * Where to write the output CSV file.
+   */
+  outfile: {
+    type: "string",
+    default: path.join(getDesktopDir(), `atuls-anki-deck.csv`),
+  },
+} satisfies ParseArgsOptionsConfig;
 
 /**
  * This is the data that will be written into each
@@ -86,8 +114,13 @@ const PREAMBLE = `\
 const MAX_ROWS = Infinity;
 
 const run = async () => {
+  const {
+    values: { ankiUser, mediaPrefix, noteType, deckName, outfile },
+  } = parseArgs({
+    options: CLI_ARGS,
+  });
   const rootAnkiDir = getRootAnkiDir();
-  const userDir = path.join(rootAnkiDir, ANKI_USER);
+  const userDir = path.join(rootAnkiDir, ankiUser);
   // https://docs.ankiweb.net/importing/text-files.html#importing-media
   const collectionMediaDir = path.join(userDir, "collection.media");
   for (const dir of [rootAnkiDir, userDir, collectionMediaDir]) {
@@ -105,12 +138,12 @@ const run = async () => {
       if (rowCount >= MAX_ROWS) {
         break;
       }
-      const destPicture = `${MEDIA_FILENAME_PREFIX}${row.picture.filename}`;
+      const destPicture = `${mediaPrefix}${row.picture.filename}`;
       copyFileIfChangedSync(
         getAssetFilePath(row.picture.filename),
         path.join(collectionMediaDir, destPicture),
       );
-      const destAudio = `${MEDIA_FILENAME_PREFIX}${row.audio}`;
+      const destAudio = `${mediaPrefix}${row.audio}`;
       copyFileIfChangedSync(
         getAssetFilePath(row.audio),
         path.join(collectionMediaDir, destAudio),
@@ -118,8 +151,8 @@ const run = async () => {
       rowCount += 1;
       csvRows.push({
         id: row.id,
-        noteType: NOTE_TYPE,
-        deckName: DECK_NAME,
+        noteType,
+        deckName,
         tags: row.category ? [row.category] : [],
         hangul: row.hangul,
         picture: destPicture,
@@ -143,7 +176,6 @@ const run = async () => {
   );
 
   const csv = [PREAMBLE, encodedRows].join("\n");
-  const outfile = path.join(getDesktopDir(), CSV_OUTFILE);
   writeFileSync(outfile, csv, { encoding: "utf-8" });
   console.log(`Wrote ${outfile}.`);
 };

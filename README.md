@@ -29,6 +29,9 @@ All content is stored in Notion and downloaded at
 build time. The static website is deployed does not
 communicate with Notion.
 
+The content can also be exported to
+[Anki](https://apps.ankiweb.net/) as a deck.
+
 ## Quick start
 
 ### Prerequisites

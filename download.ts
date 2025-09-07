@@ -5,7 +5,15 @@ import dotenv from "dotenv";
 import Queue from "queue";
 import { type DatabaseRow, type WordPicture } from "./src/database-spec.ts";
 import { ASSETS_DIR, DB_JSON_ASSET, getAssetFilePath } from "./src/assets.ts";
-import { parseArgs } from "util";
+import { parseArgs, type ParseArgsOptionsConfig } from "util";
+
+const CLI_ARGS = {
+  /** Always download files, overwriting existing ones? */
+  overwrite: {
+    type: "boolean",
+    default: false,
+  },
+} satisfies ParseArgsOptionsConfig;
 
 dotenv.config();
 
@@ -261,12 +269,7 @@ async function downloadFile(args: {
 
 const run = async () => {
   const args = parseArgs({
-    options: {
-      overwrite: {
-        type: "boolean",
-        default: false,
-      },
-    },
+    options: CLI_ARGS,
   });
   const {
     values: { overwrite },

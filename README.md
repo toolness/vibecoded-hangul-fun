@@ -1,5 +1,33 @@
-This is a simple vibe-coded web app that quizzes the user by asking
-them to translate English/romanized words into Hangul.
+This is a simple (mostly) vibe-coded web app that
+helps the user learn Korean. It has a variety
+of modes:
+
+- **Translate mode** - asks the user to translate
+  romanized Koran words (e.g. "bibimbap") into Hangul.
+
+- **Typing tutor mode** - asks the user to type
+  Hangul words.
+
+- **Picture mode** - shows the user a picture representing
+  a word, asking them to type it in Hangul.
+
+- **Reverse picture mode** - shows the user a word in
+  Hangul, prompting the user to think of the picture
+  it represents.
+
+- **Minimal pair mode** - presents the user with the
+  audio for two words that constitute a [minimal pair][],
+  prompting them to guess the word they heard.
+
+Typing modes present real-time feedback on how many
+keystrokes the user has typed correctly so far.
+
+Many of these modes were inspired by Gabriel Wyner's
+[Fluent Forever](https://fluentforeverbook.com/).
+
+All content is stored in Notion and downloaded at
+build time. The static website is deployed does not
+communicate with Notion.
 
 ## Quick start
 

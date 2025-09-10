@@ -7,8 +7,11 @@ export const ASSETS_DIR = "src/assets/database";
 /**
  * Where the DB is stored, relative to {@link ASSETS_DIR}. This
  * will contain an array of `DatabaseRow` objects.
+ *
+ * Starting this with an underscore so it's easy to find in
+ * directory listings, file explorers, etc.
  */
-export const DB_JSON_ASSET = `database.json`;
+export const DB_JSON_ASSET = `_database.json`;
 
 /**
  * Given an asset filename, returns the URL to it,

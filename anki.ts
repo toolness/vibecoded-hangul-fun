@@ -92,7 +92,7 @@ type CsvRow = {
   /**
    * Any pronunciation notes, etc, to be shown on the back of the card.
    */
-  notes: string;
+  notes: string[];
 
   /**
    * The pronunciation audio (mp3) filename for the word, relative to Anki's
@@ -156,9 +156,7 @@ const run = async () => {
         tags: row.category ? [row.category] : [],
         hangul: row.hangul,
         picture: destPicture,
-        notes: [row.notes, row.exampleSentence]
-          .filter((text) => Boolean(text))
-          .join("\n\n"),
+        notes: [row.notes ?? "", row.exampleSentence ?? ""].filter(Boolean),
         audio: destAudio,
       });
     }
@@ -172,7 +170,7 @@ const run = async () => {
       row.tags.map((tag) => escapeHTML(convertToTag(tag))).join(" "),
       escapeHTML(row.hangul),
       `<img src="${escapeHTML(row.picture)}">`,
-      escapeHTML(row.notes),
+      row.notes.map(escapeHTML).join("<br>"),
       `[sound:${escapeHTML(row.audio)}]`,
     ]),
   );

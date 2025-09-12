@@ -34,7 +34,7 @@ jobs:
         run: npm run download
         env:
           NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
-          NOTION_DB_ID: ${{ secrets.NOTION_DB_ID }}
+          NOTION_DS_ID: ${{ secrets.NOTION_DS_ID }}
 
       - name: Build
         run: npm run build

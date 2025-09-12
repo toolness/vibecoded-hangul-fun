@@ -78,7 +78,7 @@ Now create an `.env` file with the following variables defined:
 
 ```
 NOTION_API_KEY=<Your Notion API key>
-NOTION_DB_ID=<Your Notion DB id>
+NOTION_DS_ID=<Your Notion data source id>
 ```
 
 ### Downloading the database

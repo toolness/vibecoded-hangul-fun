@@ -23,10 +23,10 @@ if (!NOTION_API_KEY) {
   throw new Error("Please define NOTION_API_KEY!");
 }
 
-const NOTION_DB_ID = process.env.NOTION_DB_ID;
+const NOTION_DS_ID = process.env.NOTION_DS_ID;
 
-if (!NOTION_DB_ID) {
-  throw new Error("Please define NOTION_DB_ID!");
+if (!NOTION_DS_ID) {
+  throw new Error("Please define NOTION_DS_ID!");
 }
 
 /**
@@ -57,8 +57,8 @@ async function downloadDatabase(
   let nextCursor: string | undefined = undefined;
 
   while (hasMore) {
-    const response = await notion.databases.query({
-      database_id: id,
+    const response = await notion.dataSources.query({
+      data_source_id: id,
       start_cursor: nextCursor,
     });
 
@@ -286,7 +286,7 @@ const run = async () => {
 
   console.log("Downloading database...");
 
-  const entries = await downloadDatabase(notion, NOTION_DB_ID);
+  const entries = await downloadDatabase(notion, NOTION_DS_ID);
 
   // Ensure assets directory exists
   if (!existsSync(ASSETS_DIR)) {

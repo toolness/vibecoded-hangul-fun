@@ -23,6 +23,7 @@ import Confetti from "./Confetti";
 import { Pronouncer } from "./Pronouncer";
 import { getAssetUrl } from "./assets";
 import { WordPicture } from "./WordPicture";
+import NotesSection from "./NotesSection";
 
 const MODE_PROMPT: Record<Mode, string> = {
   typingtutor: "Type this Hangul:",
@@ -155,9 +156,7 @@ function ReversePictureAnswerer({ state, dispatch }: AnswererProps) {
         )}
       </div>
 
-      {showAnswer && currentQuestion.notes && (
-        <div className="notes-section">{currentQuestion.notes}</div>
-      )}
+      <NotesSection currentQuestion={currentQuestion} show={showAnswer} />
     </>
   );
 }
@@ -265,9 +264,7 @@ function MinimalPairAnswerer({ state, dispatch, vocalizer }: AnswererProps) {
         )}
       </div>
 
-      {hasAnswered && currentQuestion.notes && (
-        <div className="notes-section">{currentQuestion.notes}</div>
-      )}
+      <NotesSection currentQuestion={currentQuestion} show={hasAnswered} />
     </>
   );
 }
@@ -409,9 +406,10 @@ function TypingModeAnswerer(props: AnswererProps) {
         )}
       </div>
 
-      {(showAnswer || isCompletelyCorrect) && currentQuestion.notes && (
-        <div className="notes-section">{currentQuestion.notes}</div>
-      )}
+      <NotesSection
+        currentQuestion={currentQuestion}
+        show={showAnswer || isCompletelyCorrect}
+      />
     </>
   );
 }

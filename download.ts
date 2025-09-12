@@ -1,4 +1,4 @@
-import { Client } from "@notionhq/client";
+import { Client, type GetDataSourceResponse } from "@notionhq/client";
 import { writeFileSync, existsSync, mkdirSync } from "fs";
 import { join } from "path";
 import dotenv from "dotenv";
@@ -48,10 +48,32 @@ type DatabaseEntry = {
   imageUrl?: string;
 };
 
+async function downloadSentences(
+  notion: Client,
+  wordsDataSource: GetDataSourceResponse,
+): Promise<Map<string, string>> {
+  const sentences = new Map<string, string>();
+  const sentencesColumnSchema = wordsDataSource.properties["Sentences"];
+  if (sentencesColumnSchema?.type !== "relation") {
+    throw new Error(
+      `Expected data source to have a relation column called "Sentences"`,
+    );
+  }
+  const sentencesDataSourceId = sentencesColumnSchema.relation.data_source_id;
+
+  // TODO: Download all sentences, mapping the ID of each sentence to its name, and return the result.
+  return sentences;
+}
+
 async function downloadDatabase(
   notion: Client,
   id: string,
 ): Promise<DatabaseEntry[]> {
+  const dataSource = await notion.dataSources.retrieve({
+    data_source_id: id,
+  });
+  const sentences = await downloadSentences(notion, dataSource);
+
   const entries: DatabaseEntry[] = [];
   let hasMore = true;
   let nextCursor: string | undefined = undefined;
@@ -236,6 +258,7 @@ async function downloadDatabase(
         category,
         notes,
         minimalPairs: minimalPairs.length > 0 ? minimalPairs : undefined,
+        exampleSentence: undefined, // TODO: Fix this by mapping the first entry in properties["Sentences"] to `sentences`
       };
 
       entries.push({

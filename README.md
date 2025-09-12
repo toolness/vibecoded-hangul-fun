@@ -66,6 +66,9 @@ schema:
 - `Category` - Select, an optional tag representing a
   category for the word, such as "History" or "Place".
 - `Notes` - Text, contains optional pronunciation notes.
+- `Sentences` - A relation to a different table; the
+  name of each row in the table should be an example sentence
+  or song lyric that uses the word.
 - `Disabled` - Checkbox, a boolean indicating whether to
   include this word in the app at all. This is essentially
   a way to "soft delete" a row.

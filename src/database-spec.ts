@@ -73,4 +73,9 @@ export interface DatabaseRow {
    * If defined, the array will never be empty.
    */
   minimalPairs?: string[];
+
+  /**
+   * An example sentence (or lyric from a song) that uses the word.
+   */
+  exampleSentence?: string;
 }

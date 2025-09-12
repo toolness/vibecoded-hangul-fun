@@ -61,7 +61,65 @@ async function downloadSentences(
   }
   const sentencesDataSourceId = sentencesColumnSchema.relation.data_source_id;
 
-  // TODO: Download all sentences, mapping the ID of each sentence to its name, and return the result.
+  // Download all sentences from the related table
+  let hasMore = true;
+  let nextCursor: string | undefined = undefined;
+
+  while (hasMore) {
+    const response = await notion.dataSources.query({
+      data_source_id: sentencesDataSourceId,
+      start_cursor: nextCursor,
+    });
+
+    hasMore = response.has_more;
+    nextCursor = response.next_cursor ?? undefined;
+
+    for (const page of response.results) {
+      if (!("properties" in page)) {
+        continue;
+      }
+
+      // Extract the name/title of each sentence
+      const properties = page.properties;
+      let sentenceText = "";
+
+      // Try to extract from Name property (could be title or rich_text)
+      if (properties.Name) {
+        if (
+          properties.Name.type === "title" &&
+          Array.isArray(properties.Name.title) &&
+          properties.Name.title.length > 0
+        ) {
+          sentenceText = properties.Name.title[0].plain_text;
+        } else if (
+          properties.Name.type === "rich_text" &&
+          Array.isArray(properties.Name.rich_text) &&
+          properties.Name.rich_text.length > 0
+        ) {
+          sentenceText = properties.Name.rich_text[0].plain_text;
+        }
+      }
+
+      // If no Name property, try to find any title property
+      if (!sentenceText) {
+        for (const value of Object.values(properties)) {
+          if (
+            value.type === "title" &&
+            Array.isArray(value.title) &&
+            value.title.length > 0
+          ) {
+            sentenceText = value.title[0].plain_text;
+            break;
+          }
+        }
+      }
+
+      if (sentenceText) {
+        sentences.set(page.id, sentenceText);
+      }
+    }
+  }
+
   return sentences;
 }
 
@@ -239,6 +297,20 @@ async function downloadDatabase(
         minimalPairs = properties["Minimal pairs"].relation.map((r) => r.id);
       }
 
+      // Extract Sentences relation and map the first one to exampleSentence
+      let exampleSentence: string | undefined;
+      if (
+        properties["Sentences"] &&
+        properties["Sentences"].type === "relation" &&
+        Array.isArray(properties["Sentences"].relation) &&
+        properties["Sentences"].relation.length > 0
+      ) {
+        // Get the first sentence ID from the relation
+        const firstSentenceId = properties["Sentences"].relation[0].id;
+        // Look it up in our sentences map
+        exampleSentence = sentences.get(firstSentenceId);
+      }
+
       // Convert to WordPicture format - prioritize emojis
       let picture: WordPicture | undefined;
       if (emojis) {
@@ -258,7 +330,7 @@ async function downloadDatabase(
         category,
         notes,
         minimalPairs: minimalPairs.length > 0 ? minimalPairs : undefined,
-        exampleSentence: undefined, // TODO: Fix this by mapping the first entry in properties["Sentences"] to `sentences`
+        exampleSentence,
       };
 
       entries.push({

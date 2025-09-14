@@ -27,7 +27,12 @@ function WordSelectionModal({
       [...words]
         .sort((a, b) => (a.name || "").localeCompare(b.name || ""))
         .map((word) => ({
-          value: word.name || "",
+          // For now we'll include the hangul as part of the value that's searched.
+          //
+          // Note that that this will search for whole syllables rather than
+          // individual jamos; we could potentially change this by doing custom
+          // filtering: https://react-select.com/advanced#custom-filter-logic
+          value: (word.name || "") + (word.hangul ?? ""),
           label: word.name || "",
           data: word,
         })),

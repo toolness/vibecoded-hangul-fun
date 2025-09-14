@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import "./HamburgerMenu.css";
 import WordSelectionModal from "./WordSelectionModal";
 import CategorySelectionModal from "./CategorySelectionModal";
@@ -40,6 +40,7 @@ function HamburgerMenu({
     useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -47,16 +48,19 @@ function HamburgerMenu({
 
   const handleChooseWord = () => {
     setIsMenuOpen(false);
+    previousFocusRef.current = document.activeElement as HTMLElement;
     setIsWordSelectionModalOpen(true);
   };
 
   const handleChooseCategory = () => {
     setIsMenuOpen(false);
+    previousFocusRef.current = document.activeElement as HTMLElement;
     setIsCategoryModalOpen(true);
   };
 
   const handleAbout = () => {
     setIsMenuOpen(false);
+    previousFocusRef.current = document.activeElement as HTMLElement;
     setIsAboutModalOpen(true);
   };
 
@@ -74,6 +78,7 @@ function HamburgerMenu({
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.shiftKey && e.key === "W") {
         e.preventDefault();
+        previousFocusRef.current = document.activeElement as HTMLElement;
         setIsWordSelectionModalOpen(true);
       }
     };
@@ -133,6 +138,7 @@ function HamburgerMenu({
           words={words}
           onSelectWord={handleWordSelected}
           onClose={() => setIsWordSelectionModalOpen(false)}
+          previousFocus={previousFocusRef.current}
         />
       )}
 
@@ -142,11 +148,15 @@ function HamburgerMenu({
           currentCategory={currentCategory}
           onSelectCategory={handleCategorySelected}
           onClose={() => setIsCategoryModalOpen(false)}
+          previousFocus={previousFocusRef.current}
         />
       )}
 
       {isAboutModalOpen && (
-        <AboutModal onClose={() => setIsAboutModalOpen(false)} />
+        <AboutModal
+          onClose={() => setIsAboutModalOpen(false)}
+          previousFocus={previousFocusRef.current}
+        />
       )}
     </div>
   );

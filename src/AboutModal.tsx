@@ -1,30 +1,12 @@
-import { useEffect } from "react";
 import "./AboutModal.css";
+import Modal from "./Modal";
 
 interface AboutModalProps {
   onClose: () => void;
+  previousFocus?: HTMLElement | null;
 }
 
-function AboutModal({ onClose }: AboutModalProps) {
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose();
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [onClose]);
-
-  const handleBackdropClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
-
+function AboutModal({ onClose, previousFocus }: AboutModalProps) {
   const buildDate = new Date(__BUILD_DATE__);
   const formattedDate = buildDate.toLocaleDateString("en-US", {
     year: "numeric",
@@ -36,23 +18,14 @@ function AboutModal({ onClose }: AboutModalProps) {
   });
 
   return (
-    <div className="modal-backdrop" onClick={handleBackdropClick}>
-      <div className="modal-container about-modal">
-        <div className="modal-header">
-          <h2>About</h2>
-          <button
-            className="modal-close"
-            onClick={onClose}
-            aria-label="Close modal"
-          >
-            ×
-          </button>
-        </div>
-        <div className="modal-body">
-          <p>Build Date: {formattedDate}</p>
-        </div>
-      </div>
-    </div>
+    <Modal
+      title="About"
+      onClose={onClose}
+      className="about-modal"
+      previousFocus={previousFocus}
+    >
+      <p>Build Date: {formattedDate}</p>
+    </Modal>
   );
 }
 

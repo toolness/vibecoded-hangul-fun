@@ -1,8 +1,9 @@
-import { useMemo, useEffect } from "react";
+import { useMemo } from "react";
 import Select from "react-select";
 import type { SingleValue } from "react-select";
 import "./WordSelectionModal.css";
 import type { DatabaseRow } from "./database-spec";
+import Modal from "./Modal";
 
 interface WordOption {
   value: string;
@@ -14,12 +15,14 @@ interface WordSelectionModalProps {
   words: DatabaseRow[];
   onSelectWord: (word: DatabaseRow) => void;
   onClose: () => void;
+  previousFocus?: HTMLElement | null;
 }
 
 function WordSelectionModal({
   words,
   onSelectWord,
   onClose,
+  previousFocus,
 }: WordSelectionModalProps) {
   // Convert words to React-Select options and sort alphabetically
   const options = useMemo(
@@ -39,26 +42,6 @@ function WordSelectionModal({
     [words],
   );
 
-  // Handle ESC key to close modal
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose();
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [onClose]);
-
-  const handleBackdropClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
-
   const handleChange = (newValue: SingleValue<WordOption>) => {
     if (newValue) {
       // Immediately select and close when a word is chosen
@@ -68,50 +51,40 @@ function WordSelectionModal({
   };
 
   return (
-    <div className="modal-backdrop" onClick={handleBackdropClick}>
-      <div className="modal-container">
-        <div className="modal-header">
-          <h2>Choose a word</h2>
-          <button
-            className="modal-close"
-            onClick={onClose}
-            aria-label="Close modal"
-          >
-            ×
-          </button>
-        </div>
-        <div className="modal-body">
-          <Select
-            className="word-select"
-            classNamePrefix="word-select"
-            value={null}
-            onChange={handleChange}
-            options={options}
-            placeholder="Search for a word..."
-            isClearable={false}
-            isSearchable={true}
-            autoFocus={true}
-            menuIsOpen={true}
-            styles={{
-              control: (base) => ({
-                ...base,
-                minHeight: "40px",
-              }),
-              menu: (base) => ({
-                ...base,
-                position: "relative",
-                marginTop: "0",
-                marginBottom: "8px",
-              }),
-              menuList: (base) => ({
-                ...base,
-                maxHeight: "300px",
-              }),
-            }}
-          />
-        </div>
-      </div>
-    </div>
+    <Modal
+      title="Choose a word"
+      onClose={onClose}
+      previousFocus={previousFocus}
+    >
+      <Select
+        className="word-select"
+        classNamePrefix="word-select"
+        value={null}
+        onChange={handleChange}
+        options={options}
+        placeholder="Search for a word..."
+        isClearable={false}
+        isSearchable={true}
+        autoFocus={true}
+        menuIsOpen={true}
+        styles={{
+          control: (base) => ({
+            ...base,
+            minHeight: "40px",
+          }),
+          menu: (base) => ({
+            ...base,
+            position: "relative",
+            marginTop: "0",
+            marginBottom: "8px",
+          }),
+          menuList: (base) => ({
+            ...base,
+            maxHeight: "300px",
+          }),
+        }}
+      />
+    </Modal>
   );
 }
 

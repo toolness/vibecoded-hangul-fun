@@ -66,6 +66,7 @@ async function downloadSentences(
   let nextCursor: string | undefined = undefined;
 
   while (hasMore) {
+    console.log(`Retrieving sentences...`)
     const response = await notion.dataSources.query({
       data_source_id: sentencesDataSourceId,
       start_cursor: nextCursor,
@@ -137,6 +138,7 @@ async function downloadDatabase(
   let nextCursor: string | undefined = undefined;
 
   while (hasMore) {
+    console.log(`Retrieving words...`)
     const response = await notion.dataSources.query({
       data_source_id: id,
       start_cursor: nextCursor,

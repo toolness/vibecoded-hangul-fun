@@ -2,19 +2,20 @@ import { describe, it, expect } from "vitest";
 import { quizReducer, createInitialState } from "./quizStateReducer";
 import type { QuizState } from "./quizStateReducer";
 import type { DatabaseRow } from "./database-spec";
+import { createTestDatabaseRow } from "./test/testHelpers";
 
 describe("quizReducer", () => {
-  const mockQuestion: DatabaseRow = {
+  const mockQuestion: DatabaseRow = createTestDatabaseRow({
     id: "test-id-1",
     name: "hello",
     hangul: "안녕",
-  };
+  });
 
-  const mockQuestion2: DatabaseRow = {
+  const mockQuestion2: DatabaseRow = createTestDatabaseRow({
     id: "test-id-2",
     name: "goodbye",
     hangul: "안녕히",
-  };
+  });
 
   const mockQuestions = [mockQuestion, mockQuestion2];
 
@@ -108,21 +109,21 @@ describe("quizReducer", () => {
 
   describe("NEXT_QUESTION", () => {
     it("should move to next question from remaining questions", () => {
-      const q1: DatabaseRow = {
+      const q1: DatabaseRow = createTestDatabaseRow({
         id: "test-id-q1",
         name: "q1",
         hangul: "하나",
-      };
-      const q2: DatabaseRow = {
+      });
+      const q2: DatabaseRow = createTestDatabaseRow({
         id: "test-id-q2",
         name: "q2",
         hangul: "둘",
-      };
-      const q3: DatabaseRow = {
+      });
+      const q3: DatabaseRow = createTestDatabaseRow({
         id: "test-id-q3",
         name: "q3",
         hangul: "셋",
-      };
+      });
       const questions = [q1, q2, q3];
       const initialState = createInitialState(questions);
       const beforeLength = initialState.remainingQuestions.length;

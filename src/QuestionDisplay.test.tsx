@@ -2,34 +2,35 @@ import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import QuestionDisplay from "./QuestionDisplay";
 import type { DatabaseRow } from "./database-spec";
+import { createTestDatabaseRow } from "./test/testHelpers";
 
 describe("QuestionDisplay", () => {
-  const mockQuestionWithUrl: DatabaseRow = {
+  const mockQuestionWithUrl: DatabaseRow = createTestDatabaseRow({
     id: "test-id-1",
     name: "hello",
     hangul: "안녕하세요",
     url: "https://example.com",
-  };
+  });
 
-  const mockQuestionWithoutUrl: DatabaseRow = {
+  const mockQuestionWithoutUrl: DatabaseRow = createTestDatabaseRow({
     id: "test-id-2",
     name: "goodbye",
     hangul: "안녕히 가세요",
-  };
+  });
 
-  const mockQuestionWithEmoji: DatabaseRow = {
+  const mockQuestionWithEmoji: DatabaseRow = createTestDatabaseRow({
     id: "test-id-3",
     name: "smile",
     hangul: "미소",
     picture: { type: "emojis", emojis: "😊" },
-  };
+  });
 
-  const mockQuestionWithImage: DatabaseRow = {
+  const mockQuestionWithImage: DatabaseRow = createTestDatabaseRow({
     id: "test-id-4",
     name: "cat",
     hangul: "고양이",
     picture: { type: "local-image", filename: "cat.png" },
-  };
+  });
 
   describe("Normal mode", () => {
     it("should display romanized text as a link when URL is available", () => {

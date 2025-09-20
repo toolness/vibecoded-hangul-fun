@@ -4,34 +4,43 @@ import userEvent from "@testing-library/user-event";
 import App from "./App";
 import "@testing-library/jest-dom";
 import type { Mode } from "./quizStateReducer";
+import { createTestDatabaseRow } from "./test/testHelpers";
 
 function TestApp(props: { initialMode?: Mode }) {
   return (
     <App
       initialMode={props.initialMode ?? "picture"}
       initialRows={[
-        {
+        createTestDatabaseRow({
           id: "test-1",
           name: "hello",
           hangul: "안녕하세요",
           picture: { type: "local-image", filename: "hi.png" },
-        },
-        {
+        }),
+        createTestDatabaseRow({
           id: "test-2",
           name: "goodbye",
           hangul: "안녕히 가세요",
           url: "https://example.com",
           picture: { type: "local-image", filename: "bye.png" },
-        },
-        { id: "test-3", name: "thank you", hangul: "감사합니다" },
-        { id: "test-4", name: "sorry", hangul: "죄송합니다" },
-        { id: "test-5", name: "yes", hangul: "네" },
-        {
+        }),
+        createTestDatabaseRow({
+          id: "test-3",
+          name: "thank you",
+          hangul: "감사합니다",
+        }),
+        createTestDatabaseRow({
+          id: "test-4",
+          name: "sorry",
+          hangul: "죄송합니다",
+        }),
+        createTestDatabaseRow({ id: "test-5", name: "yes", hangul: "네" }),
+        createTestDatabaseRow({
           id: "test-6",
           name: "smile",
           hangul: "미소",
           picture: { type: "emojis", emojis: "😊" },
-        },
+        }),
       ]}
     />
   );

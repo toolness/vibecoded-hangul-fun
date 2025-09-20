@@ -2,15 +2,16 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import HamburgerMenu from "./HamburgerMenu";
 import type { DatabaseRow } from "./database-spec";
+import { createTestDatabaseRow } from "./test/testHelpers";
 
 describe("HamburgerMenu", () => {
   const mockWords: DatabaseRow[] = [
-    { id: "test-id-1", name: "hello", hangul: "안녕" },
-    {
+    createTestDatabaseRow({ id: "test-id-1", name: "hello", hangul: "안녕" }),
+    createTestDatabaseRow({
       id: "test-id-2",
       name: "goodbye",
       hangul: "안녕히",
-    },
+    }),
   ];
 
   const mockOnSelectWord = vi.fn();

@@ -437,7 +437,7 @@ const run = async () => {
       downloadQueue.push(async () => {
         try {
           // Determine file extension from URL or default to jpg
-          let extension = "jpg";
+          let extension: string | undefined;
           const urlParts = imageUrl.split(".");
           const lastPart = urlParts[urlParts.length - 1].split("?")[0];
           if (
@@ -446,6 +446,12 @@ const run = async () => {
             )
           ) {
             extension = lastPart.toLowerCase();
+          }
+          if (!extension) {
+            extension = "jpg";
+            console.log(
+              `WARNING: Unable to determine file extension for image URL, defaulting to JPG: ${imageUrl}`,
+            );
           }
           const filename = `${baseName}.${extension}`;
           await downloadFile({ url: imageUrl, filename, overwrite });

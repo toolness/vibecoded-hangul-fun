@@ -434,26 +434,26 @@ const run = async () => {
     }
     // Queue remote image URL download if no file but has imageUrl
     else if (imageUrl && !row.picture) {
+      // Determine file extension from URL or default to jpg
+      let extension: string | undefined;
+      const urlParts = imageUrl.split(".");
+      const lastPart = urlParts[urlParts.length - 1].split("?")[0];
+      if (
+        ["jpg", "jpeg", "png", "gif", "webp", "svg"].includes(
+          lastPart.toLowerCase(),
+        )
+      ) {
+        extension = lastPart.toLowerCase();
+      }
+      if (!extension) {
+        console.log(
+          `WARNING: Unable to determine file extension for image URL, skipping download: ${imageUrl}`,
+        );
+        continue;
+      }
+      const filename = `${baseName}.${extension}`;
       downloadQueue.push(async () => {
         try {
-          // Determine file extension from URL or default to jpg
-          let extension: string | undefined;
-          const urlParts = imageUrl.split(".");
-          const lastPart = urlParts[urlParts.length - 1].split("?")[0];
-          if (
-            ["jpg", "jpeg", "png", "gif", "webp", "svg"].includes(
-              lastPart.toLowerCase(),
-            )
-          ) {
-            extension = lastPart.toLowerCase();
-          }
-          if (!extension) {
-            extension = "jpg";
-            console.log(
-              `WARNING: Unable to determine file extension for image URL, defaulting to JPG: ${imageUrl}`,
-            );
-          }
-          const filename = `${baseName}.${extension}`;
           await downloadFile({ url: imageUrl, filename, overwrite });
           row.picture = {
             type: "local-image",

@@ -168,11 +168,51 @@ describe("quizReducer", () => {
     });
   });
 
-  describe("SET_MODE", () => {
+  describe("SET_OPTIONS", () => {
+    it("should not set unspecified options", () => {
+      const initialState = createInitialState(
+        mockQuestions,
+        "minimalpair",
+        "mycategory",
+      );
+      const result = quizReducer(initialState, {
+        type: "SET_OPTIONS",
+        mode: "typingtutor",
+      });
+      expect(result.mode).toBe("typingtutor");
+      expect(result.category).toBe("mycategory");
+    });
+
+    it("should not set options explicitly set to undefined", () => {
+      const initialState = createInitialState(
+        mockQuestions,
+        "minimalpair",
+        "mycategory",
+      );
+      const result = quizReducer(initialState, {
+        type: "SET_OPTIONS",
+        mode: "typingtutor",
+        category: "myothercategory",
+      });
+      expect(result.mode).toBe("typingtutor");
+      expect(result.category).toBe("myothercategory");
+    });
+
+    it("should respect maxQuestions", () => {
+      const initialState = createInitialState(mockQuestions);
+      const result = quizReducer(initialState, {
+        type: "SET_OPTIONS",
+        maxQuestions: 1,
+      });
+      expect(result.allQuestions).toHaveLength(mockQuestions.length);
+      expect(result.currentQuestion).toBe(mockQuestions[0]);
+      expect(result.remainingQuestions).toHaveLength(0);
+    });
+
     it("should set mode to typingtutor", () => {
       const initialState = createInitialState(mockQuestions);
       const result = quizReducer(initialState, {
-        type: "SET_MODE",
+        type: "SET_OPTIONS",
         mode: "typingtutor",
       });
       expect(result.mode).toBe("typingtutor");
@@ -181,7 +221,7 @@ describe("quizReducer", () => {
     it("should set mode to translate", () => {
       const initialState = createInitialState(mockQuestions, "typingtutor");
       const result = quizReducer(initialState, {
-        type: "SET_MODE",
+        type: "SET_OPTIONS",
         mode: "translate",
       });
       expect(result.mode).toBe("translate");
@@ -195,7 +235,7 @@ describe("quizReducer", () => {
         showAnswer: true,
       };
       const result = quizReducer(stateWithData, {
-        type: "SET_MODE",
+        type: "SET_OPTIONS",
         mode: "typingtutor",
       });
       expect(result.mode).toBe("typingtutor");

@@ -59,11 +59,11 @@ function App({
   };
 
   const handleSetMode = (newMode: Mode) => {
-    dispatch({ type: "SET_MODE", mode: newMode });
+    dispatch({ type: "SET_OPTIONS", mode: newMode });
   };
 
   const handleSetCategory = (newCategory: string | undefined) => {
-    dispatch({ type: "SET_CATEGORY", category: newCategory });
+    dispatch({ type: "SET_OPTIONS", category: newCategory });
   };
 
   const Answerer = ANSWERERS[mode];

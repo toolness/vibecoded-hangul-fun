@@ -7,15 +7,19 @@ export type Mode =
   | "minimalpair"
   | "reversepicture";
 
-export interface QuizState {
+export interface QuizOptions {
+  category: string | undefined;
+  maxQuestions: number | undefined;
+  mode: Mode;
+}
+
+export interface QuizState extends QuizOptions {
   currentQuestion: DatabaseRow;
   userInput: string;
   remainingQuestions: DatabaseRow[];
   allQuestions: DatabaseRow[];
   allQuestionsFiltered: DatabaseRow[];
-  category: string | undefined;
   showAnswer: boolean;
-  mode: Mode;
 }
 
 const DUMMY_QUESTION: DatabaseRow = {
@@ -75,6 +79,7 @@ export const createInitialState = (
   allQuestions: DatabaseRow[],
   mode: Mode = "translate",
   category: string | undefined = undefined,
+  maxQuestions: number | undefined = undefined,
 ): QuizState => {
   const allQuestionsFiltered = filterQuestionsForMode(
     allQuestions,
@@ -85,7 +90,7 @@ export const createInitialState = (
     }
     return question.category === category;
   });
-  const remainingQuestions = allQuestionsFiltered.slice();
+  const remainingQuestions = allQuestionsFiltered.slice(0, maxQuestions);
   shuffleInPlace(remainingQuestions);
   return {
     currentQuestion: remainingQuestions.pop() ?? DUMMY_QUESTION,
@@ -94,6 +99,7 @@ export const createInitialState = (
     allQuestions,
     allQuestionsFiltered,
     category,
+    maxQuestions,
     showAnswer: false,
     mode,
   };
@@ -104,8 +110,12 @@ export type QuizAction =
   | { type: "SHOW_ANSWER" }
   | { type: "NEXT_QUESTION" }
   | { type: "SET_QUESTION"; question: DatabaseRow }
-  | { type: "SET_MODE"; mode: Mode }
-  | { type: "SET_CATEGORY"; category: string | undefined };
+  | ({
+      type: "SET_OPTIONS";
+      // Note that there's a semantic difference here between not specifying
+      // an option at all, and setting it to undefined. The former will not
+      // modify the option, while the latter will set it to undefined.
+    } & Partial<QuizOptions>);
 
 export function quizReducer(state: QuizState, action: QuizAction): QuizState {
   switch (action.type) {
@@ -141,19 +151,18 @@ export function quizReducer(state: QuizState, action: QuizAction): QuizState {
       }
     }
 
-    case "SET_MODE":
+    case "SET_OPTIONS": {
+      const options: QuizOptions = {
+        ...state,
+        ...action,
+      };
       return createInitialState(
         state.allQuestions,
-        action.mode,
-        state.category,
+        options.mode,
+        options.category,
+        options.maxQuestions,
       );
-
-    case "SET_CATEGORY":
-      return createInitialState(
-        state.allQuestions,
-        state.mode,
-        action.category,
-      );
+    }
 
     default:
       return state;

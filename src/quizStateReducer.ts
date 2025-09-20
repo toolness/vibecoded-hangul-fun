@@ -1,5 +1,4 @@
 import type { DatabaseRow } from "./database-spec";
-import { createTestDatabaseRow } from "./test/testHelpers";
 
 export type Mode =
   | "translate"
@@ -19,15 +18,16 @@ export interface QuizState {
   mode: Mode;
 }
 
-const DUMMY_QUESTION: DatabaseRow = createTestDatabaseRow({
+const DUMMY_QUESTION: DatabaseRow = {
   id: "dummy-question-id",
+  createdTime: new Date().toISOString(),
   name: "???",
   hangul: "???",
   picture: {
     type: "emojis",
     emojis: "❓",
   },
-});
+};
 
 function filterQuestionsForMode(
   allQuestions: DatabaseRow[],

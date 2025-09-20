@@ -27,6 +27,9 @@ export interface DatabaseRow {
   /** Unique ID for this row (UUID). */
   id: string;
 
+  /** ISO date the row was created, e.g. "2025-09-17T05:26:00.000Z". */
+  createdTime: string;
+
   /** The English/romanized text. */
   name: string;
 

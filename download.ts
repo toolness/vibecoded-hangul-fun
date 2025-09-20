@@ -152,6 +152,10 @@ async function downloadDatabase(
         continue;
       }
 
+      if (!("created_time" in page)) {
+        throw new Error(`Page ${page.id} does not have a created time`);
+      }
+
       const properties = page.properties;
 
       // Validate required properties exist
@@ -324,6 +328,7 @@ async function downloadDatabase(
 
       const row: DatabaseRow = {
         id: page.id,
+        createdTime: page.created_time,
         name,
         hangul,
         isTranslation,

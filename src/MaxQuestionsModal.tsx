@@ -50,13 +50,13 @@ function MaxQuestionsModal({
 
   return (
     <Modal
-      title="Set maximum questions"
+      title="Set maximum words"
       onClose={onClose}
       previousFocus={previousFocus}
     >
       <div className="max-questions-container">
         <label htmlFor="max-questions-input" className="max-questions-label">
-          Maximum number of questions:
+          Maximum number of words:
         </label>
         <input
           id="max-questions-input"
@@ -70,7 +70,8 @@ function MaxQuestionsModal({
           autoFocus
         />
         <div className="max-questions-hint">
-          Leave empty to have unlimited questions
+          Leave empty to have unlimited words. Words are ordered in reverse
+          chronological order.
         </div>
         <div className="max-questions-buttons">
           <button

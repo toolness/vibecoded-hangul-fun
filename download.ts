@@ -6,6 +6,7 @@ import Queue from "queue";
 import { type DatabaseRow, type WordPicture } from "./src/database-spec.ts";
 import { ASSETS_DIR, DB_JSON_ASSET, getAssetFilePath } from "./src/assets.ts";
 import { parseArgs, type ParseArgsOptionsConfig } from "util";
+import loadXxhash from "xxhash-wasm";
 
 const CLI_ARGS = {
   /** Always download files, overwriting existing ones? */
@@ -451,7 +452,11 @@ const run = async () => {
         );
         continue;
       }
-      const filename = `${baseName}.${extension}`;
+      // Base the hash on the image ULR: this means if the user
+      // wants to change the image, they should change the URL so
+      // it has a different hash.
+      const hash = await makeHash(imageUrl);
+      const filename = `${baseName}-${hash}.${extension}`;
       downloadQueue.push(async () => {
         try {
           await downloadFile({ url: imageUrl, filename, overwrite });
@@ -496,6 +501,13 @@ const run = async () => {
   console.log(`Wrote ${dbPath}.`);
 };
 
+async function makeHash(value: string): Promise<string> {
+  const xxhash = await loadXxhash();
+  const hexHash = await xxhash.h32ToString(value, 0); // 0 is the seed
+  const hash = Buffer.from(hexHash, "hex").toString("base64url");
+  return hash;
+}
+
 async function maybeDownloadFirstFile(args: {
   files: File[];
   label: string;
@@ -517,8 +529,13 @@ async function maybeDownloadFirstFile(args: {
     const urlParts = url.split("/");
     const originalName = urlParts[urlParts.length - 1].split("?")[0];
     const extension = originalName.split(".").pop();
+    // Base the hash on the original filename: this means if the user
+    // wants to change the image, they should change the filename so
+    // it has a different hash.
+    const hash = await makeHash(originalName);
+
     if (extension) {
-      filename = `${baseName}.${extension}`;
+      filename = `${baseName}-${hash}.${extension}`;
     } else {
       console.warn(
         `WARNING: Unable to determine file extension for ${fullLabel}.`,

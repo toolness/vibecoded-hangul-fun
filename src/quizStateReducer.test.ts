@@ -170,11 +170,10 @@ describe("quizReducer", () => {
 
   describe("SET_OPTIONS", () => {
     it("should not set unspecified options", () => {
-      const initialState = createInitialState(
-        mockQuestions,
-        "minimalpair",
-        "mycategory",
-      );
+      const initialState = createInitialState(mockQuestions, {
+        mode: "minimalpair",
+        category: "mycategory",
+      });
       const result = quizReducer(initialState, {
         type: "SET_OPTIONS",
         mode: "typingtutor",
@@ -184,11 +183,10 @@ describe("quizReducer", () => {
     });
 
     it("should not set options explicitly set to undefined", () => {
-      const initialState = createInitialState(
-        mockQuestions,
-        "minimalpair",
-        "mycategory",
-      );
+      const initialState = createInitialState(mockQuestions, {
+        mode: "minimalpair",
+        category: "mycategory",
+      });
       const result = quizReducer(initialState, {
         type: "SET_OPTIONS",
         mode: "typingtutor",
@@ -219,7 +217,9 @@ describe("quizReducer", () => {
     });
 
     it("should set mode to translate", () => {
-      const initialState = createInitialState(mockQuestions, "typingtutor");
+      const initialState = createInitialState(mockQuestions, {
+        mode: "typingtutor",
+      });
       const result = quizReducer(initialState, {
         type: "SET_OPTIONS",
         mode: "translate",

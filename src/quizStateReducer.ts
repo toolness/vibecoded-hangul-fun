@@ -22,6 +22,12 @@ export interface QuizState extends QuizOptions {
   showAnswer: boolean;
 }
 
+const DEFAULT_OPTIONS: QuizOptions = {
+  mode: "translate",
+  category: undefined,
+  maxQuestions: undefined,
+};
+
 const DUMMY_QUESTION: DatabaseRow = {
   id: "dummy-question-id",
   createdTime: new Date().toISOString(),
@@ -77,10 +83,12 @@ function shuffleInPlace<T>(array: T[]) {
 
 export const createInitialState = (
   allQuestions: DatabaseRow[],
-  mode: Mode = "translate",
-  category: string | undefined = undefined,
-  maxQuestions: number | undefined = undefined,
+  options: Partial<QuizOptions> = {},
 ): QuizState => {
+  const { mode, category, maxQuestions } = {
+    ...DEFAULT_OPTIONS,
+    ...options,
+  };
   const allQuestionsFiltered = filterQuestionsForMode(
     allQuestions,
     mode,
@@ -143,25 +151,17 @@ export function quizReducer(state: QuizState, action: QuizAction): QuizState {
           showAnswer: false,
         };
       } else {
-        return createInitialState(
-          state.allQuestions,
-          state.mode,
-          state.category,
-        );
+        return createInitialState(state.allQuestions, {
+          ...state,
+        });
       }
     }
 
     case "SET_OPTIONS": {
-      const options: QuizOptions = {
+      return createInitialState(state.allQuestions, {
         ...state,
         ...action,
-      };
-      return createInitialState(
-        state.allQuestions,
-        options.mode,
-        options.category,
-        options.maxQuestions,
-      );
+      });
     }
 
     default:

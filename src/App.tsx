@@ -44,7 +44,11 @@ function App({
 
   // State management
   const [state, dispatch] = useReducer(quizReducer, undefined, () => {
-    return createInitialState(initialRows, initialMode, undefined);
+    return createInitialState(initialRows, {
+      mode: initialMode,
+      category: undefined,
+      maxQuestions: undefined,
+    });
   });
   const {
     currentQuestion,

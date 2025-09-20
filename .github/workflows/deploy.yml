@@ -30,6 +30,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Cache database assets
+        uses: actions/cache@v4
+        with:
+          path: src/assets/database
+          key: database-${{ github.run_id }}
+          restore-keys: |
+            database-
+
       - name: Download data
         run: npm run download
         env:

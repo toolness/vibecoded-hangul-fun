@@ -17,6 +17,7 @@ describe("HamburgerMenu", () => {
   const mockOnSelectWord = vi.fn();
   const mockOnSetMode = vi.fn();
   const mockOnSelectCategory = vi.fn();
+  const mockOnSetMaxQuestions = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -28,8 +29,10 @@ describe("HamburgerMenu", () => {
         words={mockWords}
         allQuestions={mockWords}
         currentCategory={undefined}
+        currentMaxQuestions={undefined}
         onSelectWord={mockOnSelectWord}
         onSelectCategory={mockOnSelectCategory}
+        onSetMaxQuestions={mockOnSetMaxQuestions}
         mode="translate"
         onSetMode={mockOnSetMode}
       />,
@@ -43,8 +46,10 @@ describe("HamburgerMenu", () => {
         words={mockWords}
         allQuestions={mockWords}
         currentCategory={undefined}
+        currentMaxQuestions={undefined}
         onSelectWord={mockOnSelectWord}
         onSelectCategory={mockOnSelectCategory}
+        onSetMaxQuestions={mockOnSetMaxQuestions}
         mode="translate"
         onSetMode={mockOnSetMode}
       />,
@@ -66,8 +71,10 @@ describe("HamburgerMenu", () => {
         words={mockWords}
         allQuestions={mockWords}
         currentCategory={undefined}
+        currentMaxQuestions={undefined}
         onSelectWord={mockOnSelectWord}
         onSelectCategory={mockOnSelectCategory}
+        onSetMaxQuestions={mockOnSetMaxQuestions}
         mode="translate"
         onSetMode={mockOnSetMode}
       />,
@@ -88,8 +95,10 @@ describe("HamburgerMenu", () => {
         words={mockWords}
         allQuestions={mockWords}
         currentCategory={undefined}
+        currentMaxQuestions={undefined}
         onSelectWord={mockOnSelectWord}
         onSelectCategory={mockOnSelectCategory}
+        onSetMaxQuestions={mockOnSetMaxQuestions}
         mode="typingtutor"
         onSetMode={mockOnSetMode}
       />,
@@ -109,8 +118,10 @@ describe("HamburgerMenu", () => {
         words={mockWords}
         allQuestions={mockWords}
         currentCategory={undefined}
+        currentMaxQuestions={undefined}
         onSelectWord={mockOnSelectWord}
         onSelectCategory={mockOnSelectCategory}
+        onSetMaxQuestions={mockOnSetMaxQuestions}
         mode="typingtutor"
         onSetMode={mockOnSetMode}
       />,
@@ -132,8 +143,10 @@ describe("HamburgerMenu", () => {
         words={mockWords}
         allQuestions={mockWords}
         currentCategory={undefined}
+        currentMaxQuestions={undefined}
         onSelectWord={mockOnSelectWord}
         onSelectCategory={mockOnSelectCategory}
+        onSetMaxQuestions={mockOnSetMaxQuestions}
         mode="translate"
         onSetMode={mockOnSetMode}
       />,
@@ -155,8 +168,10 @@ describe("HamburgerMenu", () => {
         words={mockWords}
         allQuestions={mockWords}
         currentCategory={undefined}
+        currentMaxQuestions={undefined}
         onSelectWord={mockOnSelectWord}
         onSelectCategory={mockOnSelectCategory}
+        onSetMaxQuestions={mockOnSetMaxQuestions}
         mode="translate"
         onSetMode={mockOnSetMode}
       />,

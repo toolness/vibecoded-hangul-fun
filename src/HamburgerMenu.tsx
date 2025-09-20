@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import "./HamburgerMenu.css";
 import WordSelectionModal from "./WordSelectionModal";
 import CategorySelectionModal from "./CategorySelectionModal";
+import MaxQuestionsModal from "./MaxQuestionsModal";
 import AboutModal from "./AboutModal";
 import type { DatabaseRow } from "./database-spec";
 import type { Mode } from "./quizStateReducer";
@@ -20,8 +21,10 @@ interface HamburgerMenuProps {
   words: DatabaseRow[];
   allQuestions: DatabaseRow[];
   currentCategory: string | undefined;
+  currentMaxQuestions: number | undefined;
   onSelectWord: (word: DatabaseRow) => void;
   onSelectCategory: (category: string | undefined) => void;
+  onSetMaxQuestions: (maxQuestions: number | undefined) => void;
   mode: Mode;
   onSetMode: (mode: Mode) => void;
 }
@@ -30,8 +33,10 @@ function HamburgerMenu({
   words,
   allQuestions,
   currentCategory,
+  currentMaxQuestions,
   onSelectWord,
   onSelectCategory,
+  onSetMaxQuestions,
   mode,
   onSetMode,
 }: HamburgerMenuProps) {
@@ -39,6 +44,7 @@ function HamburgerMenu({
   const [isWordSelectionModalOpen, setIsWordSelectionModalOpen] =
     useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [isMaxQuestionsModalOpen, setIsMaxQuestionsModalOpen] = useState(false);
   const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
   const previousFocusRef = useRef<HTMLElement | null>(null);
 
@@ -58,6 +64,12 @@ function HamburgerMenu({
     setIsCategoryModalOpen(true);
   };
 
+  const handleMaxQuestions = () => {
+    setIsMenuOpen(false);
+    previousFocusRef.current = document.activeElement as HTMLElement;
+    setIsMaxQuestionsModalOpen(true);
+  };
+
   const handleAbout = () => {
     setIsMenuOpen(false);
     previousFocusRef.current = document.activeElement as HTMLElement;
@@ -67,6 +79,11 @@ function HamburgerMenu({
   const handleCategorySelected = (category: string | undefined) => {
     onSelectCategory(category);
     setIsCategoryModalOpen(false);
+  };
+
+  const handleMaxQuestionsSet = (maxQuestions: number | undefined) => {
+    onSetMaxQuestions(maxQuestions);
+    setIsMaxQuestionsModalOpen(false);
   };
 
   const handleWordSelected = (word: DatabaseRow) => {
@@ -110,6 +127,9 @@ function HamburgerMenu({
             <button className="menu-link" onClick={handleChooseCategory}>
               Choose category&hellip;
             </button>
+            <button className="menu-link" onClick={handleMaxQuestions}>
+              Max words&hellip;
+            </button>
             <button className="menu-link" onClick={handleChooseWord}>
               Choose word&hellip;
             </button>
@@ -148,6 +168,15 @@ function HamburgerMenu({
           currentCategory={currentCategory}
           onSelectCategory={handleCategorySelected}
           onClose={() => setIsCategoryModalOpen(false)}
+          previousFocus={previousFocusRef.current}
+        />
+      )}
+
+      {isMaxQuestionsModalOpen && (
+        <MaxQuestionsModal
+          currentMaxQuestions={currentMaxQuestions}
+          onSetMaxQuestions={handleMaxQuestionsSet}
+          onClose={() => setIsMaxQuestionsModalOpen(false)}
           previousFocus={previousFocusRef.current}
         />
       )}

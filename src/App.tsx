@@ -54,6 +54,7 @@ function App({
     currentQuestion,
     mode,
     category,
+    maxQuestions,
     allQuestions,
     allQuestionsFiltered,
   } = state;
@@ -70,6 +71,10 @@ function App({
     dispatch({ type: "SET_OPTIONS", category: newCategory });
   };
 
+  const handleSetMaxQuestions = (newMaxQuestions: number | undefined) => {
+    dispatch({ type: "SET_OPTIONS", maxQuestions: newMaxQuestions });
+  };
+
   const Answerer = ANSWERERS[mode];
 
   return (
@@ -78,8 +83,10 @@ function App({
         words={allQuestionsFiltered}
         allQuestions={allQuestions}
         currentCategory={category}
+        currentMaxQuestions={maxQuestions}
         onSelectWord={handleWordSelection}
         onSelectCategory={handleSetCategory}
+        onSetMaxQuestions={handleSetMaxQuestions}
         mode={mode}
         onSetMode={handleSetMode}
       />

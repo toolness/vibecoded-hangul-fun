@@ -349,6 +349,16 @@ async function downloadDatabase(
     }
   }
 
+  // Sort entries by created time, newest first, breaking ties by English name.
+  entries.sort((a, b) => {
+    const dateA = new Date(a.row.createdTime).getTime();
+    const dateB = new Date(b.row.createdTime).getTime();
+    if (dateA === dateB) {
+      return a.row.name.localeCompare(b.row.name);
+    }
+    return dateB - dateA;
+  });
+
   return entries;
 }
 

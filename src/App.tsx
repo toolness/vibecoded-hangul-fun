@@ -108,12 +108,12 @@ function App({
         <Answerer state={state} dispatch={dispatch} vocalizer={vocalizer} />
       </div>
 
-      <div className="notion-footer">
+      <div className="footer-links">
         <a
           href={`https://notion.so/${currentQuestion.id.replace(/-/g, "")}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="notion-link"
+          className="footer-link"
         >
           <img src={NotionLogo} alt="Notion" className="notion-logo" />
         </a>
@@ -122,7 +122,7 @@ function App({
             href={currentQuestion.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="wikipedia-link"
+            className="footer-link"
           >
             <img
               src={WikipediaLogo}

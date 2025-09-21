@@ -251,14 +251,14 @@ span.question-emojis {
   margin-top: 0.75rem;
 }
 
-.notion-footer {
+.footer-links {
   display: flex;
   justify-content: center;
   padding: 1rem;
   margin-top: 2rem;
 }
 
-.notion-link {
+.footer-link {
   display: inline-block;
 }
 
@@ -274,8 +274,7 @@ span.question-emojis {
   opacity: 1;
 }
 
-.wikipedia-link {
-  display: inline-block;
+.footer-link + .footer-link {
   margin-left: 1rem;
 }
 

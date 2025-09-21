@@ -250,3 +250,26 @@ span.question-emojis {
 .example-sentence.with-notes {
   margin-top: 0.75rem;
 }
+
+.notion-footer {
+  display: flex;
+  justify-content: center;
+  padding: 1rem;
+  margin-top: 2rem;
+}
+
+.notion-link {
+  display: inline-block;
+}
+
+.notion-logo {
+  width: 1.5em;
+  height: auto;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: opacity 0.2s;
+}
+
+.notion-logo:hover {
+  opacity: 1;
+}

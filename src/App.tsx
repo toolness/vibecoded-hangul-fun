@@ -24,6 +24,7 @@ import { Pronouncer } from "./Pronouncer";
 import { getAssetUrl } from "./assets";
 import { WordPicture } from "./WordPicture";
 import NotesSection from "./NotesSection";
+import NotionLogo from "./assets/Notion_Logo.svg";
 
 const MODE_PROMPT: Record<Mode, string> = {
   typingtutor: "Type this Hangul:",
@@ -104,6 +105,17 @@ function App({
         </div>
 
         <Answerer state={state} dispatch={dispatch} vocalizer={vocalizer} />
+      </div>
+
+      <div className="notion-footer">
+        <a
+          href={`https://notion.so/${currentQuestion.id.replace(/-/g, "")}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="notion-link"
+        >
+          <img src={NotionLogo} alt="Notion" className="notion-logo" />
+        </a>
       </div>
     </main>
   );

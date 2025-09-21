@@ -273,3 +273,20 @@ span.question-emojis {
 .notion-logo:hover {
   opacity: 1;
 }
+
+.wikipedia-link {
+  display: inline-block;
+  margin-left: 1rem;
+}
+
+.wikipedia-logo {
+  width: 1.5em;
+  height: auto;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: opacity 0.2s;
+}
+
+.wikipedia-logo:hover {
+  opacity: 1;
+}

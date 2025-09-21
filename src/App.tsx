@@ -25,6 +25,7 @@ import { getAssetUrl } from "./assets";
 import { WordPicture } from "./WordPicture";
 import NotesSection from "./NotesSection";
 import NotionLogo from "./assets/Notion_Logo.svg";
+import WikipediaLogo from "./assets/Wikipedia_Logo.svg";
 
 const MODE_PROMPT: Record<Mode, string> = {
   typingtutor: "Type this Hangul:",
@@ -116,6 +117,20 @@ function App({
         >
           <img src={NotionLogo} alt="Notion" className="notion-logo" />
         </a>
+        {currentQuestion.url && currentQuestion.url.includes("wikipedia") && (
+          <a
+            href={currentQuestion.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="wikipedia-link"
+          >
+            <img
+              src={WikipediaLogo}
+              alt="Wikipedia"
+              className="wikipedia-logo"
+            />
+          </a>
+        )}
       </div>
     </main>
   );

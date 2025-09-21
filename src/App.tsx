@@ -110,7 +110,8 @@ function App({
 
       <div className="footer-links">
         <a
-          href={`https://notion.so/${currentQuestion.id.replace(/-/g, "")}`}
+          // This needs to be www.notion.so in order to open the Notion app on Android.
+          href={`https://www.notion.so/${currentQuestion.id.replace(/-/g, "")}`}
           target="_blank"
           rel="noopener noreferrer"
           className="footer-link"

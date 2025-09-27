@@ -186,10 +186,14 @@ export function quizReducer(state: QuizState, action: QuizAction): QuizState {
     }
 
     case "SET_OPTIONS": {
-      return createInitialState(state.allQuestions, {
-        ...state,
-        ...action,
-      });
+      return createInitialState(
+        state.allQuestions,
+        {
+          ...state,
+          ...action,
+        },
+        state.currentQuestion.id,
+      );
     }
 
     default:

@@ -4,6 +4,7 @@ import WordSelectionModal from "./WordSelectionModal";
 import CategorySelectionModal from "./CategorySelectionModal";
 import MaxQuestionsModal from "./MaxQuestionsModal";
 import AboutModal from "./AboutModal";
+import Toast from "./Toast";
 import type { DatabaseRow } from "./database-spec";
 import type { Mode } from "./quizStateReducer";
 
@@ -48,6 +49,7 @@ function HamburgerMenu({
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [isMaxQuestionsModalOpen, setIsMaxQuestionsModalOpen] = useState(false);
   const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
+  const [showToast, setShowToast] = useState(false);
   const previousFocusRef = useRef<HTMLElement | null>(null);
 
   const toggleMenu = () => {
@@ -86,6 +88,7 @@ function HamburgerMenu({
     const shareUrl = `${location.origin}${location.pathname}?iid=${currentQuestionId}&imode=${mode}`;
     try {
       await navigator.clipboard.writeText(shareUrl);
+      setShowToast(true);
     } catch (err) {
       console.error("Failed to copy URL:", err);
     }
@@ -140,7 +143,7 @@ function HamburgerMenu({
               About
             </button>
             <button className="menu-link" onClick={handleShare}>
-              Share
+              Copy permalink
             </button>
             <button className="menu-link" onClick={handleChooseCategory}>
               Choose category&hellip;
@@ -203,6 +206,13 @@ function HamburgerMenu({
         <AboutModal
           onClose={() => setIsAboutModalOpen(false)}
           previousFocus={previousFocusRef.current}
+        />
+      )}
+
+      {showToast && (
+        <Toast
+          message="URL copied to clipboard."
+          onClose={() => setShowToast(false)}
         />
       )}
     </div>

@@ -97,6 +97,7 @@ function App({
         onSetMaxQuestions={handleSetMaxQuestions}
         mode={mode}
         onSetMode={handleSetMode}
+        currentQuestionId={currentQuestion.id}
       />
 
       <div className="quiz-container" data-testid="quiz-container">

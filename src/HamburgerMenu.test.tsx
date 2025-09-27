@@ -35,6 +35,7 @@ describe("HamburgerMenu", () => {
         onSetMaxQuestions={mockOnSetMaxQuestions}
         mode="translate"
         onSetMode={mockOnSetMode}
+        currentQuestionId="test-id-1"
       />,
     );
     expect(screen.getByLabelText("Toggle menu")).toBeInTheDocument();
@@ -52,6 +53,7 @@ describe("HamburgerMenu", () => {
         onSetMaxQuestions={mockOnSetMaxQuestions}
         mode="translate"
         onSetMode={mockOnSetMode}
+        currentQuestionId="test-id-1"
       />,
     );
 
@@ -77,6 +79,7 @@ describe("HamburgerMenu", () => {
         onSetMaxQuestions={mockOnSetMaxQuestions}
         mode="translate"
         onSetMode={mockOnSetMode}
+        currentQuestionId="test-id-1"
       />,
     );
 
@@ -101,6 +104,7 @@ describe("HamburgerMenu", () => {
         onSetMaxQuestions={mockOnSetMaxQuestions}
         mode="typingtutor"
         onSetMode={mockOnSetMode}
+        currentQuestionId="test-id-1"
       />,
     );
 
@@ -124,6 +128,7 @@ describe("HamburgerMenu", () => {
         onSetMaxQuestions={mockOnSetMaxQuestions}
         mode="typingtutor"
         onSetMode={mockOnSetMode}
+        currentQuestionId="test-id-1"
       />,
     );
 
@@ -149,6 +154,7 @@ describe("HamburgerMenu", () => {
         onSetMaxQuestions={mockOnSetMaxQuestions}
         mode="translate"
         onSetMode={mockOnSetMode}
+        currentQuestionId="test-id-1"
       />,
     );
 
@@ -174,6 +180,7 @@ describe("HamburgerMenu", () => {
         onSetMaxQuestions={mockOnSetMaxQuestions}
         mode="translate"
         onSetMode={mockOnSetMode}
+        currentQuestionId="test-id-1"
       />,
     );
 

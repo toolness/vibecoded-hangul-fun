@@ -27,6 +27,7 @@ interface HamburgerMenuProps {
   onSetMaxQuestions: (maxQuestions: number | undefined) => void;
   mode: Mode;
   onSetMode: (mode: Mode) => void;
+  currentQuestionId: string | undefined;
 }
 
 function HamburgerMenu({
@@ -39,6 +40,7 @@ function HamburgerMenu({
   onSetMaxQuestions,
   mode,
   onSetMode,
+  currentQuestionId,
 }: HamburgerMenuProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isWordSelectionModalOpen, setIsWordSelectionModalOpen] =
@@ -74,6 +76,19 @@ function HamburgerMenu({
     setIsMenuOpen(false);
     previousFocusRef.current = document.activeElement as HTMLElement;
     setIsAboutModalOpen(true);
+  };
+
+  const handleShare = async () => {
+    setIsMenuOpen(false);
+    if (!currentQuestionId) {
+      return;
+    }
+    const shareUrl = `${location.origin}${location.pathname}?iid=${currentQuestionId}&imode=${mode}`;
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+    } catch (err) {
+      console.error("Failed to copy URL:", err);
+    }
   };
 
   const handleCategorySelected = (category: string | undefined) => {
@@ -123,6 +138,9 @@ function HamburgerMenu({
           <div className="menu-content">
             <button className="menu-link" onClick={handleAbout}>
               About
+            </button>
+            <button className="menu-link" onClick={handleShare}>
+              Share
             </button>
             <button className="menu-link" onClick={handleChooseCategory}>
               Choose category&hellip;

@@ -7,6 +7,20 @@ export type Mode =
   | "minimalpair"
   | "reversepicture";
 
+const MODES: Record<Mode, true> = {
+  translate: true,
+  typingtutor: true,
+  picture: true,
+  minimalpair: true,
+  reversepicture: true,
+};
+
+export function validateMode(mode: string): Mode | undefined {
+  if (mode in MODES) {
+    return mode as Mode;
+  }
+}
+
 export interface QuizOptions {
   category: string | undefined;
   maxQuestions: number | undefined;
@@ -84,6 +98,7 @@ function shuffleInPlace<T>(array: T[]) {
 export const createInitialState = (
   allQuestions: DatabaseRow[],
   options: Partial<QuizOptions> = {},
+  initialQuestionId: string | undefined = undefined,
 ): QuizState => {
   const { mode, category, maxQuestions } = {
     ...DEFAULT_OPTIONS,
@@ -100,8 +115,21 @@ export const createInitialState = (
   });
   const remainingQuestions = allQuestionsFiltered.slice(0, maxQuestions);
   shuffleInPlace(remainingQuestions);
+
+  const getInitialQuestion = () => {
+    if (initialQuestionId) {
+      const index = remainingQuestions.findIndex(
+        (q) => q.id === initialQuestionId,
+      );
+      if (index !== -1) {
+        return remainingQuestions.splice(index, 1)[0];
+      }
+    }
+    return remainingQuestions.pop() ?? DUMMY_QUESTION;
+  };
+
   return {
-    currentQuestion: remainingQuestions.pop() ?? DUMMY_QUESTION,
+    currentQuestion: getInitialQuestion(),
     userInput: "",
     remainingQuestions,
     allQuestions,

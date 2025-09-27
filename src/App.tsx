@@ -38,19 +38,25 @@ const MODE_PROMPT: Record<Mode, string> = {
 function App({
   initialMode,
   initialRows,
+  initialQuestionId,
 }: {
   initialMode: Mode;
   initialRows: DatabaseRow[];
+  initialQuestionId?: string;
 }) {
   const vocalizer = useKoreanVocalizer();
 
   // State management
   const [state, dispatch] = useReducer(quizReducer, undefined, () => {
-    return createInitialState(initialRows, {
-      mode: initialMode,
-      category: undefined,
-      maxQuestions: undefined,
-    });
+    return createInitialState(
+      initialRows,
+      {
+        mode: initialMode,
+        category: undefined,
+        maxQuestions: undefined,
+      },
+      initialQuestionId,
+    );
   });
   const {
     currentQuestion,

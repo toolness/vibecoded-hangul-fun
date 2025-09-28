@@ -431,8 +431,8 @@ const run = async () => {
     // Queue image download from files
     if (imageFiles.length > 0) {
       downloadQueue.push(async () => {
-        const filename = await maybeDownloadFirstFile({
-          files: imageFiles,
+        const filename = await maybeDownloadFile({
+          file: imageFiles[0],
           label: "image",
           baseName,
           overwrite,
@@ -449,8 +449,8 @@ const run = async () => {
     // Queue audio download
     if (audioFiles.length > 0) {
       downloadQueue.push(async () => {
-        row.audio = await maybeDownloadFirstFile({
-          files: audioFiles,
+        row.audio = await maybeDownloadFile({
+          file: audioFiles[0],
           label: "audio",
           baseName,
           overwrite,
@@ -480,18 +480,14 @@ async function makeHash(value: string): Promise<string> {
   return hash;
 }
 
-async function maybeDownloadFirstFile(args: {
-  files: File[];
+async function maybeDownloadFile(args: {
+  file: File;
   label: string;
   baseName: string;
   overwrite: boolean;
 }): Promise<string | undefined> {
-  const { files, label, baseName, overwrite } = args;
-  if (files.length === 0) {
-    return;
-  }
+  const { file, label, baseName, overwrite } = args;
   const fullLabel = `${label} "${baseName}"`;
-  const file = files[0];
   let url = "";
   let filename = "";
 

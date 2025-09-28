@@ -459,7 +459,7 @@ const run = async () => {
         );
         continue;
       }
-      // Base the hash on the image ULR: this means if the user
+      // Base the hash on the image URL: this means if the user
       // wants to change the image, they should change the URL so
       // it has a different hash.
       const hash = await makeHash(imageUrl);

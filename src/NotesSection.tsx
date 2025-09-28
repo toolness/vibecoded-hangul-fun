@@ -9,17 +9,17 @@ export default function NotesSection({
   currentQuestion,
   show,
 }: NotesSectionProps) {
-  const hasNotes = currentQuestion.notes;
-  const hasExampleSentence = currentQuestion.exampleSentence;
+  const { exampleSentence, notes } = currentQuestion;
 
-  if (!show || (!hasNotes && !hasExampleSentence)) return null;
+  if (!show || (!notes && !exampleSentence)) return null;
 
   return (
     <div className="notes-section">
-      {hasNotes && <div>{currentQuestion.notes}</div>}
-      {hasExampleSentence && (
-        <div className={`example-sentence${hasNotes ? " with-notes" : ""}`}>
-          {currentQuestion.exampleSentence}
+      {notes && <div>{currentQuestion.notes}</div>}
+      {exampleSentence && (
+        <div className={`example-sentence${notes ? " with-notes" : ""}`}>
+          {exampleSentence.text}
+          {/* TODO: Embed sentence audio if available. */}
         </div>
       )}
     </div>

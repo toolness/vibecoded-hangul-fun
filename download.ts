@@ -3,7 +3,11 @@ import { writeFileSync, existsSync, mkdirSync } from "fs";
 import { join } from "path";
 import dotenv from "dotenv";
 import Queue from "queue";
-import { type DatabaseRow, type WordPicture } from "./src/database-spec.ts";
+import {
+  type DatabaseRow,
+  type ExampleSentence,
+  type WordPicture,
+} from "./src/database-spec.ts";
 import { ASSETS_DIR, DB_JSON_ASSET, getAssetFilePath } from "./src/assets.ts";
 import { parseArgs, type ParseArgsOptionsConfig } from "util";
 import loadXxhash from "xxhash-wasm";
@@ -52,8 +56,8 @@ type DatabaseEntry = {
 async function downloadSentences(
   notion: Client,
   wordsDataSource: GetDataSourceResponse,
-): Promise<Map<string, string>> {
-  const sentences = new Map<string, string>();
+): Promise<Map<string, ExampleSentence>> {
+  const sentences = new Map<string, ExampleSentence>();
   const sentencesColumnSchema = wordsDataSource.properties["Sentences"];
   if (sentencesColumnSchema?.type !== "relation") {
     throw new Error(
@@ -117,7 +121,10 @@ async function downloadSentences(
       }
 
       if (sentenceText) {
-        sentences.set(page.id, sentenceText);
+        // TODO: Extract sentence audio.
+        sentences.set(page.id, {
+          text: sentenceText,
+        });
       }
     }
   }
@@ -305,7 +312,7 @@ async function downloadDatabase(
       }
 
       // Extract Sentences relation and map the first one to exampleSentence
-      let exampleSentence: string | undefined;
+      let exampleSentence: ExampleSentence | undefined;
       if (
         properties["Sentences"] &&
         properties["Sentences"].type === "relation" &&

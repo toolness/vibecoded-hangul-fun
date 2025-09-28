@@ -80,5 +80,18 @@ export interface DatabaseRow {
   /**
    * An example sentence (or lyric from a song) that uses the word.
    */
-  exampleSentence?: string;
+  exampleSentence?: ExampleSentence;
+}
+
+export interface ExampleSentence {
+  /**
+   * The actual sentence.
+   */
+  text: string;
+
+  /**
+   * Optional local audio filename (relative to assets/database).
+   * It may be an empty string.
+   */
+  audio?: string;
 }

@@ -156,7 +156,9 @@ const run = async () => {
         tags: row.category ? [row.category] : [],
         hangul: row.hangul,
         picture: destPicture,
-        notes: [row.notes ?? "", row.exampleSentence ?? ""].filter(Boolean),
+        notes: [row.notes ?? "", row.exampleSentence?.text ?? ""].filter(
+          Boolean,
+        ),
         audio: destAudio,
       });
     }

@@ -132,15 +132,11 @@ async function downloadSentences(
   return sentences;
 }
 
-async function downloadDatabase(
+async function downloadWords(
   notion: Client,
-  id: string,
+  dataSourceId: string,
+  sentences: Map<string, ExampleSentence>,
 ): Promise<DatabaseEntry[]> {
-  const dataSource = await notion.dataSources.retrieve({
-    data_source_id: id,
-  });
-  const sentences = await downloadSentences(notion, dataSource);
-
   const entries: DatabaseEntry[] = [];
   let hasMore = true;
   let nextCursor: string | undefined = undefined;
@@ -148,7 +144,7 @@ async function downloadDatabase(
   while (hasMore) {
     console.log(`Retrieving words...`);
     const response = await notion.dataSources.query({
-      data_source_id: id,
+      data_source_id: dataSourceId,
       start_cursor: nextCursor,
     });
 
@@ -406,7 +402,11 @@ const run = async () => {
 
   console.log("Downloading database...");
 
-  const entries = await downloadDatabase(notion, NOTION_DS_ID);
+  const dataSource = await notion.dataSources.retrieve({
+    data_source_id: NOTION_DS_ID,
+  });
+  const sentences = await downloadSentences(notion, dataSource);
+  const entries = await downloadWords(notion, NOTION_DS_ID, sentences);
 
   // Ensure assets directory exists
   if (!existsSync(ASSETS_DIR)) {

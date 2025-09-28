@@ -1,13 +1,18 @@
 import type { DatabaseRow } from "./database-spec";
+import { Pronouncer } from "./Pronouncer";
+import { getAssetUrl } from "./assets";
+import type { Vocalizer } from "./speech";
 
 interface NotesSectionProps {
   currentQuestion: DatabaseRow;
   show: boolean;
+  vocalizer?: Vocalizer | null;
 }
 
 export default function NotesSection({
   currentQuestion,
   show,
+  vocalizer,
 }: NotesSectionProps) {
   const { exampleSentence, notes } = currentQuestion;
 
@@ -19,7 +24,13 @@ export default function NotesSection({
       {exampleSentence && (
         <div className={`example-sentence${notes ? " with-notes" : ""}`}>
           {exampleSentence.text}
-          {/* TODO: Embed sentence audio if available. */}
+          <Pronouncer
+            audioUrl={
+              exampleSentence.audio && getAssetUrl(exampleSentence.audio).href
+            }
+            hangul={exampleSentence.text}
+            vocalizer={vocalizer || null}
+          />
         </div>
       )}
     </div>

@@ -158,7 +158,7 @@ type AnswererProps = {
   vocalizer?: ReturnType<typeof useKoreanVocalizer>;
 };
 
-function ReversePictureAnswerer({ state, dispatch }: AnswererProps) {
+function ReversePictureAnswerer({ state, dispatch, vocalizer }: AnswererProps) {
   const [showAnswer, setShowAnswer] = useState(false);
 
   const { currentQuestion } = state;
@@ -202,7 +202,11 @@ function ReversePictureAnswerer({ state, dispatch }: AnswererProps) {
         )}
       </div>
 
-      <NotesSection currentQuestion={currentQuestion} show={showAnswer} />
+      <NotesSection
+        currentQuestion={currentQuestion}
+        show={showAnswer}
+        vocalizer={vocalizer}
+      />
     </>
   );
 }
@@ -310,13 +314,17 @@ function MinimalPairAnswerer({ state, dispatch, vocalizer }: AnswererProps) {
         )}
       </div>
 
-      <NotesSection currentQuestion={currentQuestion} show={hasAnswered} />
+      <NotesSection
+        currentQuestion={currentQuestion}
+        show={hasAnswered}
+        vocalizer={vocalizer}
+      />
     </>
   );
 }
 
 function TypingModeAnswerer(props: AnswererProps) {
-  const { state, dispatch } = props;
+  const { state, dispatch, vocalizer } = props;
   const [showConfetti, setShowConfetti] = useState(false);
   const nextButtonRef = useRef<HTMLButtonElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -455,6 +463,7 @@ function TypingModeAnswerer(props: AnswererProps) {
       <NotesSection
         currentQuestion={currentQuestion}
         show={showAnswer || isCompletelyCorrect}
+        vocalizer={vocalizer}
       />
     </>
   );

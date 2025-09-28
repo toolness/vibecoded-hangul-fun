@@ -57,10 +57,12 @@ type NotionDownloader = (
   download: NotionFileDownload,
 ) => Promise<string | undefined>;
 
-async function downloadSentences(
-  notion: Client,
-  wordsDataSource: GetDataSourceResponse,
-): Promise<Map<string, ExampleSentence>> {
+async function downloadSentences(args: {
+  notion: Client;
+  wordsDataSource: GetDataSourceResponse;
+  downloader: NotionDownloader;
+}): Promise<Map<string, ExampleSentence>> {
+  const { notion, wordsDataSource, downloader } = args;
   const sentences = new Map<string, ExampleSentence>();
   const sentencesColumnSchema = wordsDataSource.properties["Sentences"];
   if (sentencesColumnSchema?.type !== "relation") {
@@ -92,6 +94,7 @@ async function downloadSentences(
       // Extract the name/title of each sentence
       const properties = page.properties;
       let sentenceText = "";
+      let audio: string | undefined;
 
       // Try to extract from Name property (could be title or rich_text)
       if (properties.Name) {
@@ -124,12 +127,28 @@ async function downloadSentences(
         }
       }
 
-      if (sentenceText) {
-        // TODO: Extract sentence audio.
-        sentences.set(page.id, {
-          text: sentenceText,
+      if (!sentenceText) {
+        continue;
+      }
+
+      // Extract Audio files (optional)
+      if (
+        properties.Audio &&
+        properties.Audio.type === "files" &&
+        Array.isArray(properties.Audio.files) &&
+        properties.Audio.files.length > 0
+      ) {
+        audio = await downloader({
+          file: properties.Audio.files[0],
+          label: "sentence audio",
+          baseName: `sentence-${page.id}`,
         });
       }
+
+      sentences.set(page.id, {
+        text: sentenceText,
+        audio,
+      });
     }
   }
 
@@ -436,10 +455,9 @@ const run = async () => {
   // Create a queue with concurrency of 5
   const downloadQueue = new Queue({ concurrency: 5, autostart: false });
 
-  const dataSource = await notion.dataSources.retrieve({
+  const wordsDataSource = await notion.dataSources.retrieve({
     data_source_id: NOTION_DS_ID,
   });
-  const sentences = await downloadSentences(notion, dataSource);
   const downloader: NotionDownloader = async (download) => {
     const downloadInfo = await getDownloadInfo(download);
     if (downloadInfo) {
@@ -452,6 +470,11 @@ const run = async () => {
       return downloadInfo.filename;
     }
   };
+  const sentences = await downloadSentences({
+    notion,
+    wordsDataSource,
+    downloader,
+  });
   const rows = await downloadWords({
     notion,
     dataSourceId: NOTION_DS_ID,
@@ -486,8 +509,15 @@ type DownloadInfo = {
 };
 
 type NotionFileDownload = {
+  /** The Notion file to download. */
   file: File;
+  /** Debugging label for the file. */
   label: string;
+  /**
+   * Base filename for the file when downloaded, without any
+   * extension. This will
+   * not be the final filename (a hash will be appended to it).
+   */
   baseName: string;
 };
 

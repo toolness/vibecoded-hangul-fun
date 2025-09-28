@@ -48,11 +48,14 @@ type File = {
   external?: { url: string };
 };
 
-type DatabaseEntry = {
-  row: DatabaseRow;
-  imageFiles: File[];
-  audioFiles: File[];
-};
+/**
+ * Given info about a Notion file to download, enqueues it
+ * for download and returns the resolved filename that it
+ * will be downloaded to.
+ */
+type NotionDownloader = (
+  download: NotionFileDownload,
+) => Promise<string | undefined>;
 
 async function downloadSentences(
   notion: Client,
@@ -133,12 +136,14 @@ async function downloadSentences(
   return sentences;
 }
 
-async function downloadWords(
-  notion: Client,
-  dataSourceId: string,
-  sentences: Map<string, ExampleSentence>,
-): Promise<DatabaseEntry[]> {
-  const entries: DatabaseEntry[] = [];
+async function downloadWords(args: {
+  notion: Client;
+  dataSourceId: string;
+  sentences: Map<string, ExampleSentence>;
+  downloader: NotionDownloader;
+}): Promise<DatabaseRow[]> {
+  const { notion, dataSourceId, sentences, downloader } = args;
+  const entries: DatabaseRow[] = [];
   let hasMore = true;
   let nextCursor: string | undefined = undefined;
 
@@ -176,12 +181,11 @@ async function downloadWords(
       let name = "";
       let hangul = "";
       let url = "";
-      let emojis = "";
+      let picture: WordPicture | undefined;
+      let audio: string | undefined;
       let category = "";
       let notes = "";
       let isTranslation = false;
-      const imageFiles: File[] = [];
-      let audioFiles: File[] = [];
 
       // Extract Name
       if (
@@ -197,6 +201,9 @@ async function downloadWords(
       ) {
         name = properties.Name.rich_text[0].plain_text;
       }
+
+      // Use sanitized name based on row name
+      const baseFilename = name.replace(/[^a-zA-Z0-9]/g, "_").toLowerCase();
 
       // Extract Hangul
       if (
@@ -223,6 +230,7 @@ async function downloadWords(
       }
 
       // Extract Image URL (optional)
+      const imageFiles: File[] = [];
       if (
         properties["Image URL"] &&
         properties["Image URL"].type === "url" &&
@@ -236,15 +244,44 @@ async function downloadWords(
           },
         });
       }
+      if (
+        properties.Image &&
+        properties.Image.type === "files" &&
+        Array.isArray(properties.Image.files)
+      ) {
+        imageFiles.push(...properties.Image.files);
+      }
+      if (imageFiles.length > 0) {
+        const filename = await downloader({
+          file: imageFiles[0],
+          label: "image",
+          baseName: baseFilename,
+        });
+        if (filename) {
+          picture = {
+            type: "local-image",
+            filename,
+          };
+        }
+      }
 
       // Extract Emojis (optional)
       if (
+        !picture &&
         properties.Emojis &&
         properties.Emojis.type === "rich_text" &&
         Array.isArray(properties.Emojis.rich_text) &&
         properties.Emojis.rich_text.length > 0
       ) {
-        emojis = properties.Emojis.rich_text.map((t) => t.plain_text).join("");
+        const emojis = properties.Emojis.rich_text
+          .map((t) => t.plain_text)
+          .join("");
+        if (emojis) {
+          picture = {
+            type: "emojis",
+            emojis,
+          };
+        }
       }
 
       // Extract Category (optional)
@@ -285,22 +322,18 @@ async function downloadWords(
         continue;
       }
 
-      // Extract Image files (optional)
-      if (
-        properties.Image &&
-        properties.Image.type === "files" &&
-        Array.isArray(properties.Image.files)
-      ) {
-        imageFiles.push(...properties.Image.files);
-      }
-
       // Extract Audio files (optional)
       if (
         properties.Audio &&
         properties.Audio.type === "files" &&
-        Array.isArray(properties.Audio.files)
+        Array.isArray(properties.Audio.files) &&
+        properties.Audio.files.length > 0
       ) {
-        audioFiles = properties.Audio.files;
+        audio = await downloader({
+          file: properties.Audio.files[0],
+          label: "audio",
+          baseName: baseFilename,
+        });
       }
 
       // Extract Minimal pairs (optional)
@@ -327,15 +360,6 @@ async function downloadWords(
         exampleSentence = sentences.get(firstSentenceId);
       }
 
-      // Convert to WordPicture format - prioritize emojis
-      let picture: WordPicture | undefined;
-      if (emojis) {
-        picture = {
-          type: "emojis",
-          emojis,
-        };
-      }
-
       const row: DatabaseRow = {
         id: page.id,
         createdTime: page.created_time,
@@ -344,26 +368,23 @@ async function downloadWords(
         isTranslation,
         url,
         picture,
+        audio,
         category,
         notes,
         minimalPairs: minimalPairs.length > 0 ? minimalPairs : undefined,
         exampleSentence,
       };
 
-      entries.push({
-        row,
-        imageFiles,
-        audioFiles,
-      });
+      entries.push(row);
     }
   }
 
   // Sort entries by created time, newest first, breaking ties by English name.
   entries.sort((a, b) => {
-    const dateA = new Date(a.row.createdTime).getTime();
-    const dateB = new Date(b.row.createdTime).getTime();
+    const dateA = new Date(a.createdTime).getTime();
+    const dateB = new Date(b.createdTime).getTime();
     if (dateA === dateB) {
-      return a.row.name.localeCompare(b.row.name);
+      return a.name.localeCompare(b.name);
     }
     return dateB - dateA;
   });
@@ -371,11 +392,11 @@ async function downloadWords(
   return entries;
 }
 
-async function downloadFile(args: {
-  url: string;
-  filename: string;
-  overwrite: boolean;
-}): Promise<void> {
+async function downloadFile(
+  args: DownloadInfo & {
+    overwrite: boolean;
+  },
+): Promise<void> {
   const { url, filename, overwrite } = args;
   const filepath = join(ASSETS_DIR, filename);
   if (existsSync(filepath) && !overwrite) {
@@ -407,12 +428,6 @@ const run = async () => {
 
   console.log("Downloading database...");
 
-  const dataSource = await notion.dataSources.retrieve({
-    data_source_id: NOTION_DS_ID,
-  });
-  const sentences = await downloadSentences(notion, dataSource);
-  const entries = await downloadWords(notion, NOTION_DS_ID, sentences);
-
   // Ensure assets directory exists
   if (!existsSync(ASSETS_DIR)) {
     mkdirSync(ASSETS_DIR, { recursive: true });
@@ -421,45 +436,28 @@ const run = async () => {
   // Create a queue with concurrency of 5
   const downloadQueue = new Queue({ concurrency: 5, autostart: false });
 
-  // Prepare rows and queue all downloads
-  const rows: DatabaseRow[] = [];
-
-  for (const { row, imageFiles, audioFiles } of entries) {
-    // Use sanitized name based on row name
-    const baseName = row.name.replace(/[^a-zA-Z0-9]/g, "_").toLowerCase();
-
-    // Queue image download from files
-    if (imageFiles.length > 0) {
-      downloadQueue.push(async () => {
-        const filename = await maybeDownloadFile({
-          file: imageFiles[0],
-          label: "image",
-          baseName,
+  const dataSource = await notion.dataSources.retrieve({
+    data_source_id: NOTION_DS_ID,
+  });
+  const sentences = await downloadSentences(notion, dataSource);
+  const downloader: NotionDownloader = async (download) => {
+    const downloadInfo = await getDownloadInfo(download);
+    if (downloadInfo) {
+      downloadQueue.push(async () =>
+        downloadFile({
+          ...downloadInfo,
           overwrite,
-        });
-        if (filename) {
-          row.picture = {
-            type: "local-image",
-            filename,
-          };
-        }
-      });
+        }),
+      );
+      return downloadInfo.filename;
     }
-
-    // Queue audio download
-    if (audioFiles.length > 0) {
-      downloadQueue.push(async () => {
-        row.audio = await maybeDownloadFile({
-          file: audioFiles[0],
-          label: "audio",
-          baseName,
-          overwrite,
-        });
-      });
-    }
-
-    rows.push(row);
-  }
+  };
+  const rows = await downloadWords({
+    notion,
+    dataSourceId: NOTION_DS_ID,
+    sentences,
+    downloader,
+  });
 
   // Start processing and wait for all downloads to complete
   if (downloadQueue.length > 0) {
@@ -487,11 +485,15 @@ type DownloadInfo = {
   filename: string;
 };
 
-async function getDownloadInfo(args: {
+type NotionFileDownload = {
   file: File;
   label: string;
   baseName: string;
-}): Promise<DownloadInfo | undefined> {
+};
+
+async function getDownloadInfo(
+  args: NotionFileDownload,
+): Promise<DownloadInfo | undefined> {
   const { file, label, baseName } = args;
   const fullLabel = `${label} "${baseName}"`;
   let url = "";
@@ -550,26 +552,6 @@ async function getDownloadInfo(args: {
       url,
       filename,
     };
-  }
-}
-
-async function maybeDownloadFile(args: {
-  file: File;
-  label: string;
-  baseName: string;
-  overwrite: boolean;
-}): Promise<string | undefined> {
-  const { file, label, baseName, overwrite } = args;
-  const downloadInfo = await getDownloadInfo({ file, label, baseName });
-  if (downloadInfo) {
-    const { filename, url } = downloadInfo;
-    try {
-      await downloadFile({ url, filename, overwrite });
-      return filename;
-    } catch (error) {
-      console.error(`Failed to download file ${url} to ${filename}:`, error);
-      throw error;
-    }
   }
 }
 

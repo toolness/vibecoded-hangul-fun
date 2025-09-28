@@ -38,6 +38,8 @@ if (!NOTION_DS_ID) {
  * Ideally we'd reuse this from the Notion SDK
  * but its auto-generated types make this
  * virtually impossible.
+ *
+ * This is documented here: https://developers.notion.com/reference/file-object
  */
 type File = {
   type?: string;
@@ -50,7 +52,6 @@ type DatabaseEntry = {
   row: DatabaseRow;
   imageFiles: File[];
   audioFiles: File[];
-  imageUrl?: string;
 };
 
 async function downloadSentences(
@@ -175,12 +176,11 @@ async function downloadWords(
       let name = "";
       let hangul = "";
       let url = "";
-      let imageUrl = "";
       let emojis = "";
       let category = "";
       let notes = "";
       let isTranslation = false;
-      let imageFiles: File[] = [];
+      const imageFiles: File[] = [];
       let audioFiles: File[] = [];
 
       // Extract Name
@@ -226,9 +226,15 @@ async function downloadWords(
       if (
         properties["Image URL"] &&
         properties["Image URL"].type === "url" &&
-        typeof properties["Image URL"].url === "string"
+        typeof properties["Image URL"].url === "string" &&
+        properties["Image URL"].url
       ) {
-        imageUrl = properties["Image URL"].url;
+        imageFiles.push({
+          type: "external",
+          external: {
+            url: properties["Image URL"].url,
+          },
+        });
       }
 
       // Extract Emojis (optional)
@@ -285,7 +291,7 @@ async function downloadWords(
         properties.Image.type === "files" &&
         Array.isArray(properties.Image.files)
       ) {
-        imageFiles = properties.Image.files;
+        imageFiles.push(...properties.Image.files);
       }
 
       // Extract Audio files (optional)
@@ -348,7 +354,6 @@ async function downloadWords(
         row,
         imageFiles,
         audioFiles,
-        imageUrl,
       });
     }
   }
@@ -419,7 +424,7 @@ const run = async () => {
   // Prepare rows and queue all downloads
   const rows: DatabaseRow[] = [];
 
-  for (const { row, imageFiles, audioFiles, imageUrl } of entries) {
+  for (const { row, imageFiles, audioFiles } of entries) {
     // Use sanitized name based on row name
     const baseName = row.name.replace(/[^a-zA-Z0-9]/g, "_").toLowerCase();
 
@@ -437,46 +442,6 @@ const run = async () => {
             type: "local-image",
             filename,
           };
-        }
-      });
-    }
-    // Queue remote image URL download if no file but has imageUrl
-    else if (imageUrl && !row.picture) {
-      // Determine file extension from URL or default to jpg
-      let extension: string | undefined;
-      const urlParts = imageUrl.split(".");
-      const lastPart = urlParts[urlParts.length - 1].split("?")[0];
-      if (
-        ["jpg", "jpeg", "png", "gif", "webp", "svg"].includes(
-          lastPart.toLowerCase(),
-        )
-      ) {
-        extension = lastPart.toLowerCase();
-      }
-      if (!extension) {
-        console.log(
-          `WARNING: Unable to determine file extension for image URL, skipping download: ${imageUrl}`,
-        );
-        continue;
-      }
-      // Base the hash on the image URL: this means if the user
-      // wants to change the image, they should change the URL so
-      // it has a different hash.
-      const hash = await makeHash(imageUrl);
-      const filename = `${baseName}-${hash}.${extension}`;
-      downloadQueue.push(async () => {
-        try {
-          await downloadFile({ url: imageUrl, filename, overwrite });
-          row.picture = {
-            type: "local-image",
-            filename,
-          };
-        } catch (error) {
-          console.error(
-            `Failed to download remote image for "${row.name}":`,
-            error,
-          );
-          throw error;
         }
       });
     }
@@ -549,8 +514,32 @@ async function maybeDownloadFirstFile(args: {
       );
     }
   } else if (file.type === "external" && file.external) {
-    console.warn(
-      `WARNING: Unsupported image file type "external" for ${fullLabel}.`,
+    url = file.external.url;
+    // Determine file extension from URL
+    let extension: string | undefined;
+    const urlParts = url.split(".");
+    const lastPart = urlParts[urlParts.length - 1].split("?")[0];
+    if (
+      ["jpg", "jpeg", "png", "gif", "webp", "svg", "mp3", "ogg"].includes(
+        lastPart.toLowerCase(),
+      )
+    ) {
+      extension = lastPart.toLowerCase();
+    }
+    if (extension) {
+      // Base the hash on the URL: this means if the user
+      // wants to change the image, they should change the URL so
+      // it has a different hash.
+      const hash = await makeHash(url);
+      filename = `${baseName}-${hash}.${extension}`;
+    } else {
+      console.log(
+        `WARNING: Unable to determine file extension for URL, skipping download: ${url}`,
+      );
+    }
+  } else {
+    console.log(
+      `WARNING: Unsupported file type, skipping download: ${file.type}`,
     );
   }
 

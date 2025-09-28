@@ -480,13 +480,19 @@ async function makeHash(value: string): Promise<string> {
   return hash;
 }
 
-async function maybeDownloadFile(args: {
+type DownloadInfo = {
+  /** Remote URL to retrieve. */
+  url: string;
+  /** Local filename to save to (not including path). */
+  filename: string;
+};
+
+async function getDownloadInfo(args: {
   file: File;
   label: string;
   baseName: string;
-  overwrite: boolean;
-}): Promise<string | undefined> {
-  const { file, label, baseName, overwrite } = args;
+}): Promise<DownloadInfo | undefined> {
+  const { file, label, baseName } = args;
   const fullLabel = `${label} "${baseName}"`;
   let url = "";
   let filename = "";
@@ -540,11 +546,28 @@ async function maybeDownloadFile(args: {
   }
 
   if (url && filename) {
+    return {
+      url,
+      filename,
+    };
+  }
+}
+
+async function maybeDownloadFile(args: {
+  file: File;
+  label: string;
+  baseName: string;
+  overwrite: boolean;
+}): Promise<string | undefined> {
+  const { file, label, baseName, overwrite } = args;
+  const downloadInfo = await getDownloadInfo({ file, label, baseName });
+  if (downloadInfo) {
+    const { filename, url } = downloadInfo;
     try {
       await downloadFile({ url, filename, overwrite });
       return filename;
     } catch (error) {
-      console.error(`Failed to download file for ${fullLabel}:`, error);
+      console.error(`Failed to download file ${url} to ${filename}:`, error);
       throw error;
     }
   }

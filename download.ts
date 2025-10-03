@@ -6,6 +6,7 @@ import Queue from "queue";
 import {
   type DatabaseRow,
   type ExampleSentence,
+  type SentenceMarkupItem,
   type WordPicture,
 } from "./src/database-spec.ts";
 import { ASSETS_DIR, DB_JSON_ASSET, getAssetFilePath } from "./src/assets.ts";
@@ -145,14 +146,46 @@ async function downloadSentences(args: {
         });
       }
 
+      const markupItems: SentenceMarkupItem[] = [];
+
+      if (
+        properties.Markup &&
+        properties.Markup.type === "rich_text" &&
+        properties.Markup.rich_text.length > 0
+      ) {
+        properties.Markup.rich_text.forEach((item) => {
+          if (item.type === "text") {
+            const idMatch = item.href?.match(/^\/([0-9a-f]+)$/);
+            let id: string | undefined;
+            if (idMatch) {
+              id = addDashesToUuid(idMatch[1]);
+            }
+            markupItems.push({ text: item.plain_text, wordId: id });
+          }
+        });
+      }
+
       sentences.set(page.id, {
         text: sentenceText,
         audio,
+        markupItems: markupItems.length > 0 ? markupItems : undefined,
       });
     }
   }
 
   return sentences;
+}
+
+/**
+ * Converts a UUID without dashes to one with dashes.
+ *
+ * Example: "2770b5d6dd6180a086ccc862ccaa2f13" => "2770b5d6-dd61-80a0-86cc-cc862ccaa2f13"
+ */
+function addDashesToUuid(uuid: string): string {
+  return uuid.replace(
+    /^([0-9a-f]{8})([0-9a-f]{4})([0-9a-f]{4})([0-9a-f]{4})([0-9a-f]{12})$/,
+    "$1-$2-$3-$4-$5",
+  );
 }
 
 async function downloadWords(args: {

@@ -94,4 +94,22 @@ export interface ExampleSentence {
    * It may be an empty string.
    */
   audio?: string;
+
+  /**
+   * Sentence markup items.
+   */
+  markupItems?: SentenceMarkupItem[];
+}
+
+export interface SentenceMarkupItem {
+  /**
+   * Text of the sentence item.
+   */
+  text: string;
+
+  /**
+   * ID of the word this represents. Points to a
+   * {@link DatabaseRow.id}.
+   */
+  wordId?: string;
 }

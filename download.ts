@@ -6,7 +6,7 @@ import {
   type QueryDataSourceResponse,
 } from "@notionhq/client";
 import { writeFileSync, existsSync, mkdirSync, readFileSync } from "fs";
-import path, { dirname, join } from "path";
+import path, { join } from "path";
 import dotenv from "dotenv";
 import Queue from "queue";
 import {

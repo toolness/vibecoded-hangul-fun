@@ -28,3 +28,4 @@ src/assets/database/*
 download.js
 
 .claude
+.cache

@@ -1,6 +1,12 @@
-import { Client, type GetDataSourceResponse } from "@notionhq/client";
-import { writeFileSync, existsSync, mkdirSync } from "fs";
-import { join } from "path";
+import {
+  Client,
+  type GetDataSourceParameters,
+  type GetDataSourceResponse,
+  type QueryDataSourceParameters,
+  type QueryDataSourceResponse,
+} from "@notionhq/client";
+import { writeFileSync, existsSync, mkdirSync, readFileSync } from "fs";
+import path, { dirname, join } from "path";
 import dotenv from "dotenv";
 import Queue from "queue";
 import {
@@ -12,10 +18,20 @@ import {
 import { ASSETS_DIR, DB_JSON_ASSET, getAssetFilePath } from "./src/assets.ts";
 import { parseArgs, type ParseArgsOptionsConfig } from "util";
 import loadXxhash from "xxhash-wasm";
+import { createHash } from "crypto";
 
 const CLI_ARGS = {
   /** Always download files, overwriting existing ones? */
   overwrite: {
+    type: "boolean",
+    default: false,
+  },
+  /**
+   * Whether to use cached API responses. Useful when iterating
+   * on this tool and you don't want to have to wait for the network
+   * all the time.
+   */
+  offline: {
     type: "boolean",
     default: false,
   },
@@ -34,6 +50,8 @@ const NOTION_DS_ID = process.env.NOTION_DS_ID;
 if (!NOTION_DS_ID) {
   throw new Error("Please define NOTION_DS_ID!");
 }
+
+const CACHE_DIR = ".cache";
 
 /**
  * Ideally we'd reuse this from the Notion SDK
@@ -58,8 +76,64 @@ type NotionDownloader = (
   download: NotionFileDownload,
 ) => Promise<string | undefined>;
 
-async function downloadSentences(args: {
+class CachingNotionClient {
   notion: Client;
+  isOffline: boolean;
+
+  constructor(args: { notion: Client; isOffline: boolean }) {
+    this.notion = args.notion;
+    this.isOffline = args.isOffline;
+  }
+
+  private async cachedRetrieve<T>(
+    key: unknown,
+    download: () => Promise<T>,
+  ): Promise<T> {
+    const cacheKey = JSON.stringify(key);
+    const sha256 = createHash("sha256").update(cacheKey).digest("hex");
+    const cachedFile = path.join(CACHE_DIR, `${sha256}.json`);
+    if (this.isOffline) {
+      if (existsSync(cachedFile)) {
+        return JSON.parse(readFileSync(cachedFile, { encoding: "utf-8" }));
+      }
+      console.log(
+        `Cached response for ${cacheKey} does not exist, fetching from network.`,
+      );
+    }
+    const response = await download();
+    writeFileSync(cachedFile, JSON.stringify(response, null, 2), {
+      encoding: "utf-8",
+    });
+    return response;
+  }
+
+  async queryDataSource(
+    args: QueryDataSourceParameters,
+  ): Promise<QueryDataSourceResponse> {
+    return this.cachedRetrieve(
+      {
+        type: "queryDataSource",
+        args,
+      },
+      () => this.notion.dataSources.query(args),
+    );
+  }
+
+  async retrieveDataSource(
+    args: GetDataSourceParameters,
+  ): Promise<GetDataSourceResponse> {
+    return this.cachedRetrieve(
+      {
+        type: "retrieveDataSource",
+        args,
+      },
+      () => this.notion.dataSources.retrieve(args),
+    );
+  }
+}
+
+async function downloadSentences(args: {
+  notion: CachingNotionClient;
   wordsDataSource: GetDataSourceResponse;
   downloader: NotionDownloader;
 }): Promise<Map<string, ExampleSentence>> {
@@ -79,7 +153,7 @@ async function downloadSentences(args: {
 
   while (hasMore) {
     console.log(`Retrieving sentences...`);
-    const response = await notion.dataSources.query({
+    const response = await notion.queryDataSource({
       data_source_id: sentencesDataSourceId,
       start_cursor: nextCursor,
     });
@@ -189,7 +263,7 @@ function addDashesToUuid(uuid: string): string {
 }
 
 async function downloadWords(args: {
-  notion: Client;
+  notion: CachingNotionClient;
   dataSourceId: string;
   sentences: Map<string, ExampleSentence>;
   downloader: NotionDownloader;
@@ -201,7 +275,7 @@ async function downloadWords(args: {
 
   while (hasMore) {
     console.log(`Retrieving words...`);
-    const response = await notion.dataSources.query({
+    const response = await notion.queryDataSource({
       data_source_id: dataSourceId,
       start_cursor: nextCursor,
     });
@@ -476,19 +550,24 @@ const run = async () => {
   const {
     values: { overwrite },
   } = args;
-  const notion = new Client({ auth: NOTION_API_KEY });
+  const notion = new CachingNotionClient({
+    notion: new Client({ auth: NOTION_API_KEY }),
+    isOffline: args.values.offline,
+  });
 
   console.log("Downloading database...");
 
-  // Ensure assets directory exists
-  if (!existsSync(ASSETS_DIR)) {
-    mkdirSync(ASSETS_DIR, { recursive: true });
+  for (const dirName of [CACHE_DIR, ASSETS_DIR]) {
+    if (!existsSync(dirName)) {
+      console.log(`Creating directory "${dirName}".`);
+      mkdirSync(dirName, { recursive: true });
+    }
   }
 
   // Create a queue with concurrency of 5
   const downloadQueue = new Queue({ concurrency: 5, autostart: false });
 
-  const wordsDataSource = await notion.dataSources.retrieve({
+  const wordsDataSource = await notion.retrieveDataSource({
     data_source_id: NOTION_DS_ID,
   });
   const downloader: NotionDownloader = async (download) => {

@@ -137,9 +137,8 @@ async function downloadSentences(args: {
   notion: CachingNotionClient;
   wordsDataSource: GetDataSourceResponse;
   downloader: NotionDownloader;
-}): Promise<Map<string, SentenceDatabaseRow>> {
+}): Promise<SentenceDatabaseRow[]> {
   const { notion, wordsDataSource, downloader } = args;
-  const sentences = new Map<string, SentenceDatabaseRow>();
   const sentencesColumnSchema = wordsDataSource.properties["Sentences"];
   if (sentencesColumnSchema?.type !== "relation") {
     throw new Error(
@@ -151,6 +150,7 @@ async function downloadSentences(args: {
   // Download all sentences from the related table
   let hasMore = true;
   let nextCursor: string | undefined = undefined;
+  const sentences: SentenceDatabaseRow[] = [];
 
   while (hasMore) {
     console.log(`Retrieving sentences...`);
@@ -240,7 +240,8 @@ async function downloadSentences(args: {
         });
       }
 
-      sentences.set(page.id, {
+      sentences.push({
+        id: page.id,
         text: sentenceText,
         audio,
         markupItems: markupItems.length > 0 ? markupItems : undefined,
@@ -266,7 +267,7 @@ function addDashesToUuid(uuid: string): string {
 async function downloadWords(args: {
   notion: CachingNotionClient;
   dataSourceId: string;
-  sentences: Map<string, SentenceDatabaseRow>;
+  sentences: Map<string, BaseSentence>;
   downloader: NotionDownloader;
 }): Promise<WordDatabaseRow[]> {
   const { notion, dataSourceId, sentences, downloader } = args;
@@ -484,13 +485,7 @@ async function downloadWords(args: {
         // Get the first sentence ID from the relation
         const firstSentenceId = properties["Sentences"].relation[0].id;
         // Look it up in our sentences map
-        const sentence = sentences.get(firstSentenceId);
-        if (sentence) {
-          exampleSentence = {
-            text: sentence.text,
-            audio: sentence.audio,
-          };
-        }
+        exampleSentence = sentences.get(firstSentenceId);
       }
 
       const row: WordDatabaseRow = {
@@ -589,15 +584,18 @@ const run = async () => {
       return downloadInfo.filename;
     }
   };
-  const sentences = await downloadSentences({
+
+  const sentenceRows = await downloadSentences({
     notion,
     wordsDataSource,
     downloader,
   });
-  const rows = await downloadWords({
+  const wordRows = await downloadWords({
     notion,
     dataSourceId: NOTION_DS_ID,
-    sentences,
+    sentences: new Map<string, BaseSentence>(
+      sentenceRows.map(({ id, text, audio }) => [id, { text, audio }]),
+    ),
     downloader,
   });
 
@@ -608,7 +606,7 @@ const run = async () => {
 
   const dbPath = getAssetFilePath(DB_JSON_ASSET);
 
-  writeFileSync(dbPath, JSON.stringify(rows, null, 2));
+  writeFileSync(dbPath, JSON.stringify(wordRows, null, 2));
 
   console.log(`Wrote ${dbPath}.`);
 };

@@ -97,6 +97,9 @@ export interface BaseSentence {
 }
 
 export interface SentenceDatabaseRow extends BaseSentence {
+  /** Unique UUID for the sentence. */
+  id: string;
+
   /**
    * Sentence markup items.
    */

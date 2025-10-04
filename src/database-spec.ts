@@ -1,3 +1,8 @@
+export interface Database {
+  words: WordDatabaseRow[];
+  sentences: SentenceDatabaseRow[];
+}
+
 /**
  * Defines the picture that represents a word.
  */

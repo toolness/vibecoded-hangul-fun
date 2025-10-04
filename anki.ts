@@ -1,4 +1,4 @@
-import { type WordDatabaseRow } from "./src/database-spec.ts";
+import { type Database } from "./src/database-spec.ts";
 import { DB_JSON_ASSET, getAssetFilePath } from "./src/assets.ts";
 
 import { copyFileSync, existsSync, readFileSync, writeFileSync } from "fs";
@@ -133,7 +133,7 @@ const run = async () => {
   const csvRows: CsvRow[] = [];
 
   let rowCount = 0;
-  for (const row of dbRows) {
+  for (const row of dbRows.words) {
     if (row.audio && row.picture?.type === "local-image" && row.hangul) {
       if (rowCount >= MAX_ROWS) {
         break;
@@ -224,9 +224,9 @@ function convertToTag(value: string) {
   return value.replace(/ /g, "::");
 }
 
-function loadDatabase(): WordDatabaseRow[] {
+function loadDatabase(): Database {
   const data = readFileSync(getAssetFilePath(DB_JSON_ASSET), "utf-8");
-  return JSON.parse(data) as WordDatabaseRow[];
+  return JSON.parse(data) as Database;
 }
 
 function getDesktopDir(): string {

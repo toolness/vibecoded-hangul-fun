@@ -15,6 +15,7 @@ import {
   type WordPicture,
   type SentenceDatabaseRow,
   type BaseSentence,
+  type Database,
 } from "./src/database-spec.ts";
 import { ASSETS_DIR, DB_JSON_ASSET, getAssetFilePath } from "./src/assets.ts";
 import { parseArgs, type ParseArgsOptionsConfig } from "util";
@@ -585,16 +586,16 @@ const run = async () => {
     }
   };
 
-  const sentenceRows = await downloadSentences({
+  const sentences = await downloadSentences({
     notion,
     wordsDataSource,
     downloader,
   });
-  const wordRows = await downloadWords({
+  const words = await downloadWords({
     notion,
     dataSourceId: NOTION_DS_ID,
     sentences: new Map<string, BaseSentence>(
-      sentenceRows.map(({ id, text, audio }) => [id, { text, audio }]),
+      sentences.map(({ id, text, audio }) => [id, { text, audio }]),
     ),
     downloader,
   });
@@ -605,8 +606,8 @@ const run = async () => {
   }
 
   const dbPath = getAssetFilePath(DB_JSON_ASSET);
-
-  writeFileSync(dbPath, JSON.stringify(wordRows, null, 2));
+  const database: Database = { words, sentences };
+  writeFileSync(dbPath, JSON.stringify(database, null, 2));
 
   console.log(`Wrote ${dbPath}.`);
 };

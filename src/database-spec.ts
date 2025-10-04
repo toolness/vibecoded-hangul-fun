@@ -23,7 +23,7 @@ export type WordPicture =
  * Represents a row describing an English/romanized word,
  * its Hangul equivalent, and any additional metadata.
  */
-export interface DatabaseRow {
+export interface WordDatabaseRow {
   /** Unique ID for this row (UUID). */
   id: string;
 
@@ -80,10 +80,10 @@ export interface DatabaseRow {
   /**
    * An example sentence (or lyric from a song) that uses the word.
    */
-  exampleSentence?: ExampleSentence;
+  exampleSentence?: BaseSentence;
 }
 
-export interface ExampleSentence {
+export interface BaseSentence {
   /**
    * The actual sentence.
    */
@@ -94,7 +94,9 @@ export interface ExampleSentence {
    * It may be an empty string.
    */
   audio?: string;
+}
 
+export interface SentenceDatabaseRow extends BaseSentence {
   /**
    * Sentence markup items.
    */
@@ -109,7 +111,7 @@ export interface SentenceMarkupItem {
 
   /**
    * ID of the word this represents. Points to a
-   * {@link DatabaseRow.id}.
+   * {@link WordDatabaseRow.id}.
    */
   wordId?: string;
 }

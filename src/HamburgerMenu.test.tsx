@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import HamburgerMenu from "./HamburgerMenu";
-import type { DatabaseRow } from "./database-spec";
+import type { WordDatabaseRow } from "./database-spec";
 import { createTestDatabaseRow } from "./test/testHelpers";
 
 describe("HamburgerMenu", () => {
-  const mockWords: DatabaseRow[] = [
+  const mockWords: WordDatabaseRow[] = [
     createTestDatabaseRow({ id: "test-id-1", name: "hello", hangul: "안녕" }),
     createTestDatabaseRow({
       id: "test-id-2",

@@ -10,10 +10,11 @@ import path, { join } from "path";
 import dotenv from "dotenv";
 import Queue from "queue";
 import {
-  type DatabaseRow,
-  type ExampleSentence,
+  type WordDatabaseRow,
   type SentenceMarkupItem,
   type WordPicture,
+  type SentenceDatabaseRow,
+  type BaseSentence,
 } from "./src/database-spec.ts";
 import { ASSETS_DIR, DB_JSON_ASSET, getAssetFilePath } from "./src/assets.ts";
 import { parseArgs, type ParseArgsOptionsConfig } from "util";
@@ -136,9 +137,9 @@ async function downloadSentences(args: {
   notion: CachingNotionClient;
   wordsDataSource: GetDataSourceResponse;
   downloader: NotionDownloader;
-}): Promise<Map<string, ExampleSentence>> {
+}): Promise<Map<string, SentenceDatabaseRow>> {
   const { notion, wordsDataSource, downloader } = args;
-  const sentences = new Map<string, ExampleSentence>();
+  const sentences = new Map<string, SentenceDatabaseRow>();
   const sentencesColumnSchema = wordsDataSource.properties["Sentences"];
   if (sentencesColumnSchema?.type !== "relation") {
     throw new Error(
@@ -265,11 +266,11 @@ function addDashesToUuid(uuid: string): string {
 async function downloadWords(args: {
   notion: CachingNotionClient;
   dataSourceId: string;
-  sentences: Map<string, ExampleSentence>;
+  sentences: Map<string, SentenceDatabaseRow>;
   downloader: NotionDownloader;
-}): Promise<DatabaseRow[]> {
+}): Promise<WordDatabaseRow[]> {
   const { notion, dataSourceId, sentences, downloader } = args;
-  const entries: DatabaseRow[] = [];
+  const entries: WordDatabaseRow[] = [];
   let hasMore = true;
   let nextCursor: string | undefined = undefined;
 
@@ -473,7 +474,7 @@ async function downloadWords(args: {
       }
 
       // Extract Sentences relation and map the first one to exampleSentence
-      let exampleSentence: ExampleSentence | undefined;
+      let exampleSentence: BaseSentence | undefined;
       if (
         properties["Sentences"] &&
         properties["Sentences"].type === "relation" &&
@@ -483,10 +484,16 @@ async function downloadWords(args: {
         // Get the first sentence ID from the relation
         const firstSentenceId = properties["Sentences"].relation[0].id;
         // Look it up in our sentences map
-        exampleSentence = sentences.get(firstSentenceId);
+        const sentence = sentences.get(firstSentenceId);
+        if (sentence) {
+          exampleSentence = {
+            text: sentence.text,
+            audio: sentence.audio,
+          };
+        }
       }
 
-      const row: DatabaseRow = {
+      const row: WordDatabaseRow = {
         id: page.id,
         createdTime: page.created_time,
         name,

@@ -5,7 +5,7 @@ import CategorySelectionModal from "./CategorySelectionModal";
 import MaxQuestionsModal from "./MaxQuestionsModal";
 import AboutModal from "./AboutModal";
 import Toast from "./Toast";
-import type { DatabaseRow } from "./database-spec";
+import type { WordDatabaseRow } from "./database-spec";
 import type { Mode } from "./quizStateReducer";
 
 const MODE_NAMES: { [k in Mode]: string } = {
@@ -19,11 +19,11 @@ const MODE_NAMES: { [k in Mode]: string } = {
 const MODE_ORDER: Mode[] = Object.keys(MODE_NAMES) as Mode[];
 
 interface HamburgerMenuProps {
-  words: DatabaseRow[];
-  allQuestions: DatabaseRow[];
+  words: WordDatabaseRow[];
+  allQuestions: WordDatabaseRow[];
   currentCategory: string | undefined;
   currentMaxQuestions: number | undefined;
-  onSelectWord: (word: DatabaseRow) => void;
+  onSelectWord: (word: WordDatabaseRow) => void;
   onSelectCategory: (category: string | undefined) => void;
   onSetMaxQuestions: (maxQuestions: number | undefined) => void;
   mode: Mode;
@@ -104,7 +104,7 @@ function HamburgerMenu({
     setIsMaxQuestionsModalOpen(false);
   };
 
-  const handleWordSelected = (word: DatabaseRow) => {
+  const handleWordSelected = (word: WordDatabaseRow) => {
     onSelectWord(word);
     setIsWordSelectionModalOpen(false);
   };

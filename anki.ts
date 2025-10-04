@@ -1,4 +1,4 @@
-import { type DatabaseRow } from "./src/database-spec.ts";
+import { type WordDatabaseRow } from "./src/database-spec.ts";
 import { DB_JSON_ASSET, getAssetFilePath } from "./src/assets.ts";
 
 import { copyFileSync, existsSync, readFileSync, writeFileSync } from "fs";
@@ -224,9 +224,9 @@ function convertToTag(value: string) {
   return value.replace(/ /g, "::");
 }
 
-function loadDatabase(): DatabaseRow[] {
+function loadDatabase(): WordDatabaseRow[] {
   const data = readFileSync(getAssetFilePath(DB_JSON_ASSET), "utf-8");
-  return JSON.parse(data) as DatabaseRow[];
+  return JSON.parse(data) as WordDatabaseRow[];
 }
 
 function getDesktopDir(): string {

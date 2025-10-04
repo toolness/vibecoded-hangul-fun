@@ -1,10 +1,10 @@
-import type { DatabaseRow } from "../database-spec";
+import type { WordDatabaseRow } from "../database-spec";
 
 export function createTestDatabaseRow(
-  row: Omit<DatabaseRow, "createdTime"> & {
+  row: Omit<WordDatabaseRow, "createdTime"> & {
     createdTime?: string;
   },
-): DatabaseRow {
+): WordDatabaseRow {
   return {
     ...row,
     createdTime: row.createdTime ?? "2025-09-17T05:26:00.000Z",

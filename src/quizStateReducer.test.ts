@@ -1,17 +1,17 @@
 import { describe, it, expect } from "vitest";
 import { quizReducer, createInitialState } from "./quizStateReducer";
 import type { QuizState } from "./quizStateReducer";
-import type { DatabaseRow } from "./database-spec";
+import type { WordDatabaseRow } from "./database-spec";
 import { createTestDatabaseRow } from "./test/testHelpers";
 
 describe("quizReducer", () => {
-  const mockQuestion: DatabaseRow = createTestDatabaseRow({
+  const mockQuestion: WordDatabaseRow = createTestDatabaseRow({
     id: "test-id-1",
     name: "hello",
     hangul: "안녕",
   });
 
-  const mockQuestion2: DatabaseRow = createTestDatabaseRow({
+  const mockQuestion2: WordDatabaseRow = createTestDatabaseRow({
     id: "test-id-2",
     name: "goodbye",
     hangul: "안녕히",
@@ -109,17 +109,17 @@ describe("quizReducer", () => {
 
   describe("NEXT_QUESTION", () => {
     it("should move to next question from remaining questions", () => {
-      const q1: DatabaseRow = createTestDatabaseRow({
+      const q1: WordDatabaseRow = createTestDatabaseRow({
         id: "test-id-q1",
         name: "q1",
         hangul: "하나",
       });
-      const q2: DatabaseRow = createTestDatabaseRow({
+      const q2: WordDatabaseRow = createTestDatabaseRow({
         id: "test-id-q2",
         name: "q2",
         hangul: "둘",
       });
-      const q3: DatabaseRow = createTestDatabaseRow({
+      const q3: WordDatabaseRow = createTestDatabaseRow({
         id: "test-id-q3",
         name: "q3",
         hangul: "셋",

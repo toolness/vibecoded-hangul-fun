@@ -1,10 +1,10 @@
-import type { DatabaseRow } from "./database-spec";
+import type { WordDatabaseRow } from "./database-spec";
 import { Pronouncer } from "./Pronouncer";
 import { getAssetUrl } from "./assets";
 import type { Vocalizer } from "./speech";
 
 interface NotesSectionProps {
-  currentQuestion: DatabaseRow;
+  currentQuestion: WordDatabaseRow;
   show: boolean;
   vocalizer?: Vocalizer | null;
 }

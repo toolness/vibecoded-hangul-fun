@@ -107,6 +107,8 @@ export interface SentenceDatabaseRow extends BaseSentence {
 
   /**
    * Sentence markup items.
+   *
+   * If defined, the array will never be empty.
    */
   markupItems?: SentenceMarkupItem[];
 }

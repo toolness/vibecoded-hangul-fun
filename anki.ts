@@ -1,4 +1,4 @@
-import { type Database } from "./src/database-spec.ts";
+import { type Database, type WordDatabaseRow } from "./src/database-spec.ts";
 import { DB_JSON_ASSET, getAssetFilePath } from "./src/assets.ts";
 
 import { copyFileSync, existsSync, readFileSync, writeFileSync } from "fs";
@@ -13,10 +13,21 @@ const CLI_ARGS = {
     type: "string",
     default: `User 1`,
   },
-  /** The Anki note type to populate the relevant CSV column with. */
-  noteType: {
+  /**
+   * The Anki note type to populate the relevant CSV column with, for
+   * words.
+   */
+  wordNoteType: {
     type: "string",
     default: `Atul's Picture Words`,
+  },
+  /**
+   * The Anki note type to populate the relevant CSV column with, for
+   * sentences.
+   */
+  sentenceNoteType: {
+    type: "string",
+    default: `Atul's Cloze Sentences`,
   },
   /** The Anki deck to add the notes to. */
   deckName: {
@@ -41,15 +52,15 @@ const CLI_ARGS = {
 } satisfies ParseArgsOptionsConfig;
 
 /**
- * This is the data that will be written into each
- * CSV row to be imported into Anki. Each row will be
+ * This is the first few columns of data that will be written
+ * into each CSV row to be imported into Anki. Each row will be
  * mapped to an Anki note.
  *
  * For more details, see:
  *
  * https://docs.ankiweb.net/importing/text-files.html
  */
-type CsvRow = {
+type BaseCsvRow = {
   /**
    * This is actually the database row ID from our DB, _not_
    * the Anki GUID. According to Anki's documentation, the Anki GUID
@@ -77,6 +88,39 @@ type CsvRow = {
    * `::`.
    */
   tags: string[];
+};
+
+/**
+ * Additional columns for CSV rows that represent sentences.
+ */
+type SentenceCsvRow = BaseCsvRow & {
+  type: "sentence";
+
+  /**
+   * The Hangul for the sentence, with cloze tags:
+   *
+   * https://docs.ankiweb.net/editing.html#cloze-deletion
+   */
+  hangul: string;
+
+  /**
+   * The picture filenames for the sentence, relative to Anki's collection media
+   * dir.
+   */
+  pictures: string[];
+
+  /**
+   * The pronunciation audio (mp3) filename for the sentence, relative to Anki's
+   * collection media dir.
+   */
+  audio: string;
+};
+
+/**
+ * Additional columns for CSV rows that represent words.
+ */
+type WordCsvRow = BaseCsvRow & {
+  type: "word";
 
   /**
    * The Hangul for the word.
@@ -101,6 +145,8 @@ type CsvRow = {
   audio: string;
 };
 
+type CsvRow = WordCsvRow | SentenceCsvRow;
+
 const PREAMBLE = `\
 #separator:comma
 #html:true
@@ -109,13 +155,25 @@ const PREAMBLE = `\
 #tags column:4`;
 
 /**
- * Max CSV rows to output. Set to `Infinity` for no limit.
+ * Max word CSV rows to output. Set to `Infinity` for no limit.
  */
-const MAX_ROWS = Infinity;
+const MAX_WORD_ROWS = Infinity;
+
+/**
+ * Max sentence CSV rows to output. Set to `Infinity` for no limit.
+ */
+const MAX_SENTENCE_ROWS = Infinity;
 
 const run = async () => {
   const {
-    values: { ankiUser, mediaPrefix, noteType, deckName, outfile },
+    values: {
+      ankiUser,
+      mediaPrefix,
+      wordNoteType,
+      sentenceNoteType,
+      deckName,
+      outfile,
+    },
   } = parseArgs({
     options: CLI_ARGS,
   });
@@ -132,26 +190,30 @@ const run = async () => {
   const dbRows = loadDatabase();
   const csvRows: CsvRow[] = [];
 
-  let rowCount = 0;
+  const copyAsset = (filename: string): string => {
+    const destAsset = `${mediaPrefix}${filename}`;
+    copyFileIfChangedSync(
+      getAssetFilePath(filename),
+      path.join(collectionMediaDir, destAsset),
+    );
+    return destAsset;
+  };
+
+  const wordIdMap: Map<string, WordDatabaseRow> = new Map();
+  let wordRowCount = 0;
   for (const row of dbRows.words) {
+    wordIdMap.set(row.id, row);
     if (row.audio && row.picture?.type === "local-image" && row.hangul) {
-      if (rowCount >= MAX_ROWS) {
+      if (wordRowCount >= MAX_WORD_ROWS) {
         break;
       }
-      const destPicture = `${mediaPrefix}${row.picture.filename}`;
-      copyFileIfChangedSync(
-        getAssetFilePath(row.picture.filename),
-        path.join(collectionMediaDir, destPicture),
-      );
-      const destAudio = `${mediaPrefix}${row.audio}`;
-      copyFileIfChangedSync(
-        getAssetFilePath(row.audio),
-        path.join(collectionMediaDir, destAudio),
-      );
-      rowCount += 1;
+      const destPicture = copyAsset(row.picture.filename);
+      const destAudio = copyAsset(row.audio);
+      wordRowCount += 1;
       csvRows.push({
+        type: "word",
         id: row.id,
-        noteType,
+        noteType: wordNoteType,
         deckName,
         tags: row.category ? [row.category] : [],
         hangul: row.hangul,
@@ -164,17 +226,70 @@ const run = async () => {
     }
   }
 
+  let sentenceRowCount = 0;
+  for (const row of dbRows.sentences) {
+    if (!row.markupItems || !row.audio) {
+      continue;
+    }
+    if (sentenceRowCount >= MAX_SENTENCE_ROWS) {
+      break;
+    }
+    sentenceRowCount += 1;
+    let clozeId = 0;
+    const pictures: string[] = [];
+    const clozeParts: string[] = row.markupItems.map((item) => {
+      if (item.wordId) {
+        clozeId += 1;
+        const word = wordIdMap.get(item.wordId);
+        if (word && word.picture && word.picture.type === "local-image") {
+          pictures.push(copyAsset(word.picture.filename));
+        }
+        return `{{c${clozeId}::${item.text}}}`;
+      } else {
+        return item.text;
+      }
+    });
+    const destAudio = copyAsset(row.audio);
+    csvRows.push({
+      type: "sentence",
+      id: row.id,
+      noteType: sentenceNoteType,
+      deckName,
+      tags: [],
+      hangul: clozeParts.join(""),
+      pictures,
+      audio: destAudio,
+    });
+  }
+
   const encodedRows = stringify(
-    csvRows.map((row) => [
-      row.id,
-      escapeHTML(row.noteType),
-      escapeHTML(row.deckName),
-      row.tags.map((tag) => escapeHTML(convertToTag(tag))).join(" "),
-      escapeHTML(row.hangul),
-      `<img src="${escapeHTML(row.picture)}">`,
-      row.notes.map(escapeHTML).join("<br>"),
-      `[sound:${escapeHTML(row.audio)}]`,
-    ]),
+    csvRows.map((row) => {
+      const baseRow = [
+        row.id,
+        escapeHTML(row.noteType),
+        escapeHTML(row.deckName),
+        row.tags.map((tag) => escapeHTML(convertToTag(tag))).join(" "),
+      ];
+      switch (row.type) {
+        case "word":
+          return [
+            ...baseRow,
+            escapeHTML(row.hangul),
+            `<img src="${escapeHTML(row.picture)}">`,
+            row.notes.map(escapeHTML).join("<br>"),
+            `[sound:${escapeHTML(row.audio)}]`,
+          ];
+        case "sentence":
+          return [
+            ...baseRow,
+            escapeHTML(row.hangul),
+            row.pictures
+              .map((picture) => `<img src="${escapeHTML(picture)}">`)
+              .join(""),
+            `[sound:${escapeHTML(row.audio)}]`,
+          ];
+      }
+    }) satisfies string[][],
   );
 
   const csv = [PREAMBLE, encodedRows].join("\n");

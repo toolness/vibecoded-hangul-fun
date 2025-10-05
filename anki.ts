@@ -239,11 +239,13 @@ const run = async () => {
     const pictures: string[] = [];
     const clozeParts: string[] = row.markupItems.map((item) => {
       if (item.wordId) {
-        clozeId += 1;
         const word = wordIdMap.get(item.wordId);
         if (word && word.picture && word.picture.type === "local-image") {
           pictures.push(copyAsset(word.picture.filename));
         }
+      }
+      if (item.wordId && !item.doNotQuiz) {
+        clozeId += 1;
         return `{{c${clozeId}::${item.text}}}`;
       } else {
         return item.text;

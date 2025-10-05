@@ -236,7 +236,11 @@ async function downloadSentences(args: {
             if (idMatch) {
               id = addDashesToUuid(idMatch[1]);
             }
-            markupItems.push({ text: item.plain_text, wordId: id });
+            let doNotQuiz: true | undefined;
+            if (item.annotations.color === "gray_background") {
+              doNotQuiz = true;
+            }
+            markupItems.push({ text: item.plain_text, wordId: id, doNotQuiz });
           }
         });
       }

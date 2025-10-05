@@ -98,8 +98,14 @@ The markup field can contain the following:
 - **Hyperlinks to words** - These should link a word in the
   sentence to its corresponding Word entry. We can use this to create
   Anki [Cloze][] cards for the sentence, where each highlighted
-  word is obscured. We can also use it to put the picture of the word
+  word is obscured.
+
+  We can also use it to put the picture of the word
   in the sentence.
+
+  If the word background is gray, then we won't put a Cloze tag
+  in for it (or otherwise quiz the user on it), but we will still
+  use its picture.
 
 [Cloze]: https://docs.ankiweb.net/editing.html#cloze-deletion
 

@@ -124,4 +124,9 @@ export interface SentenceMarkupItem {
    * {@link WordDatabaseRow.id}.
    */
   wordId?: string;
+
+  /**
+   * If true, don't quiz the user about this word.
+   */
+  doNotQuiz?: true;
 }

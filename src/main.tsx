@@ -4,7 +4,7 @@ import "./index.css";
 import App from "./App.tsx";
 import { DB_JSON_ASSET, getAssetUrl } from "./assets.ts";
 import { validateMode } from "./quizStateReducer.ts";
-import type { Database } from "./database-spec.ts";
+import type { Database, WordDatabaseRow } from "./database-spec.ts";
 import type { AppCard } from "./AppCard.ts";
 import { sortByDateAndName } from "./util.ts";
 
@@ -26,19 +26,48 @@ window.history.replaceState(
 
 function createInitialRows(database: Database): AppCard[] {
   const result: AppCard[] = [...database.words];
+  const wordIdMap: Map<string, WordDatabaseRow> = new Map();
+
+  for (const row of database.words) {
+    wordIdMap.set(row.id, row);
+  }
 
   for (const sentence of database.sentences) {
-    // TODO: Make a separate app card for each markup item
-    // in sentence that we'd make a cloze tag for in Anki.
-    result.push({
-      id: sentence.id,
-      createdTime: sentence.createdTime,
-      name: sentence.text,
-      hangul: sentence.text,
-      isTranslation: true,
-      audio: sentence.audio,
-      category: "Sentence",
-    });
+    if (!sentence.markupItems) {
+      continue;
+    }
+    for (const item of sentence.markupItems) {
+      if (!item.wordId || item.doNotQuiz) {
+        continue;
+      }
+      const word = wordIdMap.get(item.wordId);
+      if (!word) {
+        continue;
+      }
+      const fillInTheBlankText = sentence.markupItems
+        .map((otherItem) => {
+          if (otherItem === item) {
+            return otherItem.text
+              .split("")
+              .map((char) => (char !== " " ? "_" : char))
+              .join("");
+          } else {
+            return otherItem.text;
+          }
+        })
+        .join("");
+      result.push({
+        id: sentence.id,
+        createdTime: sentence.createdTime,
+        name: fillInTheBlankText,
+        picture: word.picture,
+        hangul: item.text,
+        fillInTheBlankText,
+        isTranslation: true,
+        audio: sentence.audio,
+        category: "Sentence",
+      });
+    }
   }
 
   sortByDateAndName(result);

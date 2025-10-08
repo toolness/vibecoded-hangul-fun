@@ -42,6 +42,7 @@ function QuestionDisplay({
 
   return (
     <div className={`mode-${mode}`}>
+      {currentQuestion.fillInTheBlankText}
       {currentQuestion.url ? (
         <a
           href={currentQuestion.url}

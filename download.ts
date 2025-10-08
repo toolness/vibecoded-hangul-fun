@@ -245,8 +245,13 @@ async function downloadSentences(args: {
         });
       }
 
+      if (!("created_time" in page)) {
+        throw new Error(`Page ${page.id} does not have a created time`);
+      }
+
       sentences.push({
         id: page.id,
+        createdTime: page.created_time,
         text: sentenceText,
         audio,
         markupItems: markupItems.length > 0 ? markupItems : undefined,

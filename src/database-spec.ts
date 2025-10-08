@@ -105,6 +105,9 @@ export interface SentenceDatabaseRow extends BaseSentence {
   /** Unique UUID for the sentence. */
   id: string;
 
+  /** ISO date the row was created, e.g. "2025-09-17T05:26:00.000Z". */
+  createdTime: string;
+
   /**
    * Sentence markup items.
    *

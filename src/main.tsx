@@ -25,17 +25,22 @@ window.history.replaceState(
 );
 
 function createInitialRows(database: Database): AppCard[] {
-  const result: AppCard[] = [...database.words];
+  const result: AppCard[] = [];
   const wordIdMap: Map<string, WordDatabaseRow> = new Map();
 
-  for (const row of database.words) {
-    wordIdMap.set(row.id, row);
+  for (const word of database.words) {
+    result.push({
+      ...word,
+      notionId: word.id,
+    });
+    wordIdMap.set(word.id, word);
   }
 
   for (const sentence of database.sentences) {
     if (!sentence.markupItems) {
       continue;
     }
+    let itemId = 0;
     for (const item of sentence.markupItems) {
       if (!item.wordId || item.doNotQuiz) {
         continue;
@@ -57,7 +62,8 @@ function createInitialRows(database: Database): AppCard[] {
         })
         .join("");
       result.push({
-        id: sentence.id,
+        id: `${sentence.id}_${itemId}`,
+        notionId: sentence.id,
         createdTime: sentence.createdTime,
         name: fillInTheBlankText,
         picture: word.picture,
@@ -67,6 +73,7 @@ function createInitialRows(database: Database): AppCard[] {
         audio: sentence.audio,
         category: "Sentence",
       });
+      itemId += 1;
     }
   }
 

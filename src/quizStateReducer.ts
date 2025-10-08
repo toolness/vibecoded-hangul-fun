@@ -44,6 +44,7 @@ const DEFAULT_OPTIONS: QuizOptions = {
 
 const DUMMY_QUESTION: AppCard = {
   id: "dummy-question-id",
+  notionId: "dummy-question-id",
   createdTime: new Date().toISOString(),
   name: "???",
   hangul: "???",

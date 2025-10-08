@@ -1,4 +1,4 @@
-import type { WordDatabaseRow } from "./database-spec";
+import type { AppCard } from "./AppCard";
 import type { Mode } from "./quizStateReducer";
 import { type Vocalizer } from "./speech";
 import { getAssetUrl } from "./assets";
@@ -6,7 +6,7 @@ import { Pronouncer } from "./Pronouncer";
 import { WordPicture } from "./WordPicture";
 
 interface QuestionDisplayProps {
-  currentQuestion: WordDatabaseRow;
+  currentQuestion: AppCard;
   mode: Mode;
   vocalizer: Vocalizer | null;
 }

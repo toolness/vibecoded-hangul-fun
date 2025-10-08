@@ -1,31 +1,31 @@
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import QuestionDisplay from "./QuestionDisplay";
-import type { WordDatabaseRow } from "./database-spec";
-import { createTestDatabaseRow } from "./test/testHelpers";
+import type { AppCard } from "./AppCard";
+import { createTestAppCard } from "./test/testHelpers";
 
 describe("QuestionDisplay", () => {
-  const mockQuestionWithUrl: WordDatabaseRow = createTestDatabaseRow({
+  const mockQuestionWithUrl: AppCard = createTestAppCard({
     id: "test-id-1",
     name: "hello",
     hangul: "안녕하세요",
     url: "https://example.com",
   });
 
-  const mockQuestionWithoutUrl: WordDatabaseRow = createTestDatabaseRow({
+  const mockQuestionWithoutUrl: AppCard = createTestAppCard({
     id: "test-id-2",
     name: "goodbye",
     hangul: "안녕히 가세요",
   });
 
-  const mockQuestionWithEmoji: WordDatabaseRow = createTestDatabaseRow({
+  const mockQuestionWithEmoji: AppCard = createTestAppCard({
     id: "test-id-3",
     name: "smile",
     hangul: "미소",
     picture: { type: "emojis", emojis: "😊" },
   });
 
-  const mockQuestionWithImage: WordDatabaseRow = createTestDatabaseRow({
+  const mockQuestionWithImage: AppCard = createTestAppCard({
     id: "test-id-4",
     name: "cat",
     hangul: "고양이",

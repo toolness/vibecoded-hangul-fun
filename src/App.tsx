@@ -7,7 +7,7 @@ import {
   type ActionDispatch,
   useMemo,
 } from "react";
-import type { WordDatabaseRow } from "./database-spec";
+import type { AppCard } from "./AppCard";
 import { calculateCorrectKeystrokes } from "./calculateCorrectKeystrokes";
 import {
   quizReducer,
@@ -41,7 +41,7 @@ function App({
   initialQuestionId,
 }: {
   initialMode: Mode;
-  initialRows: WordDatabaseRow[];
+  initialRows: AppCard[];
   initialQuestionId?: string;
 }) {
   const vocalizer = useKoreanVocalizer();
@@ -67,7 +67,7 @@ function App({
     allQuestionsFiltered,
   } = state;
 
-  const handleWordSelection = (word: WordDatabaseRow) => {
+  const handleWordSelection = (word: AppCard) => {
     dispatch({ type: "SET_QUESTION", question: word });
   };
 
@@ -212,9 +212,7 @@ function ReversePictureAnswerer({ state, dispatch, vocalizer }: AnswererProps) {
 }
 
 function MinimalPairAnswerer({ state, dispatch, vocalizer }: AnswererProps) {
-  const [selectedChoice, setSelectedChoice] = useState<WordDatabaseRow | null>(
-    null,
-  );
+  const [selectedChoice, setSelectedChoice] = useState<AppCard | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
 
   const handleSkip = () => {
@@ -254,7 +252,7 @@ function MinimalPairAnswerer({ state, dispatch, vocalizer }: AnswererProps) {
     setShowConfetti(false);
   }, [currentQuestion]);
 
-  const handleChoiceClick = (choice: WordDatabaseRow) => {
+  const handleChoiceClick = (choice: AppCard) => {
     if (hasAnswered) return;
 
     setSelectedChoice(choice);
@@ -263,7 +261,7 @@ function MinimalPairAnswerer({ state, dispatch, vocalizer }: AnswererProps) {
     }
   };
 
-  const getButtonClassName = (choice: WordDatabaseRow) => {
+  const getButtonClassName = (choice: AppCard) => {
     if (!hasAnswered) {
       return "button choice-button";
     }

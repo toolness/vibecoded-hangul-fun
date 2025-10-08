@@ -1,4 +1,4 @@
-import type { WordDatabaseRow } from "./database-spec";
+import type { AppCard } from "./AppCard";
 
 export type Mode =
   | "translate"
@@ -28,11 +28,11 @@ export interface QuizOptions {
 }
 
 export interface QuizState extends QuizOptions {
-  currentQuestion: WordDatabaseRow;
+  currentQuestion: AppCard;
   userInput: string;
-  remainingQuestions: WordDatabaseRow[];
-  allQuestions: WordDatabaseRow[];
-  allQuestionsFiltered: WordDatabaseRow[];
+  remainingQuestions: AppCard[];
+  allQuestions: AppCard[];
+  allQuestionsFiltered: AppCard[];
   showAnswer: boolean;
 }
 
@@ -42,7 +42,7 @@ const DEFAULT_OPTIONS: QuizOptions = {
   maxQuestions: undefined,
 };
 
-const DUMMY_QUESTION: WordDatabaseRow = {
+const DUMMY_QUESTION: AppCard = {
   id: "dummy-question-id",
   createdTime: new Date().toISOString(),
   name: "???",
@@ -54,9 +54,9 @@ const DUMMY_QUESTION: WordDatabaseRow = {
 };
 
 function filterQuestionsForMode(
-  allQuestions: WordDatabaseRow[],
+  allQuestions: AppCard[],
   mode: Mode,
-): WordDatabaseRow[] {
+): AppCard[] {
   switch (mode) {
     case "translate":
       return allQuestions.filter(
@@ -96,7 +96,7 @@ function shuffleInPlace<T>(array: T[]) {
 }
 
 export const createInitialState = (
-  allQuestions: WordDatabaseRow[],
+  allQuestions: AppCard[],
   options: Partial<QuizOptions> = {},
   initialQuestionId: string | undefined = undefined,
 ): QuizState => {
@@ -145,7 +145,7 @@ export type QuizAction =
   | { type: "UPDATE_INPUT"; input: string }
   | { type: "SHOW_ANSWER" }
   | { type: "NEXT_QUESTION" }
-  | { type: "SET_QUESTION"; question: WordDatabaseRow }
+  | { type: "SET_QUESTION"; question: AppCard }
   | ({
       type: "SET_OPTIONS";
       // Note that there's a semantic difference here between not specifying

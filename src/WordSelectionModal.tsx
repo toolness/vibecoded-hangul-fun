@@ -2,18 +2,18 @@ import { useMemo } from "react";
 import Select from "react-select";
 import type { SingleValue } from "react-select";
 import "./WordSelectionModal.css";
-import type { WordDatabaseRow } from "./database-spec";
+import type { AppCard } from "./AppCard";
 import Modal from "./Modal";
 
 interface WordOption {
   value: string;
   label: string;
-  data: WordDatabaseRow;
+  data: AppCard;
 }
 
 interface WordSelectionModalProps {
-  words: WordDatabaseRow[];
-  onSelectWord: (word: WordDatabaseRow) => void;
+  words: AppCard[];
+  onSelectWord: (word: AppCard) => void;
   onClose: () => void;
   previousFocus?: HTMLElement | null;
 }

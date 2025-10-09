@@ -42,7 +42,7 @@ const DEFAULT_OPTIONS: QuizOptions = {
   maxQuestions: undefined,
 };
 
-const DUMMY_QUESTION: AppCard = {
+export const EMPTY_QUESTION: AppCard = {
   id: "dummy-question-id",
   notionId: "dummy-question-id",
   createdTime: new Date().toISOString(),
@@ -126,7 +126,7 @@ export const createInitialState = (
         return remainingQuestions.splice(index, 1)[0];
       }
     }
-    return remainingQuestions.pop() ?? DUMMY_QUESTION;
+    return remainingQuestions.pop() ?? EMPTY_QUESTION;
   };
 
   return {

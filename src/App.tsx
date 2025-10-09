@@ -35,6 +35,14 @@ const MODE_PROMPT: Record<Mode, string> = {
   minimalpair: "Which word is being spoken?",
 };
 
+function getModePrompt(card: AppCard, mode: Mode): string {
+  if (card.fillInTheBlankText && mode === "picture") {
+    return "Fill in the blank:";
+  }
+
+  return MODE_PROMPT[mode];
+}
+
 function App({
   initialMode,
   initialRows,
@@ -84,6 +92,7 @@ function App({
   };
 
   const Answerer = ANSWERERS[mode];
+  const prompt = getModePrompt(currentQuestion, mode);
 
   return (
     <main>
@@ -102,7 +111,7 @@ function App({
 
       <div className="quiz-container" data-testid="quiz-container">
         <div className="question-section">
-          <h2 className="question-prompt">{MODE_PROMPT[mode]}</h2>
+          <h2 className="question-prompt">{prompt}</h2>
           <div className="question-name">
             <QuestionDisplay
               currentQuestion={currentQuestion}

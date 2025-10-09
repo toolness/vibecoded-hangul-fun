@@ -7,7 +7,7 @@ import {
   type ActionDispatch,
   useMemo,
 } from "react";
-import type { WordDatabaseRow } from "./database-spec";
+import type { AppCard } from "./AppCard";
 import { calculateCorrectKeystrokes } from "./calculateCorrectKeystrokes";
 import {
   quizReducer,
@@ -15,6 +15,7 @@ import {
   type Mode,
   type QuizState,
   type QuizAction,
+  EMPTY_QUESTION,
 } from "./quizStateReducer";
 import { useKoreanVocalizer } from "./speech";
 import HamburgerMenu from "./HamburgerMenu";
@@ -35,13 +36,21 @@ const MODE_PROMPT: Record<Mode, string> = {
   minimalpair: "Which word is being spoken?",
 };
 
+function getModePrompt(card: AppCard, mode: Mode): string {
+  if (card.fillInTheBlankItems && mode === "picture") {
+    return "Fill in the blank:";
+  }
+
+  return MODE_PROMPT[mode];
+}
+
 function App({
   initialMode,
   initialRows,
   initialQuestionId,
 }: {
   initialMode: Mode;
-  initialRows: WordDatabaseRow[];
+  initialRows: AppCard[];
   initialQuestionId?: string;
 }) {
   const vocalizer = useKoreanVocalizer();
@@ -67,7 +76,7 @@ function App({
     allQuestionsFiltered,
   } = state;
 
-  const handleWordSelection = (word: WordDatabaseRow) => {
+  const handleWordSelection = (word: AppCard) => {
     dispatch({ type: "SET_QUESTION", question: word });
   };
 
@@ -84,6 +93,10 @@ function App({
   };
 
   const Answerer = ANSWERERS[mode];
+  const isEmptyQuestion = currentQuestion === EMPTY_QUESTION;
+  const prompt = isEmptyQuestion
+    ? undefined
+    : getModePrompt(currentQuestion, mode);
 
   return (
     <main>
@@ -102,29 +115,39 @@ function App({
 
       <div className="quiz-container" data-testid="quiz-container">
         <div className="question-section">
-          <h2 className="question-prompt">{MODE_PROMPT[mode]}</h2>
+          <h2 className="question-prompt">{prompt}</h2>
           <div className="question-name">
-            <QuestionDisplay
-              currentQuestion={currentQuestion}
-              mode={mode}
-              vocalizer={vocalizer}
-            />
+            {isEmptyQuestion ? (
+              "NO VALID QUESTIONS"
+            ) : (
+              <QuestionDisplay
+                currentQuestion={currentQuestion}
+                mode={mode}
+                vocalizer={vocalizer}
+              />
+            )}
           </div>
         </div>
 
-        <Answerer state={state} dispatch={dispatch} vocalizer={vocalizer} />
+        {isEmptyQuestion ? (
+          "No questions satisfy your search criteria and mode."
+        ) : (
+          <Answerer state={state} dispatch={dispatch} vocalizer={vocalizer} />
+        )}
       </div>
 
       <div className="footer-links">
-        <a
-          // This needs to be www.notion.so in order to open the Notion app on Android.
-          href={`https://www.notion.so/${currentQuestion.id.replace(/-/g, "")}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="footer-link"
-        >
-          <img src={NotionLogo} alt="Notion" className="notion-logo" />
-        </a>
+        {!isEmptyQuestion && (
+          <a
+            // This needs to be www.notion.so in order to open the Notion app on Android.
+            href={`https://www.notion.so/${currentQuestion.notionId.replace(/-/g, "")}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="footer-link"
+          >
+            <img src={NotionLogo} alt="Notion" className="notion-logo" />
+          </a>
+        )}
         {currentQuestion.url && currentQuestion.url.includes("wikipedia") && (
           <a
             href={currentQuestion.url}
@@ -212,9 +235,7 @@ function ReversePictureAnswerer({ state, dispatch, vocalizer }: AnswererProps) {
 }
 
 function MinimalPairAnswerer({ state, dispatch, vocalizer }: AnswererProps) {
-  const [selectedChoice, setSelectedChoice] = useState<WordDatabaseRow | null>(
-    null,
-  );
+  const [selectedChoice, setSelectedChoice] = useState<AppCard | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
 
   const handleSkip = () => {
@@ -254,7 +275,7 @@ function MinimalPairAnswerer({ state, dispatch, vocalizer }: AnswererProps) {
     setShowConfetti(false);
   }, [currentQuestion]);
 
-  const handleChoiceClick = (choice: WordDatabaseRow) => {
+  const handleChoiceClick = (choice: AppCard) => {
     if (hasAnswered) return;
 
     setSelectedChoice(choice);
@@ -263,7 +284,7 @@ function MinimalPairAnswerer({ state, dispatch, vocalizer }: AnswererProps) {
     }
   };
 
-  const getButtonClassName = (choice: WordDatabaseRow) => {
+  const getButtonClassName = (choice: AppCard) => {
     if (!hasAnswered) {
       return "button choice-button";
     }

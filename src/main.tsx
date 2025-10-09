@@ -4,7 +4,9 @@ import "./index.css";
 import App from "./App.tsx";
 import { DB_JSON_ASSET, getAssetUrl } from "./assets.ts";
 import { validateMode } from "./quizStateReducer.ts";
-import type { Database } from "./database-spec.ts";
+import type { Database, WordDatabaseRow } from "./database-spec.ts";
+import type { AppCard, FillInTheBlankItem } from "./AppCard.ts";
+import { sortByDateAndName } from "./util.ts";
 
 const DATABASE_JSON_URL = getAssetUrl(DB_JSON_ASSET);
 
@@ -22,11 +24,81 @@ window.history.replaceState(
   `${window.location.origin}${window.location.pathname}`,
 );
 
+function createInitialRows(database: Database): AppCard[] {
+  const result: AppCard[] = [];
+  const wordIdMap: Map<string, WordDatabaseRow> = new Map();
+
+  for (const word of database.words) {
+    result.push({
+      ...word,
+      notionId: word.id,
+    });
+    wordIdMap.set(word.id, word);
+  }
+
+  for (const sentence of database.sentences) {
+    if (!sentence.markupItems) {
+      continue;
+    }
+    let itemId = 0;
+    for (const item of sentence.markupItems) {
+      if (!item.wordId || item.doNotQuiz) {
+        continue;
+      }
+      const word = wordIdMap.get(item.wordId);
+      if (!word) {
+        continue;
+      }
+      const fillInTheBlankItems: FillInTheBlankItem[] =
+        sentence.markupItems.map((otherItem) => {
+          if (otherItem === item) {
+            const blankValue = otherItem.text
+              .split("")
+              .map((char) => (char !== " " ? "_" : char))
+              .join("");
+            return {
+              type: "fill-in",
+              blankValue,
+              answer: otherItem.text,
+            };
+          } else {
+            return { type: "content", value: otherItem.text };
+          }
+        });
+      const name = fillInTheBlankItems
+        .map((item) => {
+          if (item.type === "content") {
+            return item.value;
+          }
+          return `[${item.answer}]`;
+        })
+        .join("");
+      result.push({
+        id: `${sentence.id}_${itemId}`,
+        notionId: sentence.id,
+        createdTime: sentence.createdTime,
+        name,
+        picture: word.picture,
+        hangul: item.text,
+        fillInTheBlankItems: fillInTheBlankItems,
+        isTranslation: true,
+        audio: sentence.audio,
+        category: "Sentence",
+      });
+      itemId += 1;
+    }
+  }
+
+  sortByDateAndName(result);
+
+  return result;
+}
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <App
       initialMode={initialMode}
-      initialRows={databaseJson.words}
+      initialRows={createInitialRows(databaseJson)}
       initialQuestionId={initialId}
     />
   </StrictMode>,

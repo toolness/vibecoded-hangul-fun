@@ -289,3 +289,28 @@ span.question-emojis {
 .wikipedia-logo:hover {
   opacity: 1;
 }
+
+.fill-in-the-blank {
+  white-space: pre-wrap;
+  margin-bottom: 8px;
+}
+
+.fill-in-the-blank.show-answer {
+  .content {
+    color: darkgray;
+  }
+
+  .blank {
+    color: black;
+  }
+}
+
+.fill-in-the-blank.hide-answer {
+  .content {
+    color: #666;
+  }
+
+  .blank {
+    color: black;
+  }
+}

@@ -17,6 +17,7 @@ import {
   type BaseSentence,
   type Database,
 } from "./src/database-spec.ts";
+import { sortByDateAndName } from "./src/util.ts";
 import { ASSETS_DIR, DB_JSON_ASSET, getAssetFilePath } from "./src/assets.ts";
 import { parseArgs, type ParseArgsOptionsConfig } from "util";
 import loadXxhash from "xxhash-wasm";
@@ -517,15 +518,7 @@ async function downloadWords(args: {
     }
   }
 
-  // Sort entries by created time, newest first, breaking ties by English name.
-  entries.sort((a, b) => {
-    const dateA = new Date(a.createdTime).getTime();
-    const dateB = new Date(b.createdTime).getTime();
-    if (dateA === dateB) {
-      return a.name.localeCompare(b.name);
-    }
-    return dateB - dateA;
-  });
+  sortByDateAndName(entries);
 
   return entries;
 }

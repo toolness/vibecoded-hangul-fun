@@ -1,17 +1,17 @@
 import { describe, it, expect } from "vitest";
 import { quizReducer, createInitialState } from "./quizStateReducer";
 import type { QuizState } from "./quizStateReducer";
-import type { WordDatabaseRow } from "./database-spec";
-import { createTestDatabaseRow } from "./test/testHelpers";
+import type { AppCard } from "./AppCard";
+import { createTestAppCard } from "./test/testHelpers";
 
 describe("quizReducer", () => {
-  const mockQuestion: WordDatabaseRow = createTestDatabaseRow({
+  const mockQuestion: AppCard = createTestAppCard({
     id: "test-id-1",
     name: "hello",
     hangul: "안녕",
   });
 
-  const mockQuestion2: WordDatabaseRow = createTestDatabaseRow({
+  const mockQuestion2: AppCard = createTestAppCard({
     id: "test-id-2",
     name: "goodbye",
     hangul: "안녕히",
@@ -109,17 +109,17 @@ describe("quizReducer", () => {
 
   describe("NEXT_QUESTION", () => {
     it("should move to next question from remaining questions", () => {
-      const q1: WordDatabaseRow = createTestDatabaseRow({
+      const q1: AppCard = createTestAppCard({
         id: "test-id-q1",
         name: "q1",
         hangul: "하나",
       });
-      const q2: WordDatabaseRow = createTestDatabaseRow({
+      const q2: AppCard = createTestAppCard({
         id: "test-id-q2",
         name: "q2",
         hangul: "둘",
       });
-      const q3: WordDatabaseRow = createTestDatabaseRow({
+      const q3: AppCard = createTestAppCard({
         id: "test-id-q3",
         name: "q3",
         hangul: "셋",

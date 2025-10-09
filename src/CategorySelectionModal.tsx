@@ -1,11 +1,11 @@
 import { useMemo } from "react";
 import "./WordSelectionModal.css";
 import "./CategorySelectionModal.css";
-import type { WordDatabaseRow } from "./database-spec";
+import type { AppCard } from "./AppCard";
 import Modal from "./Modal";
 
 interface CategorySelectionModalProps {
-  allQuestions: WordDatabaseRow[];
+  allQuestions: AppCard[];
   currentCategory: string | undefined;
   onSelectCategory: (category: string | undefined) => void;
   onClose: () => void;

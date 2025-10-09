@@ -4,6 +4,7 @@ import { type Vocalizer } from "./speech";
 import { getAssetUrl } from "./assets";
 import { Pronouncer } from "./Pronouncer";
 import { WordPicture } from "./WordPicture";
+import { FillInTheBlank } from "./FillInTheBlank";
 
 interface QuestionDisplayProps {
   currentQuestion: AppCard;
@@ -19,6 +20,9 @@ function QuestionDisplay({
   const getQuestion = (): React.ReactNode => {
     switch (mode) {
       case "typingtutor":
+        if (currentQuestion.fillInTheBlankItems) {
+          return null;
+        }
         return currentQuestion.hangul;
       case "translate":
         return currentQuestion.name;
@@ -33,6 +37,9 @@ function QuestionDisplay({
         // more layout instability.
         return <WordPicture picture={currentQuestion.picture} />;
       case "reversepicture":
+        if (currentQuestion.fillInTheBlankItems) {
+          return null;
+        }
         return currentQuestion.hangul;
     }
   };
@@ -42,7 +49,12 @@ function QuestionDisplay({
 
   return (
     <div className={`mode-${mode}`}>
-      {currentQuestion.fillInTheBlankText}
+      {currentQuestion.fillInTheBlankItems ? (
+        <FillInTheBlank
+          items={currentQuestion.fillInTheBlankItems}
+          showAnswer={mode === "picture" ? false : true}
+        />
+      ) : undefined}
       {currentQuestion.url ? (
         <a
           href={currentQuestion.url}

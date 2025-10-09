@@ -37,7 +37,7 @@ const MODE_PROMPT: Record<Mode, string> = {
 };
 
 function getModePrompt(card: AppCard, mode: Mode): string {
-  if (card.fillInTheBlankText && mode === "picture") {
+  if (card.fillInTheBlankItems && mode === "picture") {
     return "Fill in the blank:";
   }
 

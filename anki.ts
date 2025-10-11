@@ -1,5 +1,6 @@
-import { type Database, type WordDatabaseRow } from "./src/database-spec.ts";
+import { type Database } from "./src/database-spec.ts";
 import { DB_JSON_ASSET, getAssetFilePath } from "./src/assets.ts";
+import { DatabaseHelper } from "./src/database-helper.ts";
 
 import { copyFileSync, existsSync, readFileSync, writeFileSync } from "fs";
 import { stringify } from "csv-stringify/sync";
@@ -199,10 +200,9 @@ const run = async () => {
     return destAsset;
   };
 
-  const wordIdMap: Map<string, WordDatabaseRow> = new Map();
+  const dbHelper = new DatabaseHelper(dbRows);
   let wordRowCount = 0;
   for (const row of dbRows.words) {
-    wordIdMap.set(row.id, row);
     if (row.audio && row.picture?.type === "local-image" && row.hangul) {
       if (wordRowCount >= MAX_WORD_ROWS) {
         break;
@@ -237,13 +237,12 @@ const run = async () => {
     sentenceRowCount += 1;
     let clozeId = 0;
     const pictures: string[] = [];
-    const clozeParts: string[] = row.markupItems.map((item) => {
-      if (item.wordId) {
-        const word = wordIdMap.get(item.wordId);
-        if (word && word.picture && word.picture.type === "local-image") {
-          pictures.push(copyAsset(word.picture.filename));
-        }
+    for (const word of dbHelper.getSentenceWords(row)) {
+      if (word.picture && word.picture.type === "local-image") {
+        pictures.push(copyAsset(word.picture.filename));
       }
+    }
+    const clozeParts: string[] = row.markupItems.map((item) => {
       if (item.wordId && !item.doNotQuiz) {
         clozeId += 1;
         return `{{c${clozeId}::${item.text}}}`;

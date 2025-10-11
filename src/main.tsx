@@ -4,9 +4,10 @@ import "./index.css";
 import App from "./App.tsx";
 import { DB_JSON_ASSET, getAssetUrl } from "./assets.ts";
 import { validateMode } from "./quizStateReducer.ts";
-import type { Database, WordDatabaseRow } from "./database-spec.ts";
+import type { Database } from "./database-spec.ts";
 import type { AppCard, FillInTheBlankItem } from "./AppCard.ts";
 import { sortByDateAndName } from "./util.ts";
+import { DatabaseHelper } from "./database-helper.ts";
 
 const DATABASE_JSON_URL = getAssetUrl(DB_JSON_ASSET);
 
@@ -26,14 +27,13 @@ window.history.replaceState(
 
 function createInitialRows(database: Database): AppCard[] {
   const result: AppCard[] = [];
-  const wordIdMap: Map<string, WordDatabaseRow> = new Map();
+  const dbHelper = new DatabaseHelper(database);
 
   for (const word of database.words) {
     result.push({
       ...word,
       notionId: word.id,
     });
-    wordIdMap.set(word.id, word);
   }
 
   for (const sentence of database.sentences) {
@@ -45,7 +45,7 @@ function createInitialRows(database: Database): AppCard[] {
       if (!item.wordId || item.doNotQuiz) {
         continue;
       }
-      const word = wordIdMap.get(item.wordId);
+      const word = dbHelper.wordIdMap.get(item.wordId);
       if (!word) {
         continue;
       }

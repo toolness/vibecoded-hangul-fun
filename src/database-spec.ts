@@ -114,6 +114,12 @@ export interface SentenceDatabaseRow extends BaseSentence {
    * If defined, the array will never be empty.
    */
   markupItems?: SentenceMarkupItem[];
+
+  /**
+   * The {@link WordDatabaseRow} IDs of words used in
+   * the sentence.
+   */
+  wordIds?: string[];
 }
 
 export interface SentenceMarkupItem {

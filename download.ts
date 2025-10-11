@@ -246,6 +246,18 @@ async function downloadSentences(args: {
         });
       }
 
+      const wordIds: string[] = [];
+
+      if (
+        properties["Words"] &&
+        properties["Words"].type === "relation" &&
+        Array.isArray(properties["Words"].relation)
+      ) {
+        for (const relation of properties["Words"].relation) {
+          wordIds.push(relation.id);
+        }
+      }
+
       if (!("created_time" in page)) {
         throw new Error(`Page ${page.id} does not have a created time`);
       }
@@ -256,6 +268,7 @@ async function downloadSentences(args: {
         text: sentenceText,
         audio,
         markupItems: markupItems.length > 0 ? markupItems : undefined,
+        wordIds: wordIds.length > 0 ? wordIds : undefined,
       });
     }
   }

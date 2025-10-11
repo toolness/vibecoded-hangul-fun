@@ -24,6 +24,8 @@ export type AppCard = WordDatabaseRow & {
 
   /**
    * Any extra auxiliary words to show on the card.
+   *
+   * If present, the array may be empty.
    */
   extraWords?: WordDatabaseRow[];
 };

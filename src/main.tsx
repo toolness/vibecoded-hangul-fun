@@ -84,6 +84,9 @@ function createInitialRows(database: Database): AppCard[] {
         isTranslation: true,
         audio: sentence.audio,
         category: "Sentence",
+        extraWords: dbHelper
+          .getSentenceWords(sentence)
+          .filter((extraWord) => extraWord !== word),
       });
       itemId += 1;
     }

@@ -21,6 +21,11 @@ export type AppCard = WordDatabaseRow & {
    * If present, the array will never be empty.
    */
   fillInTheBlankItems?: FillInTheBlankItem[];
+
+  /**
+   * Any extra auxiliary words to show on the card.
+   */
+  extraWords?: WordDatabaseRow[];
 };
 
 export type FillInTheBlankItem =

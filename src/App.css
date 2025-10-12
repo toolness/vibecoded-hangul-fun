@@ -59,9 +59,12 @@
 }
 
 .extra-question-pictures {
+  align-content: center;
   > img.question-picture {
     max-width: 10vw;
     max-height: 10vh;
+    transform: rotate(5deg);
+    margin: -1vh -1vw;
   }
 }
 

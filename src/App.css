@@ -52,6 +52,19 @@
   align-items: center;
 }
 
+.question-pictures {
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 8px;
+}
+
+.extra-question-pictures {
+  > img.question-picture {
+    max-width: 10vw;
+    max-height: 10vh;
+  }
+}
+
 img.question-picture {
   max-width: 75vw;
   max-height: 33vh;

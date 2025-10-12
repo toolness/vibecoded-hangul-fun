@@ -35,7 +35,17 @@ function QuestionDisplay({
         // the old image show for a split-second is better than
         // making it disappear entirely, as the latter causes
         // more layout instability.
-        return <WordPicture picture={currentQuestion.picture} />;
+        return (
+          <div className="question-pictures">
+            <WordPicture picture={currentQuestion.picture} />
+            <div className="extra-question-pictures">
+              {(currentQuestion.extraWords ?? []).map((word) => {
+                if (!word.picture) return null;
+                return <WordPicture picture={word.picture} />;
+              })}
+            </div>
+          </div>
+        );
       case "reversepicture":
         if (currentQuestion.fillInTheBlankItems) {
           return null;

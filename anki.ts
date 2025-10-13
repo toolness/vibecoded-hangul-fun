@@ -115,6 +115,11 @@ type SentenceCsvRow = BaseCsvRow & {
    * collection media dir.
    */
   audio: string;
+
+  /**
+   * Any pronunciation notes, etc, to be shown on the back of the card.
+   */
+  notes: string[];
 };
 
 /**
@@ -259,6 +264,7 @@ const run = async () => {
       tags: [],
       hangul: clozeParts.join(""),
       pictures,
+      notes: [row.notes ?? ""].filter(Boolean),
       audio: destAudio,
     });
   }
@@ -287,7 +293,10 @@ const run = async () => {
             row.pictures
               .map((picture) => `<img src="${escapeHTML(picture)}">`)
               .join(""),
-            `[sound:${escapeHTML(row.audio)}]`,
+            [
+              `[sound:${escapeHTML(row.audio)}]`,
+              ...row.notes.map(escapeHTML),
+            ].join("<br>"),
           ];
       }
     }) satisfies string[][],

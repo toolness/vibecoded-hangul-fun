@@ -120,6 +120,11 @@ export interface SentenceDatabaseRow extends BaseSentence {
    * the sentence.
    */
   wordIds?: string[];
+
+  /**
+   * Pronunciation notes. It may be an empty string.
+   */
+  notes?: string;
 }
 
 export interface SentenceMarkupItem {

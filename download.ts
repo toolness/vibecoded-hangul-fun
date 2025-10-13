@@ -172,6 +172,7 @@ async function downloadSentences(args: {
       // Extract the name/title of each sentence
       const properties = page.properties;
       let sentenceText = "";
+      let notes = "";
       let audio: string | undefined;
 
       // Try to extract from Name property (could be title or rich_text)
@@ -258,6 +259,16 @@ async function downloadSentences(args: {
         }
       }
 
+      // Extract Notes (optional)
+      if (
+        properties.Notes &&
+        properties.Notes.type === "rich_text" &&
+        Array.isArray(properties.Notes.rich_text) &&
+        properties.Notes.rich_text.length > 0
+      ) {
+        notes = properties.Notes.rich_text.map((t) => t.plain_text).join("");
+      }
+
       if (!("created_time" in page)) {
         throw new Error(`Page ${page.id} does not have a created time`);
       }
@@ -269,6 +280,7 @@ async function downloadSentences(args: {
         audio,
         markupItems: markupItems.length > 0 ? markupItems : undefined,
         wordIds: wordIds.length > 0 ? wordIds : undefined,
+        notes,
       });
     }
   }

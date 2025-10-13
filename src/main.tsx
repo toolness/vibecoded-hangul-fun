@@ -84,6 +84,7 @@ function createInitialRows(database: Database): AppCard[] {
         isTranslation: true,
         audio: sentence.audio,
         category: "Sentence",
+        notes: sentence.notes,
         extraWords: dbHelper
           .getSentenceWords(sentence)
           .filter((extraWord) => extraWord !== word),

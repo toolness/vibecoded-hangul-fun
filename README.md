@@ -90,6 +90,7 @@ Also make a data source called "Sentences" with this schema:
   the words used in the sentence.
 - `Audio` - An optional audio file recording the pronounciation
   of the sentence.
+- `Notes` - Text, contains optional pronunciation notes.
 
 #### Sentence markup
 

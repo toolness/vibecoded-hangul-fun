@@ -35,6 +35,9 @@ export interface WordDatabaseRow {
   /** ISO date the row was created, e.g. "2025-09-17T05:26:00.000Z". */
   createdTime: string;
 
+  /** ISO date the row was last modified, e.g. "2025-09-17T05:26:00.000Z". */
+  lastModifiedTime: string;
+
   /** The English/romanized text. */
   name: string;
 
@@ -107,6 +110,9 @@ export interface SentenceDatabaseRow extends BaseSentence {
 
   /** ISO date the row was created, e.g. "2025-09-17T05:26:00.000Z". */
   createdTime: string;
+
+  /** ISO date the row was last modified, e.g. "2025-09-17T05:26:00.000Z". */
+  lastModifiedTime: string;
 
   /**
    * Sentence markup items.

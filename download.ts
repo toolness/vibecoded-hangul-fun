@@ -269,13 +269,16 @@ async function downloadSentences(args: {
         notes = properties.Notes.rich_text.map((t) => t.plain_text).join("");
       }
 
-      if (!("created_time" in page)) {
-        throw new Error(`Page ${page.id} does not have a created time`);
+      if (!("created_time" in page) || !("last_edited_time" in page)) {
+        throw new Error(
+          `Page ${page.id} does not have a created time or last edited time`,
+        );
       }
 
       sentences.push({
         id: page.id,
         createdTime: page.created_time,
+        lastModifiedTime: page.last_edited_time,
         text: sentenceText,
         audio,
         markupItems: markupItems.length > 0 ? markupItems : undefined,
@@ -326,8 +329,10 @@ async function downloadWords(args: {
         continue;
       }
 
-      if (!("created_time" in page)) {
-        throw new Error(`Page ${page.id} does not have a created time`);
+      if (!("created_time" in page) || !("last_edited_time" in page)) {
+        throw new Error(
+          `Page ${page.id} does not have a created time or last edited time`,
+        );
       }
 
       const properties = page.properties;
@@ -527,6 +532,7 @@ async function downloadWords(args: {
       const row: WordDatabaseRow = {
         id: page.id,
         createdTime: page.created_time,
+        lastModifiedTime: page.last_edited_time,
         name,
         hangul,
         isTranslation,

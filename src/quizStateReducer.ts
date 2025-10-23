@@ -46,6 +46,7 @@ export const EMPTY_QUESTION: AppCard = {
   id: "dummy-question-id",
   notionId: "dummy-question-id",
   createdTime: new Date().toISOString(),
+  lastModifiedTime: new Date().toISOString(),
   name: "???",
   hangul: "???",
   picture: {

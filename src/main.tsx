@@ -77,6 +77,7 @@ function createInitialRows(database: Database): AppCard[] {
         id: `${sentence.id}_${itemId}`,
         notionId: sentence.id,
         createdTime: sentence.createdTime,
+        lastModifiedTime: sentence.lastModifiedTime,
         name,
         picture: word.picture,
         hangul: item.text,

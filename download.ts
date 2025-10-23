@@ -175,6 +175,15 @@ async function downloadSentences(args: {
       let notes = "";
       let audio: string | undefined;
 
+      // Check Disabled flag (optional) - skip if true
+      if (
+        properties.Disabled &&
+        properties.Disabled.type === "checkbox" &&
+        properties.Disabled.checkbox === true
+      ) {
+        continue;
+      }
+
       // Try to extract from Name property (could be title or rich_text)
       if (properties.Name) {
         if (

@@ -135,12 +135,88 @@ class CachingNotionClient {
   }
 }
 
+/**
+ * Loads the existing database from disk if it exists.
+ * Returns an empty database if the file doesn't exist or can't be parsed.
+ */
+function loadExistingDatabase(dbPath: string): Database {
+  if (!existsSync(dbPath)) {
+    console.log("No existing database found, will download all entries.");
+    return { words: [], sentences: [] };
+  }
+
+  try {
+    const content = readFileSync(dbPath, { encoding: "utf-8" });
+    const database = JSON.parse(content) as Database;
+    console.log(
+      `Loaded existing database with ${database.words.length} words and ${database.sentences.length} sentences.`,
+    );
+    return database;
+  } catch (error) {
+    console.warn(
+      `Failed to parse existing database, will download all entries: ${error}`,
+    );
+    return { words: [], sentences: [] };
+  }
+}
+
+/**
+ * Finds the most recent lastModifiedTime in an array of entries.
+ * Returns undefined if the array is empty.
+ */
+function findMostRecentModificationTime(
+  entries: Array<{ lastModifiedTime: string }>,
+): string | undefined {
+  if (entries.length === 0) {
+    return undefined;
+  }
+
+  return entries.reduce((latest, entry) => {
+    return entry.lastModifiedTime > latest ? entry.lastModifiedTime : latest;
+  }, entries[0].lastModifiedTime);
+}
+
+/**
+ * Merges old entries with new entries, handling Disabled entries as tombstones.
+ *
+ * @param oldEntries - Existing entries from the database
+ * @param newEntries - Newly fetched entries from Notion
+ * @param getDisabled - Function to determine if an entry is disabled
+ * @returns Merged array of entries
+ */
+function mergeEntries<T extends { id: string }>(
+  oldEntries: T[],
+  newEntries: Array<T & { disabled?: boolean }>,
+  getDisabled: (entry: T & { disabled?: boolean }) => boolean,
+): T[] {
+  // Create a map from old entries
+  const entriesMap = new Map<string, T>();
+  for (const entry of oldEntries) {
+    entriesMap.set(entry.id, entry);
+  }
+
+  // Process new entries: add/update or remove based on Disabled flag
+  for (const entry of newEntries) {
+    if (getDisabled(entry)) {
+      // Remove from map if disabled (tombstone)
+      entriesMap.delete(entry.id);
+    } else {
+      // Add or update entry
+      entriesMap.set(entry.id, entry);
+    }
+  }
+
+  // Convert map values back to array
+  return Array.from(entriesMap.values());
+}
+
 async function downloadSentences(args: {
   notion: CachingNotionClient;
   wordsDataSource: GetDataSourceResponse;
   downloader: NotionDownloader;
-}): Promise<SentenceDatabaseRow[]> {
-  const { notion, wordsDataSource, downloader } = args;
+  modifiedSince?: string;
+}): Promise<Array<SentenceDatabaseRow & { disabled?: boolean }>> {
+  const { notion, wordsDataSource, downloader, modifiedSince } = args;
   const sentencesColumnSchema = wordsDataSource.properties["Sentences"];
   if (sentencesColumnSchema?.type !== "relation") {
     throw new Error(
@@ -152,13 +228,25 @@ async function downloadSentences(args: {
   // Download all sentences from the related table
   let hasMore = true;
   let nextCursor: string | undefined = undefined;
-  const sentences: SentenceDatabaseRow[] = [];
+  const sentences: Array<SentenceDatabaseRow & { disabled?: boolean }> = [];
 
   while (hasMore) {
-    console.log(`Retrieving sentences...`);
+    if (modifiedSince) {
+      console.log(`Retrieving sentences modified since ${modifiedSince}...`);
+    } else {
+      console.log(`Retrieving sentences...`);
+    }
     const response = await notion.queryDataSource({
       data_source_id: sentencesDataSourceId,
       start_cursor: nextCursor,
+      ...(modifiedSince && {
+        filter: {
+          timestamp: "last_edited_time",
+          last_edited_time: {
+            after: modifiedSince,
+          },
+        },
+      }),
     });
 
     hasMore = response.has_more;
@@ -171,18 +259,31 @@ async function downloadSentences(args: {
 
       // Extract the name/title of each sentence
       const properties = page.properties;
+
+      // Check Disabled flag (optional)
+      const isDisabled =
+        properties.Disabled &&
+        properties.Disabled.type === "checkbox" &&
+        properties.Disabled.checkbox === true;
+
+      // If disabled and we're doing a full sync, skip it entirely
+      // If disabled and doing an incremental sync, record it as a tombstone
+      if (isDisabled) {
+        if (!modifiedSince) {
+          continue;
+        } else {
+          // Add as tombstone for incremental sync
+          sentences.push({
+            id: page.id,
+            disabled: true,
+          } as SentenceDatabaseRow & { disabled: true });
+          continue;
+        }
+      }
+
       let sentenceText = "";
       let notes = "";
       let audio: string | undefined;
-
-      // Check Disabled flag (optional) - skip if true
-      if (
-        properties.Disabled &&
-        properties.Disabled.type === "checkbox" &&
-        properties.Disabled.checkbox === true
-      ) {
-        continue;
-      }
 
       // Try to extract from Name property (could be title or rich_text)
       if (properties.Name) {
@@ -317,17 +418,30 @@ async function downloadWords(args: {
   dataSourceId: string;
   sentences: Map<string, BaseSentence>;
   downloader: NotionDownloader;
-}): Promise<WordDatabaseRow[]> {
-  const { notion, dataSourceId, sentences, downloader } = args;
-  const entries: WordDatabaseRow[] = [];
+  modifiedSince?: string;
+}): Promise<Array<WordDatabaseRow & { disabled?: boolean }>> {
+  const { notion, dataSourceId, sentences, downloader, modifiedSince } = args;
+  const entries: Array<WordDatabaseRow & { disabled?: boolean }> = [];
   let hasMore = true;
   let nextCursor: string | undefined = undefined;
 
   while (hasMore) {
-    console.log(`Retrieving words...`);
+    if (modifiedSince) {
+      console.log(`Retrieving words modified since ${modifiedSince}...`);
+    } else {
+      console.log(`Retrieving words...`);
+    }
     const response = await notion.queryDataSource({
       data_source_id: dataSourceId,
       start_cursor: nextCursor,
+      ...(modifiedSince && {
+        filter: {
+          timestamp: "last_edited_time",
+          last_edited_time: {
+            after: modifiedSince,
+          },
+        },
+      }),
     });
 
     hasMore = response.has_more;
@@ -491,13 +605,25 @@ async function downloadWords(args: {
         isTranslation = properties["Is translation?"].checkbox === true;
       }
 
-      // Check Disabled flag (optional) - skip if true
-      if (
+      // Check Disabled flag (optional)
+      const isDisabled =
         properties.Disabled &&
         properties.Disabled.type === "checkbox" &&
-        properties.Disabled.checkbox === true
-      ) {
-        continue;
+        properties.Disabled.checkbox === true;
+
+      // If disabled and we're doing a full sync, skip it entirely
+      // If disabled and doing an incremental sync, record it as a tombstone
+      if (isDisabled) {
+        if (!modifiedSince) {
+          continue;
+        } else {
+          // Add as tombstone for incremental sync
+          entries.push({
+            id: page.id,
+            disabled: true,
+          } as WordDatabaseRow & { disabled: true });
+          continue;
+        }
       }
 
       // Extract Audio files (optional)
@@ -609,6 +735,25 @@ const run = async () => {
     }
   }
 
+  // Load existing database and find most recent modification times
+  const dbPath = getAssetFilePath(DB_JSON_ASSET);
+  const existingDb = loadExistingDatabase(dbPath);
+  const lastWordModifiedTime = findMostRecentModificationTime(existingDb.words);
+  const lastSentenceModifiedTime = findMostRecentModificationTime(
+    existingDb.sentences,
+  );
+
+  if (lastWordModifiedTime) {
+    console.log(
+      `Most recent word modification: ${lastWordModifiedTime}, will download only newer entries.`,
+    );
+  }
+  if (lastSentenceModifiedTime) {
+    console.log(
+      `Most recent sentence modification: ${lastSentenceModifiedTime}, will download only newer entries.`,
+    );
+  }
+
   // Create a queue with concurrency of 5
   const downloadQueue = new Queue({ concurrency: 5, autostart: false });
 
@@ -628,26 +773,55 @@ const run = async () => {
     }
   };
 
-  const sentences = await downloadSentences({
+  const newSentences = await downloadSentences({
     notion,
     wordsDataSource,
     downloader,
+    modifiedSince: lastSentenceModifiedTime,
   });
-  const words = await downloadWords({
+  const newWords = await downloadWords({
     notion,
     dataSourceId: NOTION_DS_ID,
     sentences: new Map<string, BaseSentence>(
-      sentences.map(({ id, text, audio }) => [id, { text, audio }]),
+      newSentences
+        .filter((s) => !s.disabled)
+        .map(({ id, text, audio }) => [id, { text, audio }]),
     ),
     downloader,
+    modifiedSince: lastWordModifiedTime,
   });
+
+  // Merge old and new data
+  console.log(
+    `Merging ${existingDb.sentences.length} existing sentences with ${newSentences.length} new/updated sentences...`,
+  );
+  const sentences = mergeEntries(
+    existingDb.sentences,
+    newSentences,
+    (entry) => entry.disabled === true,
+  );
+
+  console.log(
+    `Merging ${existingDb.words.length} existing words with ${newWords.length} new/updated words...`,
+  );
+  const words = mergeEntries(
+    existingDb.words,
+    newWords,
+    (entry) => entry.disabled === true,
+  );
+
+  // Sort the merged words data
+  sortByDateAndName(words);
+
+  console.log(
+    `Final database has ${words.length} words and ${sentences.length} sentences.`,
+  );
 
   // Start processing and wait for all downloads to complete
   if (downloadQueue.length > 0) {
     await downloadQueue.start();
   }
 
-  const dbPath = getAssetFilePath(DB_JSON_ASSET);
   const database: Database = { words, sentences };
   writeFileSync(dbPath, JSON.stringify(database, null, 2));
 

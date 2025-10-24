@@ -16,6 +16,7 @@ import {
   type SentenceDatabaseRow,
   type BaseSentence,
   type Database,
+  DATABASE_SCHEMA_VERSION,
 } from "./src/database-spec.ts";
 import {
   sortByDateAndName,
@@ -139,6 +140,10 @@ class CachingNotionClient {
   }
 }
 
+function makeEmptyDatabase(): Database {
+  return { words: [], sentences: [], __schemaVersion: DATABASE_SCHEMA_VERSION };
+}
+
 /**
  * Loads the existing database from disk if it exists.
  * Returns an empty database if the file doesn't exist or can't be parsed.
@@ -146,12 +151,18 @@ class CachingNotionClient {
 function loadExistingDatabase(dbPath: string): Database {
   if (!existsSync(dbPath)) {
     console.log("No existing database found, will download all entries.");
-    return { words: [], sentences: [] };
+    return makeEmptyDatabase();
   }
 
   try {
     const content = readFileSync(dbPath, { encoding: "utf-8" });
     const database = JSON.parse(content) as Database;
+    if (database.__schemaVersion !== DATABASE_SCHEMA_VERSION) {
+      console.log(
+        `Database exists but version is ${database.__schemaVersion} (expected ${DATABASE_SCHEMA_VERSION}).`,
+      );
+      return makeEmptyDatabase();
+    }
     console.log(
       `Loaded existing database with ${database.words.length} words and ${database.sentences.length} sentences.`,
     );
@@ -160,7 +171,7 @@ function loadExistingDatabase(dbPath: string): Database {
     console.warn(
       `Failed to parse existing database, will download all entries: ${error}`,
     );
-    return { words: [], sentences: [] };
+    return makeEmptyDatabase();
   }
 }
 
@@ -776,7 +787,11 @@ const run = async () => {
     await downloadQueue.start();
   }
 
-  const database: Database = { words, sentences };
+  const database: Database = {
+    words,
+    sentences,
+    __schemaVersion: DATABASE_SCHEMA_VERSION,
+  };
   writeFileSync(dbPath, JSON.stringify(database, null, 2));
 
   console.log(`Wrote ${dbPath}.`);

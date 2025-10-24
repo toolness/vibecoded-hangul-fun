@@ -208,7 +208,7 @@ async function downloadSentences(args: {
         filter: {
           timestamp: "last_edited_time",
           last_edited_time: {
-            after: modifiedSince,
+            on_or_after: modifiedSince,
           },
         },
       }),
@@ -403,7 +403,7 @@ async function downloadWords(args: {
         filter: {
           timestamp: "last_edited_time",
           last_edited_time: {
-            after: modifiedSince,
+            on_or_after: modifiedSince,
           },
         },
       }),
@@ -758,7 +758,7 @@ const run = async () => {
 
   // Merge old and new data
   console.log(
-    `Merging ${existingDb.sentences.length} existing sentences with ${newSentences.length} new/updated sentences...`,
+    `Merging ${existingDb.sentences.length} existing sentences with ${newSentences.length} possible new/updated sentences...`,
   );
   const sentences = mergeEntries(
     existingDb.sentences,
@@ -767,7 +767,7 @@ const run = async () => {
   );
 
   console.log(
-    `Merging ${existingDb.words.length} existing words with ${newWords.length} new/updated words...`,
+    `Merging ${existingDb.words.length} existing words with ${newWords.length} possible new/updated words...`,
   );
   const words = mergeEntries(
     existingDb.words,

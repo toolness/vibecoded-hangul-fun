@@ -1,4 +1,16 @@
+/**
+ * Whenever we change the database schema, _or_ the algorithm
+ * used to convert Notion's raw API responses into the DB
+ * schema, this version number should be incremented!
+ */
+export const DATABASE_SCHEMA_VERSION = 1 as const;
+
 export interface Database {
+  /**
+   * If this isn't equal to DATABASE_SCHEMA_VERSION, we shouldn't
+   * process it!
+   */
+  __schemaVersion: typeof DATABASE_SCHEMA_VERSION;
   words: WordDatabaseRow[];
   sentences: SentenceDatabaseRow[];
 }

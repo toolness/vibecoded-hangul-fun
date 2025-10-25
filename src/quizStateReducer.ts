@@ -1,4 +1,9 @@
 import type { AppCard } from "./AppCard";
+import type { DatabaseHelper } from "./database-helper";
+import { makeRestaurantOrderingCard } from "./restaurantOrdering";
+
+export const SPECIAL_RESTAURANT_ORDERING_CATEGORY =
+  "Special: Restaurant Ordering" as const;
 
 export type Mode =
   | "translate"
@@ -25,6 +30,7 @@ export interface QuizOptions {
   category: string | undefined;
   maxQuestions: number | undefined;
   mode: Mode;
+  dbHelper: DatabaseHelper | undefined;
 }
 
 export interface QuizState extends QuizOptions {
@@ -40,6 +46,7 @@ const DEFAULT_OPTIONS: QuizOptions = {
   mode: "translate",
   category: undefined,
   maxQuestions: undefined,
+  dbHelper: undefined,
 };
 
 export const EMPTY_QUESTION: AppCard = {
@@ -102,7 +109,7 @@ export const createInitialState = (
   options: Partial<QuizOptions> = {},
   initialQuestionId: string | undefined = undefined,
 ): QuizState => {
-  const { mode, category, maxQuestions } = {
+  const { mode, category, maxQuestions, dbHelper } = {
     ...DEFAULT_OPTIONS,
     ...options,
   };
@@ -140,6 +147,7 @@ export const createInitialState = (
     maxQuestions,
     showAnswer: false,
     mode,
+    dbHelper,
   };
 };
 
@@ -181,9 +189,24 @@ export function quizReducer(state: QuizState, action: QuizAction): QuizState {
           showAnswer: false,
         };
       } else {
-        return createInitialState(state.allQuestions, {
-          ...state,
-        });
+        if (state.category === SPECIAL_RESTAURANT_ORDERING_CATEGORY) {
+          const newAllQuestions = state.allQuestions.map((card) => {
+            if (
+              card.category === SPECIAL_RESTAURANT_ORDERING_CATEGORY &&
+              state.dbHelper
+            ) {
+              return makeRestaurantOrderingCard(state.dbHelper);
+            }
+            return card;
+          });
+          return createInitialState(newAllQuestions, {
+            ...state,
+          });
+        } else {
+          return createInitialState(state.allQuestions, {
+            ...state,
+          });
+        }
       }
     }
 

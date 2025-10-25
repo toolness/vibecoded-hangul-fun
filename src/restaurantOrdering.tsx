@@ -35,7 +35,27 @@ type FoodItem = {
   /** Name of food in Hangul. */
   name: string;
   /** Unit of food used when ordering at restaurant. */
-  unit: string;
+  unit: FoodUnit;
+};
+
+type FoodUnit = {
+  hangul: string;
+  english: string | undefined;
+};
+
+const bottle: FoodUnit = {
+  hangul: "병",
+  english: "bottle",
+};
+
+const cup: FoodUnit = {
+  hangul: "잔",
+  english: "cup",
+};
+
+const thingy: FoodUnit = {
+  hangul: "개",
+  english: undefined,
 };
 
 /**
@@ -43,23 +63,23 @@ type FoodItem = {
  * them in a Korean restaurant.
  */
 const FOODS: FoodItem[] = [
-  { name: "콜라", unit: "병" },
-  { name: "맥주", unit: "병" },
-  { name: "우유", unit: "잔" },
-  { name: "커피", unit: "잔" },
-  { name: "물", unit: "잔" },
-  { name: "빵", unit: "개" },
-  { name: "냉면", unit: "개" },
-  { name: "잡채", unit: "개" },
-  { name: "김밥", unit: "개" },
-  { name: "불고기", unit: "개" },
-  { name: "김치", unit: "개" },
-  { name: "비빔밥", unit: "개" },
-  { name: "오렌지", unit: "개" },
-  { name: "떡볶이", unit: "개" },
-  { name: "라면", unit: "개" },
-  { name: "주스", unit: "잔" },
-  { name: "사과", unit: "개" },
+  { name: "콜라", unit: bottle },
+  { name: "맥주", unit: bottle },
+  { name: "우유", unit: cup },
+  { name: "커피", unit: cup },
+  { name: "물", unit: cup },
+  { name: "빵", unit: thingy },
+  { name: "냉면", unit: thingy },
+  { name: "잡채", unit: thingy },
+  { name: "김밥", unit: thingy },
+  { name: "불고기", unit: thingy },
+  { name: "김치", unit: thingy },
+  { name: "비빔밥", unit: thingy },
+  { name: "오렌지", unit: thingy },
+  { name: "떡볶이", unit: thingy },
+  { name: "라면", unit: thingy },
+  { name: "주스", unit: cup },
+  { name: "사과", unit: thingy },
 ];
 
 /**
@@ -80,9 +100,13 @@ export function makeRestaurantOrderingCard(dbHelper: DatabaseHelper): AppCard {
   const foodPicture = verifyExists(foodWord.picture);
   const amount = getRandomItem(KOREAN_NUMBERS);
   const amountHangul: string = amount.short ?? amount.long;
-  const answer = `${food.name} ${amountHangul} ${food.unit}`;
-  const englishFoodName: string = getWord(food.name)?.name ?? food.name;
-  const translation = `Please give me ${amount.number} ${englishFoodName}.`;
+  const answer = `${food.name} ${amountHangul} ${food.unit.hangul}`;
+  const englishUnits: string = food.unit.english
+    ? amount.number === 1
+      ? `${food.unit.english} of `
+      : `${food.unit.english}s of `
+    : ``;
+  const translation = `Please give me ${amount.number} ${englishUnits}${foodWord.name.toLocaleLowerCase()}.`;
   const notes = `"${translation}"`;
 
   return {
@@ -102,13 +126,13 @@ export function makeRestaurantOrderingCard(dbHelper: DatabaseHelper): AppCard {
     fillInTheBlankItems: [
       {
         type: "fill-in",
-        blankValue: `${convertWordsToUnderscores(food.name)} ${amount.number} ${convertWordsToUnderscores(food.unit)}`,
+        blankValue: `${convertWordsToUnderscores(food.name)} ${amount.number} ${convertWordsToUnderscores(food.unit.hangul)}`,
         answer,
       },
       { type: "content", value: " 주세요" },
     ],
     picture: foodPicture,
     notes,
-    extraWords: [food.unit, amount.long].map(getWord).filter(isDefined),
+    extraWords: [food.unit.hangul, amount.long].map(getWord).filter(isDefined),
   };
 }

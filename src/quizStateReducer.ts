@@ -1,5 +1,6 @@
 import type { AppCard } from "./AppCard";
-import type { DatabaseHelper } from "./database-helper";
+import { DatabaseHelper } from "./database-helper";
+import { makeEmptyDatabase } from "./database-spec";
 import { makeRestaurantOrderingCard } from "./restaurantOrdering";
 
 export const SPECIAL_RESTAURANT_ORDERING_CATEGORY =
@@ -33,7 +34,7 @@ export interface QuizOptions {
   category: string | undefined;
   maxQuestions: number | undefined;
   mode: Mode;
-  dbHelper: DatabaseHelper | undefined;
+  dbHelper: DatabaseHelper;
 }
 
 export interface QuizState extends QuizOptions {
@@ -49,7 +50,7 @@ const DEFAULT_OPTIONS: QuizOptions = {
   mode: "translate",
   category: undefined,
   maxQuestions: undefined,
-  dbHelper: undefined,
+  dbHelper: new DatabaseHelper(makeEmptyDatabase()),
 };
 
 export const EMPTY_QUESTION: AppCard = {
@@ -116,15 +117,13 @@ export const createInitialState = (
     ...DEFAULT_OPTIONS,
     ...options,
   };
-  if (dbHelper) {
-    allQuestions = allQuestions.map((card) => {
-      if (card.id === SPECIAL_RESTAURANT_ORDERING_ID) {
-        // Re-generate the ordering card so it has a new random value.
-        return makeRestaurantOrderingCard(dbHelper);
-      }
-      return card;
-    });
-  }
+  allQuestions = allQuestions.map((card) => {
+    if (card.id === SPECIAL_RESTAURANT_ORDERING_ID) {
+      // Re-generate the ordering card so it has a new random value.
+      return makeRestaurantOrderingCard(dbHelper);
+    }
+    return card;
+  });
   const allQuestionsFiltered = filterQuestionsForMode(
     allQuestions,
     mode,

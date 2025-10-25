@@ -17,6 +17,7 @@ import {
   type BaseSentence,
   type Database,
   DATABASE_SCHEMA_VERSION,
+  makeEmptyDatabase,
 } from "./src/database-spec.ts";
 import {
   sortByDateAndName,
@@ -138,10 +139,6 @@ class CachingNotionClient {
       () => this.notion.dataSources.retrieve(args),
     );
   }
-}
-
-function makeEmptyDatabase(): Database {
-  return { words: [], sentences: [], __schemaVersion: DATABASE_SCHEMA_VERSION };
 }
 
 /**

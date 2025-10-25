@@ -54,7 +54,7 @@ function App({
   initialMode: Mode;
   initialRows: AppCard[];
   initialQuestionId?: string;
-  dbHelper?: DatabaseHelper;
+  dbHelper: DatabaseHelper;
 }) {
   const vocalizer = useKoreanVocalizer();
 

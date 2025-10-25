@@ -5,6 +5,10 @@
  */
 export const DATABASE_SCHEMA_VERSION = 1 as const;
 
+export function makeEmptyDatabase(): Database {
+  return { words: [], sentences: [], __schemaVersion: DATABASE_SCHEMA_VERSION };
+}
+
 export interface Database {
   /**
    * If this isn't equal to DATABASE_SCHEMA_VERSION, we shouldn't

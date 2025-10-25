@@ -5,10 +5,13 @@ import App from "./App";
 import "@testing-library/jest-dom";
 import type { Mode } from "./quizStateReducer";
 import { createTestAppCard } from "./test/testHelpers";
+import { DatabaseHelper } from "./database-helper";
+import { makeEmptyDatabase } from "./database-spec";
 
 function TestApp(props: { initialMode?: Mode }) {
   return (
     <App
+      dbHelper={new DatabaseHelper(makeEmptyDatabase())}
       initialMode={props.initialMode ?? "picture"}
       initialRows={[
         createTestAppCard({

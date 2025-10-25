@@ -27,6 +27,7 @@ import { WordPicture } from "./WordPicture";
 import NotesSection from "./NotesSection";
 import NotionLogo from "./assets/Notion_Logo.svg";
 import WikipediaLogo from "./assets/Wikipedia_Logo.svg";
+import type { DatabaseHelper } from "./database-helper";
 
 const MODE_PROMPT: Record<Mode, string> = {
   typingtutor: "Type this Hangul:",
@@ -48,10 +49,12 @@ function App({
   initialMode,
   initialRows,
   initialQuestionId,
+  dbHelper,
 }: {
   initialMode: Mode;
   initialRows: AppCard[];
   initialQuestionId?: string;
+  dbHelper: DatabaseHelper;
 }) {
   const vocalizer = useKoreanVocalizer();
 
@@ -63,6 +66,7 @@ function App({
         mode: initialMode,
         category: undefined,
         maxQuestions: undefined,
+        dbHelper,
       },
       initialQuestionId,
     );
@@ -315,7 +319,7 @@ function MinimalPairAnswerer({ state, dispatch, vocalizer }: AnswererProps) {
                 audioUrl={
                   choice.audio ? getAssetUrl(choice.audio).href : undefined
                 }
-                hangul={choice.hangul}
+                hangul={choice.fullHangul ?? choice.hangul}
                 vocalizer={vocalizer || null}
               />
             )}

@@ -14,6 +14,16 @@ export type AppCard = WordDatabaseRow & {
   notionId: string;
 
   /**
+   * The full hangul that should be pronounced by
+   * the text-to-speech system, if no audio is available.
+   *
+   * This may be different from `hangul`, which represents
+   * what the user needs to type, especially if the card
+   * represents a fill-in-the-blank card.
+   */
+  fullHangul?: string;
+
+  /**
    * If the card represents a word (or words) in a
    * sentence and the user needs to fill in the blank,
    * this will be defined.

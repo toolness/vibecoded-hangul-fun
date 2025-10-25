@@ -66,3 +66,32 @@ export function mergeEntries<T extends { id: string }>(
   // Convert map values back to array
   return Array.from(entriesMap.values());
 }
+
+/**
+ * Return a random item from the given list.
+ */
+export function getRandomItem<T>(list: T[]): T {
+  if (list.length === 0) {
+    throw new Error("Cannot select a random item from an empty list.");
+  }
+  const randomIndex = Math.floor(Math.random() * list.length);
+  return list[randomIndex];
+}
+
+export function isDefined<T>(item: T | undefined): item is T {
+  return item !== undefined;
+}
+
+export function verifyExists<T>(item: T | undefined): T {
+  if (item === undefined) {
+    throw new Error(`Expected value to not be undefined!`);
+  }
+  return item;
+}
+
+export function convertWordsToUnderscores(text: string): string {
+  return text
+    .split("")
+    .map((char) => (char !== " " ? "_" : char))
+    .join("");
+}

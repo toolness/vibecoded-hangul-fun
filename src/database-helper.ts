@@ -7,11 +7,13 @@ import type {
 export class DatabaseHelper {
   database: Database;
   wordIdMap: Map<string, WordDatabaseRow> = new Map();
+  wordHangulMap: Map<string, WordDatabaseRow> = new Map();
 
   constructor(database: Database) {
     this.database = database;
     for (const word of database.words) {
       this.wordIdMap.set(word.id, word);
+      this.wordHangulMap.set(word.hangul, word);
     }
   }
 

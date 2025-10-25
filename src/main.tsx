@@ -6,8 +6,9 @@ import { DB_JSON_ASSET, getAssetUrl } from "./assets.ts";
 import { validateMode } from "./quizStateReducer.ts";
 import type { Database } from "./database-spec.ts";
 import type { AppCard, FillInTheBlankItem } from "./AppCard.ts";
-import { sortByDateAndName } from "./util.ts";
+import { convertWordsToUnderscores, sortByDateAndName } from "./util.ts";
 import { DatabaseHelper } from "./database-helper.ts";
+import { makeRestaurantOrderingCard } from "./restaurantOrdering.tsx";
 
 const DATABASE_JSON_URL = getAssetUrl(DB_JSON_ASSET);
 
@@ -25,7 +26,10 @@ window.history.replaceState(
   `${window.location.origin}${window.location.pathname}`,
 );
 
-function createInitialRows(database: Database): AppCard[] {
+function createInitialRows(database: Database): {
+  cards: AppCard[];
+  dbHelper: DatabaseHelper;
+} {
   const result: AppCard[] = [];
   const dbHelper = new DatabaseHelper(database);
 
@@ -52,10 +56,7 @@ function createInitialRows(database: Database): AppCard[] {
       const fillInTheBlankItems: FillInTheBlankItem[] =
         sentence.markupItems.map((otherItem) => {
           if (otherItem === item) {
-            const blankValue = otherItem.text
-              .split("")
-              .map((char) => (char !== " " ? "_" : char))
-              .join("");
+            const blankValue = convertWordsToUnderscores(otherItem.text);
             return {
               type: "fill-in",
               blankValue,
@@ -81,6 +82,7 @@ function createInitialRows(database: Database): AppCard[] {
         name,
         picture: word.picture,
         hangul: item.text,
+        fullHangul: sentence.text,
         fillInTheBlankItems: fillInTheBlankItems,
         isTranslation: true,
         audio: sentence.audio,
@@ -94,17 +96,22 @@ function createInitialRows(database: Database): AppCard[] {
     }
   }
 
+  result.push(makeRestaurantOrderingCard(dbHelper));
+
   sortByDateAndName(result);
 
-  return result;
+  return { cards: result, dbHelper };
 }
+
+const { cards: initialRows, dbHelper } = createInitialRows(databaseJson);
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <App
       initialMode={initialMode}
-      initialRows={createInitialRows(databaseJson)}
+      initialRows={initialRows}
       initialQuestionId={initialId}
+      dbHelper={dbHelper}
     />
   </StrictMode>,
 );

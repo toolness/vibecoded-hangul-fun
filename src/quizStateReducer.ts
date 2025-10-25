@@ -5,6 +5,9 @@ import { makeRestaurantOrderingCard } from "./restaurantOrdering";
 export const SPECIAL_RESTAURANT_ORDERING_CATEGORY =
   "Special: Restaurant Ordering" as const;
 
+export const SPECIAL_RESTAURANT_ORDERING_ID =
+  "special-restaurant-ordering" as const;
+
 export type Mode =
   | "translate"
   | "typingtutor"
@@ -113,6 +116,15 @@ export const createInitialState = (
     ...DEFAULT_OPTIONS,
     ...options,
   };
+  if (dbHelper) {
+    allQuestions = allQuestions.map((card) => {
+      if (card.id === SPECIAL_RESTAURANT_ORDERING_ID) {
+        // Re-generate the ordering card so it has a new random value.
+        return makeRestaurantOrderingCard(dbHelper);
+      }
+      return card;
+    });
+  }
   const allQuestionsFiltered = filterQuestionsForMode(
     allQuestions,
     mode,
@@ -189,24 +201,9 @@ export function quizReducer(state: QuizState, action: QuizAction): QuizState {
           showAnswer: false,
         };
       } else {
-        if (state.category === SPECIAL_RESTAURANT_ORDERING_CATEGORY) {
-          const newAllQuestions = state.allQuestions.map((card) => {
-            if (
-              card.category === SPECIAL_RESTAURANT_ORDERING_CATEGORY &&
-              state.dbHelper
-            ) {
-              return makeRestaurantOrderingCard(state.dbHelper);
-            }
-            return card;
-          });
-          return createInitialState(newAllQuestions, {
-            ...state,
-          });
-        } else {
-          return createInitialState(state.allQuestions, {
-            ...state,
-          });
-        }
+        return createInitialState(state.allQuestions, {
+          ...state,
+        });
       }
     }
 

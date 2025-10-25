@@ -3,6 +3,7 @@ import type { DatabaseHelper } from "./database-helper";
 import {
   EMPTY_QUESTION,
   SPECIAL_RESTAURANT_ORDERING_CATEGORY,
+  SPECIAL_RESTAURANT_ORDERING_ID,
 } from "./quizStateReducer";
 import { convertWordsToUnderscores, getRandomItem, isDefined } from "./util";
 
@@ -56,6 +57,11 @@ const FOODS: FoodItem[] = [
   { name: "사과", unit: "개" },
 ];
 
+/**
+ * Randomly generates a restaurant ordering card.
+ *
+ * This should be the only card of its type in the deck.
+ */
 export function makeRestaurantOrderingCard(dbHelper: DatabaseHelper): AppCard {
   const getWord = (hangul: string) => dbHelper.wordHangulMap.get(hangul);
   const foodsWithPictures = FOODS.filter((food) =>
@@ -70,15 +76,21 @@ export function makeRestaurantOrderingCard(dbHelper: DatabaseHelper): AppCard {
   const amountHangul: string = amount.short ?? amount.long;
   const answer = `${food.name} ${amountHangul} ${food.unit}`;
   const englishFoodName: string = getWord(food.name)?.name ?? food.name;
-  const notes = `"Please give me ${amount.number} ${englishFoodName}."`;
+  const translation = `Please give me ${amount.number} ${englishFoodName}.`;
+  const notes = `"${translation}"`;
 
   return {
-    id: SPECIAL_RESTAURANT_ORDERING_CATEGORY,
+    id: SPECIAL_RESTAURANT_ORDERING_ID,
     category: SPECIAL_RESTAURANT_ORDERING_CATEGORY,
     notionId: "TODO MAKE notionId UNDEFINABLE",
+
+    // We don't want this to constantly show up at the top of the deck
+    // when it's ordered reverse chronologically, so just hard-code a
+    // time in the past for now.
     createdTime: "2025-09-17T05:26:00.000Z",
     lastModifiedTime: "2025-09-17T05:26:00.000Z",
-    name: SPECIAL_RESTAURANT_ORDERING_CATEGORY,
+
+    name: translation,
     isTranslation: true,
     hangul: answer,
     fillInTheBlankItems: [

@@ -1,6 +1,9 @@
 import type { AppCard } from "./AppCard";
 import type { DatabaseHelper } from "./database-helper";
-import { SPECIAL_RESTAURANT_ORDERING_CATEGORY } from "./quizStateReducer";
+import {
+  EMPTY_QUESTION,
+  SPECIAL_RESTAURANT_ORDERING_CATEGORY,
+} from "./quizStateReducer";
 import { convertWordsToUnderscores, getRandomItem, isDefined } from "./util";
 
 type KoreanNumber = {
@@ -54,10 +57,20 @@ const FOODS: FoodItem[] = [
 ];
 
 export function makeRestaurantOrderingCard(dbHelper: DatabaseHelper): AppCard {
-  const food = getRandomItem(FOODS);
-  const amount = getRandomItem(KOREAN_NUMBERS);
   const getWord = (hangul: string) => dbHelper.wordHangulMap.get(hangul);
-  const answer = `${food.name} ${amount.short ?? amount.long} ${food.unit}`;
+  const foodsWithPictures = FOODS.filter((food) =>
+    Boolean(getWord(food.name)?.picture),
+  );
+  if (foodsWithPictures.length === 0) {
+    return EMPTY_QUESTION;
+  }
+  const food = getRandomItem(foodsWithPictures);
+  const foodPicture = getWord(food.name)?.picture;
+  const amount = getRandomItem(KOREAN_NUMBERS);
+  const amountHangul: string = amount.short ?? amount.long;
+  const answer = `${food.name} ${amountHangul} ${food.unit}`;
+  const englishFoodName: string = getWord(food.name)?.name ?? food.name;
+  const notes = `"Please give me ${amount.number} ${englishFoodName}."`;
 
   return {
     id: SPECIAL_RESTAURANT_ORDERING_CATEGORY,
@@ -67,7 +80,7 @@ export function makeRestaurantOrderingCard(dbHelper: DatabaseHelper): AppCard {
     lastModifiedTime: "2025-09-17T05:26:00.000Z",
     name: SPECIAL_RESTAURANT_ORDERING_CATEGORY,
     isTranslation: true,
-    hangul: `${answer} 주세요`,
+    hangul: answer,
     fillInTheBlankItems: [
       {
         type: "fill-in",
@@ -76,7 +89,8 @@ export function makeRestaurantOrderingCard(dbHelper: DatabaseHelper): AppCard {
       },
       { type: "content", value: " 주세요" },
     ],
-    picture: getWord(food.name)?.picture,
+    picture: foodPicture,
+    notes,
     extraWords: [amount.long, food.unit].map(getWord).filter(isDefined),
   };
 }

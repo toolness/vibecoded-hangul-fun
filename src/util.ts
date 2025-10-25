@@ -82,6 +82,13 @@ export function isDefined<T>(item: T | undefined): item is T {
   return item !== undefined;
 }
 
+export function verifyExists<T>(item: T | undefined): T {
+  if (item === undefined) {
+    throw new Error(`Expected value to not be undefined!`);
+  }
+  return item;
+}
+
 export function convertWordsToUnderscores(text: string): string {
   return text
     .split("")

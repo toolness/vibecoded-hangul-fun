@@ -87,7 +87,7 @@ function QuestionDisplay({
             ? getAssetUrl(currentQuestion.audio).href
             : undefined
         }
-        hangul={currentQuestion.hangul}
+        hangul={currentQuestion.fullHangul ?? currentQuestion.hangul}
         vocalizer={vocalizer}
       />
     </div>

@@ -82,6 +82,7 @@ function createInitialRows(database: Database): {
         name,
         picture: word.picture,
         hangul: item.text,
+        fullHangul: sentence.text,
         fillInTheBlankItems: fillInTheBlankItems,
         isTranslation: true,
         audio: sentence.audio,

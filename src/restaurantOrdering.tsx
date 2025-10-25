@@ -123,6 +123,7 @@ export function makeRestaurantOrderingCard(dbHelper: DatabaseHelper): AppCard {
     name: translation,
     isTranslation: true,
     hangul: answer,
+    fullHangul: `${answer} 주세요`,
     fillInTheBlankItems: [
       {
         type: "fill-in",

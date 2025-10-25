@@ -319,7 +319,7 @@ function MinimalPairAnswerer({ state, dispatch, vocalizer }: AnswererProps) {
                 audioUrl={
                   choice.audio ? getAssetUrl(choice.audio).href : undefined
                 }
-                hangul={choice.hangul}
+                hangul={choice.fullHangul ?? choice.hangul}
                 vocalizer={vocalizer || null}
               />
             )}

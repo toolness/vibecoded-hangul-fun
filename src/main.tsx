@@ -8,7 +8,7 @@ import type { Database } from "./database-spec.ts";
 import type { AppCard, FillInTheBlankItem } from "./AppCard.ts";
 import { convertWordsToUnderscores, sortByDateAndName } from "./util.ts";
 import { DatabaseHelper } from "./database-helper.ts";
-import { makeRestaurantOrderingCard } from "./restaurantOrdering.tsx";
+import { makeRestaurantOrderingCard } from "./restaurantOrdering.ts";
 
 const DATABASE_JSON_URL = getAssetUrl(DB_JSON_ASSET);
 

@@ -91,6 +91,6 @@ export function makeRestaurantOrderingCard(dbHelper: DatabaseHelper): AppCard {
     ],
     picture: foodPicture,
     notes,
-    extraWords: [amount.long, food.unit].map(getWord).filter(isDefined),
+    extraWords: [food.unit, amount.long].map(getWord).filter(isDefined),
   };
 }

@@ -5,7 +5,12 @@ import {
   SPECIAL_RESTAURANT_ORDERING_CATEGORY,
   SPECIAL_RESTAURANT_ORDERING_ID,
 } from "./quizStateReducer";
-import { convertWordsToUnderscores, getRandomItem, isDefined } from "./util";
+import {
+  convertWordsToUnderscores,
+  getRandomItem,
+  isDefined,
+  verifyExists,
+} from "./util";
 
 type KoreanNumber = {
   number: number;
@@ -71,7 +76,8 @@ export function makeRestaurantOrderingCard(dbHelper: DatabaseHelper): AppCard {
     return EMPTY_QUESTION;
   }
   const food = getRandomItem(foodsWithPictures);
-  const foodPicture = getWord(food.name)?.picture;
+  const foodWord = verifyExists(getWord(food.name));
+  const foodPicture = verifyExists(foodWord.picture);
   const amount = getRandomItem(KOREAN_NUMBERS);
   const amountHangul: string = amount.short ?? amount.long;
   const answer = `${food.name} ${amountHangul} ${food.unit}`;
@@ -82,7 +88,7 @@ export function makeRestaurantOrderingCard(dbHelper: DatabaseHelper): AppCard {
   return {
     id: SPECIAL_RESTAURANT_ORDERING_ID,
     category: SPECIAL_RESTAURANT_ORDERING_CATEGORY,
-    notionId: "TODO MAKE notionId UNDEFINABLE",
+    notionId: foodWord.id,
 
     // We don't want this to constantly show up at the top of the deck
     // when it's ordered reverse chronologically, so just hard-code a

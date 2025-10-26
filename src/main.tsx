@@ -46,13 +46,12 @@ function createInitialRows(database: Database): {
     }
     let itemId = 0;
     for (const item of sentence.markupItems) {
-      if (!item.wordId || item.doNotQuiz) {
+      if ((!item.wordId && !item.forceQuiz) || item.doNotQuiz) {
         continue;
       }
-      const word = dbHelper.wordIdMap.get(item.wordId);
-      if (!word) {
-        continue;
-      }
+      const word = item.wordId
+        ? dbHelper.wordIdMap.get(item.wordId)
+        : undefined;
       const fillInTheBlankItems: FillInTheBlankItem[] =
         sentence.markupItems.map((otherItem) => {
           if (otherItem === item) {
@@ -80,7 +79,7 @@ function createInitialRows(database: Database): {
         createdTime: sentence.createdTime,
         lastModifiedTime: sentence.lastModifiedTime,
         name,
-        picture: word.picture,
+        picture: word?.picture,
         hangul: item.text,
         fullHangul: sentence.text,
         fillInTheBlankItems: fillInTheBlankItems,

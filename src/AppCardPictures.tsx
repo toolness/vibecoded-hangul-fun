@@ -6,7 +6,7 @@ export function AppCardPictures(props: { card: AppCard }) {
 
   return (
     <div className="question-pictures">
-      <WordPicture picture={card.picture} />
+      {card.picture ? <WordPicture picture={card.picture} /> : null}
       <div className="extra-question-pictures">
         {(card.extraWords ?? []).map((word) => {
           if (!word.picture) return null;

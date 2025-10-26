@@ -61,3 +61,10 @@ export type FillInTheBlankItem =
        */
       answer: string;
     };
+
+export function hasPictures(card: AppCard) {
+  if (card.picture) {
+    return true;
+  }
+  return (card.extraWords ?? []).some((word) => Boolean(word.picture));
+}

@@ -1,4 +1,4 @@
-import type { AppCard } from "./AppCard";
+import { hasPictures, type AppCard } from "./AppCard";
 import { DatabaseHelper } from "./database-helper";
 import { makeEmptyDatabase } from "./database-spec";
 import { makeRestaurantOrderingCard } from "./restaurantOrdering";
@@ -83,10 +83,14 @@ function filterQuestionsForMode(
       return allQuestions.filter((question) => question.hangul);
     case "picture":
       return allQuestions.filter(
-        (question) => question.hangul && question.picture,
+        (question) => question.hangul && hasPictures(question),
       );
     case "reversepicture":
       return allQuestions.filter(
+        // Note that we're specifically looking for question.picture,
+        // not just checking if the question has any pictures,
+        // because this mode is asking what the picture for a
+        // specific word is.
         (question) => question.hangul && question.picture,
       );
     case "minimalpair":

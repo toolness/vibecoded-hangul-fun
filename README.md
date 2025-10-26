@@ -111,6 +111,10 @@ The markup field can contain the following:
   in for it (or otherwise quiz the user on it), but we will still
   use its picture.
 
+  If the word isn't hyperlinked but is underlined, we will
+  still quiz the user on it, even though we don't have a
+  word defined for it.
+
 [Cloze]: https://docs.ankiweb.net/editing.html#cloze-deletion
 
 ### Environment variables

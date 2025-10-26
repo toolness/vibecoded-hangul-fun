@@ -3,7 +3,7 @@
  * used to convert Notion's raw API responses into the DB
  * schema, this version number should be incremented!
  */
-export const DATABASE_SCHEMA_VERSION = 1 as const;
+export const DATABASE_SCHEMA_VERSION = 2 as const;
 
 export function makeEmptyDatabase(): Database {
   return { words: [], sentences: [], __schemaVersion: DATABASE_SCHEMA_VERSION };
@@ -163,6 +163,15 @@ export interface SentenceMarkupItem {
 
   /**
    * If true, don't quiz the user about this word.
+   *
+   * @deprecated There's not really a reason to use this,
+   * try to avoid it.
    */
   doNotQuiz?: true;
+
+  /**
+   * If `wordId` isn't set, setting this to true will force
+   * quizzing the user on this part of the sentence.
+   */
+  forceQuiz?: true;
 }

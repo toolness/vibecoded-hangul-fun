@@ -311,10 +311,18 @@ async function downloadSentences(args: {
               id = addDashesToUuid(idMatch[1]);
             }
             let doNotQuiz: true | undefined;
+            let forceQuiz: true | undefined;
             if (item.annotations.color === "gray_background") {
               doNotQuiz = true;
+            } else if (item.annotations.underline && !id) {
+              forceQuiz = true;
             }
-            markupItems.push({ text: item.plain_text, wordId: id, doNotQuiz });
+            markupItems.push({
+              text: item.plain_text,
+              wordId: id,
+              doNotQuiz,
+              forceQuiz,
+            });
           }
         });
       }

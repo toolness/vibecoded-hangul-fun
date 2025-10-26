@@ -23,11 +23,11 @@ import QuestionDisplay from "./QuestionDisplay";
 import Confetti from "./Confetti";
 import { Pronouncer } from "./Pronouncer";
 import { getAssetUrl } from "./assets";
-import { WordPicture } from "./WordPicture";
 import NotesSection from "./NotesSection";
 import NotionLogo from "./assets/Notion_Logo.svg";
 import WikipediaLogo from "./assets/Wikipedia_Logo.svg";
 import type { DatabaseHelper } from "./database-helper";
+import { AppCardPictures } from "./AppCardPictures";
 
 const MODE_PROMPT: Record<Mode, string> = {
   typingtutor: "Type this Hangul:",
@@ -208,9 +208,7 @@ function ReversePictureAnswerer({ state, dispatch, vocalizer }: AnswererProps) {
 
   return (
     <>
-      <div>
-        {showAnswer && <WordPicture picture={currentQuestion.picture} />}
-      </div>
+      <div>{showAnswer && <AppCardPictures card={currentQuestion} />}</div>
 
       <div className="button-section">
         {showAnswer ? (

@@ -248,7 +248,7 @@ const run = async () => {
       }
     }
     const clozeParts: string[] = row.markupItems.map((item) => {
-      if (item.wordId && !item.doNotQuiz) {
+      if ((item.wordId && !item.doNotQuiz) || item.forceQuiz) {
         clozeId += 1;
         return `{{c${clozeId}::${item.text}}}`;
       } else {

@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "ci": "npm run typecheck && prettier . --check && npm run test",
+    "ci": "npm run typecheck && prettier . --check && npm run test && vite build --logLevel warn",
     "download": "node --experimental-transform-types download.ts",
     "anki": "node --experimental-transform-types anki.ts",
     "typecheck": "tsc -b && npm run lint",

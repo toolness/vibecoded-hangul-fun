@@ -3,8 +3,8 @@ import type { Mode } from "./quizStateReducer";
 import { type Vocalizer } from "./speech";
 import { getAssetUrl } from "./assets";
 import { Pronouncer } from "./Pronouncer";
-import { WordPicture } from "./WordPicture";
 import { FillInTheBlank } from "./FillInTheBlank";
+import { AppCardPictures } from "./AppCardPictures";
 
 interface QuestionDisplayProps {
   currentQuestion: AppCard;
@@ -35,17 +35,7 @@ function QuestionDisplay({
         // the old image show for a split-second is better than
         // making it disappear entirely, as the latter causes
         // more layout instability.
-        return (
-          <div className="question-pictures">
-            <WordPicture picture={currentQuestion.picture} />
-            <div className="extra-question-pictures">
-              {(currentQuestion.extraWords ?? []).map((word) => {
-                if (!word.picture) return null;
-                return <WordPicture picture={word.picture} />;
-              })}
-            </div>
-          </div>
-        );
+        return <AppCardPictures card={currentQuestion} />;
       case "reversepicture":
         if (currentQuestion.fillInTheBlankItems) {
           return null;

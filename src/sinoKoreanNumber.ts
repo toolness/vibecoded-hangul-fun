@@ -39,7 +39,7 @@ export function makeSinoKoreanNumberCard(): AppCard {
   const ones = getRandomItem(digits);
   const tens = getRandomItem(digits);
   const numberString = (tens.number + ones.number * 10).toString();
-  const answer = `${ones.hangul}${ten.hangul}${tens.hangul}`;
+  const answer = `${ones.number > 1 ? ones.hangul : ""}${ten.hangul}${tens.hangul}`;
 
   return {
     id: SPECIAL_SINO_KOREAN_NUMBER_ID,

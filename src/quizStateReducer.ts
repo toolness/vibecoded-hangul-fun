@@ -4,8 +4,7 @@ import { makeEmptyDatabase } from "./database-spec";
 import { makeRestaurantOrderingCard } from "./restaurantOrdering";
 import { makeSinoKoreanNumberCard } from "./sinoKoreanNumber";
 
-export const SPECIAL_SINO_KOREAN_NUMBER_CATEGORY =
-  "Special: Sino-Korean Numbers" as const;
+export const SPECIAL_SINO_KOREAN_NUMBER_CATEGORY = "Special: Money" as const;
 
 export const SPECIAL_SINO_KOREAN_NUMBER_ID =
   "special-sino-korean-number" as const;

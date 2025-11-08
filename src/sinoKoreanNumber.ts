@@ -11,6 +11,14 @@ type SinoKoreanNumber = {
   hangul: string;
 };
 
+/**
+ * Since 2003, the exchange rate has varied between
+ * a high of 0.00067 (2009) to a low of 0.0011 (2007).
+ *
+ * As of November 2025, it's around the value below.
+ */
+const WON_EXCHANGE_RATE = 0.0007;
+
 const SINO_KOREAN_NUMBERS: SinoKoreanNumber[] = [
   { number: 1, hangul: "일" },
   { number: 2, hangul: "이" },
@@ -109,6 +117,21 @@ function generateRandomNumber(): number {
   }
 }
 
+function getUsCurrencyString(won: number): string {
+  const dollars = WON_EXCHANGE_RATE * won;
+
+  if (dollars < 1) {
+    const cents = dollars * 100;
+    if (cents < 1) {
+      return "less than 1¢";
+    } else {
+      return `about ${Math.round(cents)}¢`;
+    }
+  } else {
+    return `about $${Math.round(dollars)}`;
+  }
+}
+
 /**
  * Randomly generates a Sino-Korean number card.
  *
@@ -118,6 +141,7 @@ export function makeSinoKoreanNumberCard(): AppCard {
   const number = generateRandomNumber();
   const numberString = number.toLocaleString("en-US");
   const answer = makeSinoKoreanNumber(number);
+  const usCurrencyString = getUsCurrencyString(number);
 
   if (!answer) {
     return EMPTY_QUESTION;
@@ -151,7 +175,8 @@ export function makeSinoKoreanNumberCard(): AppCard {
     ],
     picture: {
       type: "emojis",
-      emojis: numberString,
+      emojis: `₩${numberString}`,
     },
+    notes: `₩${numberString} is ${usCurrencyString}.`,
   };
 }

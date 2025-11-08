@@ -55,6 +55,16 @@ export function makeSinoKoreanNumberCard(): AppCard {
     name: answer,
     isTranslation: true,
     hangul: answer,
+    alternativeHangulAnswers: [
+      // This looks weird, but a lot of speech-to-text systems
+      // will insert numbers instead of Hangul for spoken Korean
+      // numbers.
+      //
+      // The downside is that the user can simply type the number
+      // and trivially "win", but it's not like we're keeping
+      // score or anything.
+      numberString,
+    ],
     picture: {
       type: "emojis",
       emojis: numberString,

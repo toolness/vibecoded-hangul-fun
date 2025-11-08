@@ -361,7 +361,10 @@ function TypingModeAnswerer(props: AnswererProps) {
     currentQuestion.hangul || "",
     userInput,
   );
-  const isCompletelyCorrect = userInput === currentQuestion.hangul;
+  const isCompletelyCorrect = [
+    currentQuestion.hangul,
+    ...(currentQuestion.alternativeHangulAnswers ?? []),
+  ].some((hangul) => userInput === hangul);
 
   // Trigger confetti when user completes the word correctly
   useEffect(() => {

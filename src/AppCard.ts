@@ -24,6 +24,15 @@ export type AppCard = WordDatabaseRow & {
   fullHangul?: string;
 
   /**
+   * Alternative answers that we'll accept as correct,
+   * in addition to `hangul`.
+   *
+   * This is primarily intended to support speech-to-text
+   * systems, etc.
+   */
+  alternativeHangulAnswers?: string[];
+
+  /**
    * If the card represents a word (or words) in a
    * sentence and the user needs to fill in the blank,
    * this will be defined.

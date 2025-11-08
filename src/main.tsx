@@ -9,6 +9,7 @@ import type { AppCard, FillInTheBlankItem } from "./AppCard.ts";
 import { convertWordsToUnderscores, sortByDateAndName } from "./util.ts";
 import { DatabaseHelper } from "./database-helper.ts";
 import { makeRestaurantOrderingCard } from "./restaurantOrdering.ts";
+import { makeSinoKoreanNumberCard } from "./sinoKoreanNumber.ts";
 
 const DATABASE_JSON_URL = getAssetUrl(DB_JSON_ASSET);
 
@@ -96,6 +97,7 @@ function createInitialRows(database: Database): {
   }
 
   result.push(makeRestaurantOrderingCard(dbHelper));
+  result.push(makeSinoKoreanNumberCard(dbHelper));
 
   sortByDateAndName(result);
 

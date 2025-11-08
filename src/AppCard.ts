@@ -11,7 +11,7 @@ export type AppCard = WordDatabaseRow & {
    * The ID of the notion page that the data for this
    * card is stored in.
    */
-  notionId: string;
+  notionId: string | undefined;
 
   /**
    * The full hangul that should be pronounced by

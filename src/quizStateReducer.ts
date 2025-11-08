@@ -2,6 +2,13 @@ import { hasPictures, type AppCard } from "./AppCard";
 import { DatabaseHelper } from "./database-helper";
 import { makeEmptyDatabase } from "./database-spec";
 import { makeRestaurantOrderingCard } from "./restaurantOrdering";
+import { makeSinoKoreanNumberCard } from "./sinoKoreanNumber";
+
+export const SPECIAL_SINO_KOREAN_NUMBER_CATEGORY =
+  "Special: Sino-Korean Numbers" as const;
+
+export const SPECIAL_SINO_KOREAN_NUMBER_ID =
+  "special-sino-korean-number" as const;
 
 export const SPECIAL_RESTAURANT_ORDERING_CATEGORY =
   "Special: Restaurant Ordering" as const;
@@ -55,7 +62,7 @@ const DEFAULT_OPTIONS: QuizOptions = {
 
 export const EMPTY_QUESTION: AppCard = {
   id: "dummy-question-id",
-  notionId: "dummy-question-id",
+  notionId: undefined,
   createdTime: new Date().toISOString(),
   lastModifiedTime: new Date().toISOString(),
   name: "???",
@@ -125,6 +132,8 @@ export const createInitialState = (
     if (card.id === SPECIAL_RESTAURANT_ORDERING_ID) {
       // Re-generate the ordering card so it has a new random value.
       return makeRestaurantOrderingCard(dbHelper);
+    } else if (card.id === SPECIAL_SINO_KOREAN_NUMBER_ID) {
+      return makeSinoKoreanNumberCard(dbHelper);
     }
     return card;
   });

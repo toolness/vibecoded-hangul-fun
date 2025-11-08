@@ -141,7 +141,7 @@ function App({
       </div>
 
       <div className="footer-links">
-        {!isEmptyQuestion && (
+        {currentQuestion.notionId && (
           <a
             // This needs to be www.notion.so in order to open the Notion app on Android.
             href={`https://www.notion.so/${currentQuestion.notionId.replace(/-/g, "")}`}

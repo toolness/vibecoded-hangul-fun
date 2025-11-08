@@ -1,9 +1,10 @@
 import type { AppCard } from "./AppCard";
 import {
+  EMPTY_QUESTION,
   SPECIAL_SINO_KOREAN_NUMBER_CATEGORY,
   SPECIAL_SINO_KOREAN_NUMBER_ID,
 } from "./quizStateReducer";
-import { getRandomItem, verifyExists } from "./util";
+import { getRandomInt, verifyExists } from "./util";
 
 type SinoKoreanNumber = {
   number: number;
@@ -20,10 +21,6 @@ const SINO_KOREAN_NUMBERS: SinoKoreanNumber[] = [
   { number: 7, hangul: "칠" },
   { number: 8, hangul: "팔" },
   { number: 9, hangul: "구" },
-  { number: 10, hangul: "십" },
-  { number: 100, hangul: "백" },
-  { number: 1000, hangul: "천" },
-  { number: 10000, hangul: "만" },
 ];
 
 export function makeSinoKoreanNumber(value: number): string | undefined {
@@ -80,14 +77,13 @@ export function makeSinoKoreanNumber(value: number): string | undefined {
  * This should be the only card of its type in the deck.
  */
 export function makeSinoKoreanNumberCard(): AppCard {
-  const getNumberWord = (x: number) =>
-    verifyExists(SINO_KOREAN_NUMBERS.find((word) => word.number === x));
-  const digits = SINO_KOREAN_NUMBERS.filter((word) => word.number < 10);
-  const ten = getNumberWord(10);
-  const ones = getRandomItem(digits);
-  const tens = getRandomItem(digits);
-  const numberString = (tens.number + ones.number * 10).toString();
-  const answer = `${ones.number > 1 ? ones.hangul : ""}${ten.hangul}${tens.hangul}`;
+  const number = getRandomInt(1, 99);
+  const numberString = number.toString();
+  const answer = makeSinoKoreanNumber(number);
+
+  if (!answer) {
+    return EMPTY_QUESTION;
+  }
 
   return {
     id: SPECIAL_SINO_KOREAN_NUMBER_ID,

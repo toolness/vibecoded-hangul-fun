@@ -19,7 +19,7 @@ type SinoKoreanNumber = {
  */
 const WON_EXCHANGE_RATE = 0.0007;
 
-const SINO_KOREAN_NUMBERS: SinoKoreanNumber[] = [
+const SINO_KOREAN_DIGITS: SinoKoreanNumber[] = [
   { number: 1, hangul: "일" },
   { number: 2, hangul: "이" },
   { number: 3, hangul: "삼" },
@@ -36,7 +36,7 @@ export function makeSinoKoreanNumber(value: number): string | undefined {
     return;
   }
   const getDigitWord = (x: number) =>
-    verifyExists(SINO_KOREAN_NUMBERS.find((word) => word.number === x)).hangul;
+    verifyExists(SINO_KOREAN_DIGITS.find((word) => word.number === x)).hangul;
   const getDigitWordExceptOne = (x: number) => (x === 1 ? "" : getDigitWord(x));
   const parts: string[] = [];
 

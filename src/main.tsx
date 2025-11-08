@@ -97,7 +97,7 @@ function createInitialRows(database: Database): {
   }
 
   result.push(makeRestaurantOrderingCard(dbHelper));
-  result.push(makeSinoKoreanNumberCard(dbHelper));
+  result.push(makeSinoKoreanNumberCard());
 
   sortByDateAndName(result);
 

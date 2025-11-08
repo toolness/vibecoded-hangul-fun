@@ -129,11 +129,11 @@ export const createInitialState = (
     ...options,
   };
   allQuestions = allQuestions.map((card) => {
+    // Re-generate the dynamic cards so they have new random values.
     if (card.id === SPECIAL_RESTAURANT_ORDERING_ID) {
-      // Re-generate the ordering card so it has a new random value.
       return makeRestaurantOrderingCard(dbHelper);
     } else if (card.id === SPECIAL_SINO_KOREAN_NUMBER_ID) {
-      return makeSinoKoreanNumberCard(dbHelper);
+      return makeSinoKoreanNumberCard();
     }
     return card;
   });

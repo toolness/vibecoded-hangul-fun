@@ -1,11 +1,9 @@
 import type { AppCard } from "./AppCard";
-import type { DatabaseHelper } from "./database-helper";
-import type { WordDatabaseRow } from "./database-spec";
 import {
   SPECIAL_SINO_KOREAN_NUMBER_CATEGORY,
   SPECIAL_SINO_KOREAN_NUMBER_ID,
 } from "./quizStateReducer";
-import { getRandomItem, isDefined, verifyExists } from "./util";
+import { getRandomItem, verifyExists } from "./util";
 
 type SinoKoreanNumber = {
   number: number;
@@ -28,39 +26,25 @@ const SINO_KOREAN_NUMBERS: SinoKoreanNumber[] = [
   { number: 10000, hangul: "만" },
 ];
 
-type NumberWithWord = SinoKoreanNumber & {
-  word?: WordDatabaseRow;
-};
-
 /**
  * Randomly generates a Sino-Korean number card.
  *
  * This should be the only card of its type in the deck.
  */
-export function makeSinoKoreanNumberCard(dbHelper: DatabaseHelper): AppCard {
-  const words: NumberWithWord[] = [];
-  for (const n of SINO_KOREAN_NUMBERS) {
-    const word = dbHelper.wordHangulMap.get(n.hangul);
-    words.push({
-      ...n,
-      word,
-    });
-  }
+export function makeSinoKoreanNumberCard(): AppCard {
   const getNumberWord = (x: number) =>
-    verifyExists(words.find((word) => word.number === x));
-  const digits = words.filter((word) => word.number < 10);
+    verifyExists(SINO_KOREAN_NUMBERS.find((word) => word.number === x));
+  const digits = SINO_KOREAN_NUMBERS.filter((word) => word.number < 10);
   const ten = getNumberWord(10);
   const ones = getRandomItem(digits);
   const tens = getRandomItem(digits);
   const numberString = (tens.number + ones.number * 10).toString();
   const answer = `${ones.hangul}${ten.hangul}${tens.hangul}`;
-  const featuredWord = ten.word;
-  const extraWords = [ones.word, tens.word].filter(isDefined);
 
   return {
     id: SPECIAL_SINO_KOREAN_NUMBER_ID,
     category: SPECIAL_SINO_KOREAN_NUMBER_CATEGORY,
-    notionId: featuredWord?.id,
+    notionId: undefined,
 
     // We don't want this to constantly show up at the top of the deck
     // when it's ordered reverse chronologically, so just hard-code a
@@ -71,20 +55,9 @@ export function makeSinoKoreanNumberCard(dbHelper: DatabaseHelper): AppCard {
     name: answer,
     isTranslation: true,
     hangul: answer,
-    fillInTheBlankItems: [
-      {
-        type: "fill-in",
-        blankValue: numberString,
-        answer,
-      },
-    ],
-    notes: numberString,
-    picture: featuredWord?.picture ?? {
+    picture: {
       type: "emojis",
-      // This is silly but we really want it to show up in
-      // the picture mode, even if it ... doesn't have a picture.
       emojis: numberString,
     },
-    extraWords,
   };
 }

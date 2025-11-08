@@ -78,6 +78,18 @@ export function getRandomItem<T>(list: T[]): T {
   return list[randomIndex];
 }
 
+/**
+ * Return a random integer within the given range, inclusive.
+ */
+export function getRandomInt(min: number, max: number): number {
+  const minInt = Math.ceil(min);
+  const maxInt = Math.floor(max);
+  if (minInt > maxInt) {
+    throw new Error("min must be less than or equal to max");
+  }
+  return Math.floor(Math.random() * (maxInt - minInt + 1)) + minInt;
+}
+
 export function isDefined<T>(item: T | undefined): item is T {
   return item !== undefined;
 }

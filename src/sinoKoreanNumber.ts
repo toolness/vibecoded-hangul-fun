@@ -146,6 +146,8 @@ export function makeSinoKoreanNumberCard(): AppCard {
       // and trivially "win", but it's not like we're keeping
       // score or anything.
       numberString,
+      // Also include the number without commas.
+      number.toString(),
     ],
     picture: {
       type: "emojis",

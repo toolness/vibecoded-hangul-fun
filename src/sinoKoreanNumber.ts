@@ -26,6 +26,54 @@ const SINO_KOREAN_NUMBERS: SinoKoreanNumber[] = [
   { number: 10000, hangul: "만" },
 ];
 
+export function makeSinoKoreanNumber(value: number): string | undefined {
+  if (value <= 0 || value > 999_999 || Math.floor(value) !== value) {
+    return;
+  }
+  const getDigitWord = (x: number) =>
+    verifyExists(SINO_KOREAN_NUMBERS.find((word) => word.number === x)).hangul;
+  const getDigitWordExceptOne = (x: number) => (x === 1 ? "" : getDigitWord(x));
+  const parts: string[] = [];
+
+  const tenThousands = Math.floor(value / 10_000);
+  if (tenThousands > 0) {
+    if (tenThousands === 1) {
+      parts.push(`만`);
+    } else {
+      const tenThousandsHangul = verifyExists(
+        makeSinoKoreanNumber(tenThousands),
+      );
+      parts.push(`${tenThousandsHangul}만`);
+    }
+    value -= tenThousands * 10_000;
+  }
+
+  const thousands = Math.floor(value / 1_000);
+  if (thousands > 0) {
+    parts.push(`${getDigitWordExceptOne(thousands)}천`);
+    value -= thousands * 1_000;
+  }
+
+  const hundreds = Math.floor(value / 100);
+  if (hundreds > 0) {
+    parts.push(`${getDigitWordExceptOne(hundreds)}백`);
+    value -= hundreds * 100;
+  }
+
+  const tens = Math.floor(value / 10);
+  if (tens > 0) {
+    parts.push(`${getDigitWordExceptOne(tens)}십`);
+    value -= tens * 10;
+  }
+
+  const hangul = parts.join(" ");
+
+  if (value > 0) {
+    return `${hangul}${getDigitWord(value)}`;
+  }
+  return hangul;
+}
+
 /**
  * Randomly generates a Sino-Korean number card.
  *

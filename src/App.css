@@ -46,7 +46,8 @@
   color: #213547;
 }
 
-.mode-picture {
+.mode-picture,
+.reverse-picture-picture {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -75,6 +76,7 @@ img.question-picture {
 
 span.question-emojis {
   font-size: 5rem;
+  font-weight: bold;
   display: block;
   text-align: center;
 }

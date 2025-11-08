@@ -208,7 +208,9 @@ function ReversePictureAnswerer({ state, dispatch, vocalizer }: AnswererProps) {
 
   return (
     <>
-      <div>{showAnswer && <AppCardPictures card={currentQuestion} />}</div>
+      <div className="reverse-picture-picture">
+        {showAnswer && <AppCardPictures card={currentQuestion} />}
+      </div>
 
       <div className="button-section">
         {showAnswer ? (

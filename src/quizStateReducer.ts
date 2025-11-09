@@ -41,6 +41,7 @@ export function validateMode(mode: string): Mode | undefined {
 export interface QuizOptions {
   category: string | undefined;
   maxQuestions: number | undefined;
+  autoAdvance: boolean;
   difficulty: Difficulty;
   mode: Mode;
   dbHelper: DatabaseHelper;
@@ -59,6 +60,7 @@ const DEFAULT_OPTIONS: QuizOptions = {
   mode: "translate",
   category: undefined,
   maxQuestions: undefined,
+  autoAdvance: false,
   difficulty: "medium",
   dbHelper: new DatabaseHelper(makeEmptyDatabase()),
 };
@@ -127,7 +129,7 @@ export const createInitialState = (
   options: Partial<QuizOptions> = {},
   initialQuestionId: string | undefined = undefined,
 ): QuizState => {
-  const { mode, category, maxQuestions, difficulty, dbHelper } = {
+  const { mode, category, maxQuestions, difficulty, dbHelper, autoAdvance } = {
     ...DEFAULT_OPTIONS,
     ...options,
   };
@@ -172,6 +174,7 @@ export const createInitialState = (
     allQuestionsFiltered,
     category,
     maxQuestions,
+    autoAdvance,
     difficulty,
     showAnswer: false,
     mode,

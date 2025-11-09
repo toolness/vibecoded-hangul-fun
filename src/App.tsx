@@ -31,8 +31,6 @@ import WikipediaLogo from "./assets/Wikipedia_Logo.svg";
 import type { DatabaseHelper } from "./database-helper";
 import { AppCardPictures } from "./AppCardPictures";
 
-const ENABLE_EXPERIMENTAL_AUTO_ADVANCE = false;
-
 const MODE_PROMPT: Record<Mode, string> = {
   typingtutor: "Type this Hangul:",
   translate: "Translate to Hangul:",
@@ -134,7 +132,7 @@ function App({
         currentQuestionId={currentQuestion.id}
       />
 
-      {ENABLE_EXPERIMENTAL_AUTO_ADVANCE && (
+      {state.autoAdvance && (
         <AutoAdvancer
           currentQuestion={currentQuestion}
           onAdvance={handleAdvance}

@@ -25,10 +25,12 @@ interface HamburgerMenuProps {
   currentCategory: string | undefined;
   currentMaxQuestions: number | undefined;
   currentDifficulty: Difficulty;
+  autoAdvance: boolean;
   onSelectWord: (word: AppCard) => void;
   onSelectCategory: (category: string | undefined) => void;
   onSetMaxQuestions: (maxQuestions: number | undefined) => void;
   onSetDifficulty: (difficulty: Difficulty) => void;
+  onSetAutoAdvance: (autoAdvance: boolean) => void;
   mode: Mode;
   onSetMode: (mode: Mode) => void;
   currentQuestionId: string | undefined;
@@ -40,10 +42,12 @@ function HamburgerMenu({
   currentCategory,
   currentMaxQuestions,
   currentDifficulty,
+  autoAdvance,
   onSelectWord,
   onSelectCategory,
   onSetMaxQuestions,
   onSetDifficulty,
+  onSetAutoAdvance,
   mode,
   onSetMode,
   currentQuestionId,
@@ -190,6 +194,17 @@ function HamburgerMenu({
                 </button>
               );
             })}
+            <hr className="menu-divider" />
+            <button
+              className="menu-link"
+              onClick={() => {
+                onSetAutoAdvance(!autoAdvance);
+                setIsMenuOpen(false);
+              }}
+            >
+              {autoAdvance && "✓ "}
+              Auto-advance
+            </button>
           </div>
         </div>
       )}

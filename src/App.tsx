@@ -104,6 +104,10 @@ function App({
     dispatch({ type: "SET_OPTIONS", difficulty: newDifficulty });
   };
 
+  const handleSetAutoAdvance = (newAutoAdvance: boolean) => {
+    dispatch({ type: "SET_OPTIONS", autoAdvance: newAutoAdvance });
+  };
+
   const handleAdvance = useCallback(
     () => dispatch({ type: "NEXT_QUESTION" }),
     [],
@@ -123,10 +127,12 @@ function App({
         currentCategory={category}
         currentMaxQuestions={maxQuestions}
         currentDifficulty={difficulty}
+        autoAdvance={state.autoAdvance}
         onSelectWord={handleWordSelection}
         onSelectCategory={handleSetCategory}
         onSetMaxQuestions={handleSetMaxQuestions}
         onSetDifficulty={handleSetDifficulty}
+        onSetAutoAdvance={handleSetAutoAdvance}
         mode={mode}
         onSetMode={handleSetMode}
         currentQuestionId={currentQuestion.id}

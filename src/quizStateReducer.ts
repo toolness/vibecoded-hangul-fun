@@ -22,6 +22,8 @@ export type Mode =
   | "minimalpair"
   | "reversepicture";
 
+export type Difficulty = "easy" | "medium" | "hard";
+
 const MODES: Record<Mode, true> = {
   translate: true,
   typingtutor: true,
@@ -39,6 +41,7 @@ export function validateMode(mode: string): Mode | undefined {
 export interface QuizOptions {
   category: string | undefined;
   maxQuestions: number | undefined;
+  difficulty: Difficulty;
   mode: Mode;
   dbHelper: DatabaseHelper;
 }
@@ -56,6 +59,7 @@ const DEFAULT_OPTIONS: QuizOptions = {
   mode: "translate",
   category: undefined,
   maxQuestions: undefined,
+  difficulty: "medium",
   dbHelper: new DatabaseHelper(makeEmptyDatabase()),
 };
 
@@ -123,7 +127,7 @@ export const createInitialState = (
   options: Partial<QuizOptions> = {},
   initialQuestionId: string | undefined = undefined,
 ): QuizState => {
-  const { mode, category, maxQuestions, dbHelper } = {
+  const { mode, category, maxQuestions, difficulty, dbHelper } = {
     ...DEFAULT_OPTIONS,
     ...options,
   };
@@ -132,7 +136,7 @@ export const createInitialState = (
     if (card.id === SPECIAL_RESTAURANT_ORDERING_ID) {
       return makeRestaurantOrderingCard(dbHelper);
     } else if (card.id === SPECIAL_SINO_KOREAN_NUMBER_ID) {
-      return makeSinoKoreanNumberCard();
+      return makeSinoKoreanNumberCard(difficulty);
     }
     return card;
   });
@@ -168,6 +172,7 @@ export const createInitialState = (
     allQuestionsFiltered,
     category,
     maxQuestions,
+    difficulty,
     showAnswer: false,
     mode,
     dbHelper,

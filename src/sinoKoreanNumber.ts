@@ -3,6 +3,7 @@ import {
   EMPTY_QUESTION,
   SPECIAL_SINO_KOREAN_NUMBER_CATEGORY,
   SPECIAL_SINO_KOREAN_NUMBER_ID,
+  type Difficulty,
 } from "./quizStateReducer";
 import { getRandomInt, verifyExists } from "./util";
 
@@ -83,10 +84,10 @@ export function makeSinoKoreanNumber(value: number): string | undefined {
  * Generate a random number that's likely to be in units that
  * someone would see in Korean Won.
  */
-function generateRandomNumber(): number {
+function generateRandomNumber(difficulty: Difficulty): number {
   const random = Math.random();
 
-  if (random < 0.2) {
+  if (random < 0.2 || difficulty === "easy") {
     return getRandomInt(1, 99);
   } else if (random < 0.4) {
     if (Math.random() < 0.75) {
@@ -95,7 +96,7 @@ function generateRandomNumber(): number {
     } else {
       return getRandomInt(100, 999);
     }
-  } else if (random < 0.6) {
+  } else if (random < 0.6 || difficulty === "medium") {
     if (Math.random() < 0.75) {
       // Return a number between 1,000 and 9,900 that's divisible by 100
       return getRandomInt(10, 99) * 100;
@@ -137,8 +138,8 @@ function getUsCurrencyString(won: number): string {
  *
  * This should be the only card of its type in the deck.
  */
-export function makeSinoKoreanNumberCard(): AppCard {
-  const number = generateRandomNumber();
+export function makeSinoKoreanNumberCard(difficulty: Difficulty): AppCard {
+  const number = generateRandomNumber(difficulty);
   const numberString = number.toLocaleString("en-US");
   const answer = makeSinoKoreanNumber(number);
   const usCurrencyString = getUsCurrencyString(number);

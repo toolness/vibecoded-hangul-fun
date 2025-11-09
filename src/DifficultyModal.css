@@ -1,0 +1,63 @@
+.difficulty-container {
+  padding: 1rem;
+}
+
+.difficulty-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.difficulty-option {
+  padding: 1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  background-color: white;
+  color: #333;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  width: 100%;
+}
+
+.difficulty-option:hover {
+  background-color: #f5f5f5;
+  border-color: #b0b0b0;
+}
+
+.difficulty-selected {
+  background-color: #646cff;
+  color: white;
+  border-color: #646cff;
+}
+
+.difficulty-selected:hover {
+  background-color: #5058e5;
+  border-color: #5058e5;
+}
+
+.difficulty-label {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.difficulty-description {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+@media (max-width: 640px) {
+  .difficulty-option {
+    padding: 0.8rem;
+  }
+
+  .difficulty-label {
+    font-size: 1rem;
+  }
+
+  .difficulty-description {
+    font-size: 0.85rem;
+  }
+}

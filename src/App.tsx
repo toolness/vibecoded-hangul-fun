@@ -13,6 +13,7 @@ import {
   quizReducer,
   createInitialState,
   type Mode,
+  type Difficulty,
   type QuizState,
   type QuizAction,
   EMPTY_QUESTION,
@@ -66,6 +67,7 @@ function App({
         mode: initialMode,
         category: undefined,
         maxQuestions: undefined,
+        difficulty: "medium",
         dbHelper,
       },
       initialQuestionId,
@@ -76,6 +78,7 @@ function App({
     mode,
     category,
     maxQuestions,
+    difficulty,
     allQuestions,
     allQuestionsFiltered,
   } = state;
@@ -96,6 +99,10 @@ function App({
     dispatch({ type: "SET_OPTIONS", maxQuestions: newMaxQuestions });
   };
 
+  const handleSetDifficulty = (newDifficulty: Difficulty) => {
+    dispatch({ type: "SET_OPTIONS", difficulty: newDifficulty });
+  };
+
   const Answerer = ANSWERERS[mode];
   const isEmptyQuestion = currentQuestion === EMPTY_QUESTION;
   const prompt = isEmptyQuestion
@@ -109,9 +116,11 @@ function App({
         allQuestions={allQuestions}
         currentCategory={category}
         currentMaxQuestions={maxQuestions}
+        currentDifficulty={difficulty}
         onSelectWord={handleWordSelection}
         onSelectCategory={handleSetCategory}
         onSetMaxQuestions={handleSetMaxQuestions}
+        onSetDifficulty={handleSetDifficulty}
         mode={mode}
         onSetMode={handleSetMode}
         currentQuestionId={currentQuestion.id}

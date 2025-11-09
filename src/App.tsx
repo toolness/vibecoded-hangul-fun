@@ -6,6 +6,7 @@ import {
   useRef,
   type ActionDispatch,
   useMemo,
+  useCallback,
 } from "react";
 import type { AppCard } from "./AppCard";
 import { calculateCorrectKeystrokes } from "./calculateCorrectKeystrokes";
@@ -29,6 +30,8 @@ import NotionLogo from "./assets/Notion_Logo.svg";
 import WikipediaLogo from "./assets/Wikipedia_Logo.svg";
 import type { DatabaseHelper } from "./database-helper";
 import { AppCardPictures } from "./AppCardPictures";
+
+const ENABLE_EXPERIMENTAL_AUTO_ADVANCE = false;
 
 const MODE_PROMPT: Record<Mode, string> = {
   typingtutor: "Type this Hangul:",
@@ -103,6 +106,11 @@ function App({
     dispatch({ type: "SET_OPTIONS", difficulty: newDifficulty });
   };
 
+  const handleAdvance = useCallback(
+    () => dispatch({ type: "NEXT_QUESTION" }),
+    [],
+  );
+
   const Answerer = ANSWERERS[mode];
   const isEmptyQuestion = currentQuestion === EMPTY_QUESTION;
   const prompt = isEmptyQuestion
@@ -125,6 +133,14 @@ function App({
         onSetMode={handleSetMode}
         currentQuestionId={currentQuestion.id}
       />
+
+      {ENABLE_EXPERIMENTAL_AUTO_ADVANCE && (
+        <AutoAdvancer
+          currentQuestion={currentQuestion}
+          onAdvance={handleAdvance}
+          timeoutMs={2000}
+        />
+      )}
 
       <div className="quiz-container" data-testid="quiz-container">
         <div className="question-section">
@@ -503,6 +519,57 @@ function TypingModeAnswerer(props: AnswererProps) {
         vocalizer={vocalizer}
       />
     </>
+  );
+}
+
+function AutoAdvancer(props: {
+  onAdvance: () => void;
+  currentQuestion: AppCard;
+  timeoutMs: number;
+}) {
+  const { onAdvance, timeoutMs, currentQuestion } = props;
+
+  const audioUrl = currentQuestion.audio
+    ? getAssetUrl(currentQuestion.audio).href
+    : undefined;
+
+  const audioRef = useRef<HTMLAudioElement>(null);
+
+  useEffect(() => {
+    let timeout: number | undefined;
+
+    const goToNextQuestion = () => {
+      if (audioRef.current && audioRef.current.ended === false) {
+        timeout = window.setTimeout(goToNextQuestion, 1000);
+        return;
+      }
+      onAdvance();
+      timeout = window.setTimeout(goToNextQuestion, timeoutMs);
+    };
+
+    timeout = window.setTimeout(goToNextQuestion, timeoutMs);
+
+    return () => {
+      window.clearTimeout(timeout);
+    };
+  }, [onAdvance, timeoutMs]);
+
+  if (!audioUrl) {
+    return;
+  }
+
+  return (
+    <div style={{ display: "none" }}>
+      <audio
+        // Not sure if we need key but who knows if some browsers
+        // behave strangely when only the src is changed (and when autoPlay
+        // is set), so let's do a full unmount/remount just in case.
+        key={audioUrl}
+        ref={audioRef}
+        autoPlay={true}
+        src={audioUrl}
+      />
+    </div>
   );
 }
 

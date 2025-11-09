@@ -3,6 +3,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import HamburgerMenu from "./HamburgerMenu";
 import type { AppCard } from "./AppCard";
 import { createTestAppCard } from "./test/testHelpers";
+import type { ComponentProps } from "react";
 
 describe("HamburgerMenu", () => {
   const mockWords: AppCard[] = [
@@ -20,47 +21,38 @@ describe("HamburgerMenu", () => {
   const mockOnSetMaxQuestions = vi.fn();
   const mockOnSetDifficulty = vi.fn();
 
+  const defaultProps: ComponentProps<typeof HamburgerMenu> = {
+    words: mockWords,
+    allQuestions: mockWords,
+    currentCategory: undefined,
+    currentMaxQuestions: undefined,
+    currentDifficulty: "medium",
+    onSelectWord: mockOnSelectWord,
+    onSelectCategory: mockOnSelectCategory,
+    onSetMaxQuestions: mockOnSetMaxQuestions,
+    onSetDifficulty: mockOnSetDifficulty,
+    mode: "translate",
+    onSetMode: mockOnSetMode,
+    currentQuestionId: "test-id-1",
+  };
+
+  const renderHamburgerMenu = (
+    props: Partial<ComponentProps<typeof HamburgerMenu>> = {},
+  ) => {
+    return render(<HamburgerMenu {...defaultProps} {...props} />);
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it("should render hamburger button", () => {
-    render(
-      <HamburgerMenu
-        words={mockWords}
-        allQuestions={mockWords}
-        currentCategory={undefined}
-        currentMaxQuestions={undefined}
-        currentDifficulty="medium"
-        onSelectWord={mockOnSelectWord}
-        onSelectCategory={mockOnSelectCategory}
-        onSetMaxQuestions={mockOnSetMaxQuestions}
-        onSetDifficulty={mockOnSetDifficulty}
-        mode="translate"
-        onSetMode={mockOnSetMode}
-        currentQuestionId="test-id-1"
-      />,
-    );
+    renderHamburgerMenu();
     expect(screen.getByLabelText("Toggle menu")).toBeInTheDocument();
   });
 
   it("should show menu when hamburger button is clicked", () => {
-    render(
-      <HamburgerMenu
-        words={mockWords}
-        allQuestions={mockWords}
-        currentCategory={undefined}
-        currentMaxQuestions={undefined}
-        currentDifficulty="medium"
-        onSelectWord={mockOnSelectWord}
-        onSelectCategory={mockOnSelectCategory}
-        onSetMaxQuestions={mockOnSetMaxQuestions}
-        onSetDifficulty={mockOnSetDifficulty}
-        mode="translate"
-        onSetMode={mockOnSetMode}
-        currentQuestionId="test-id-1"
-      />,
-    );
+    renderHamburgerMenu();
 
     const hamburgerButton = screen.getByLabelText("Toggle menu");
     fireEvent.click(hamburgerButton);
@@ -73,22 +65,7 @@ describe("HamburgerMenu", () => {
   });
 
   it("should show checkmark next to active mode", () => {
-    const { rerender } = render(
-      <HamburgerMenu
-        words={mockWords}
-        allQuestions={mockWords}
-        currentCategory={undefined}
-        currentMaxQuestions={undefined}
-        currentDifficulty="medium"
-        onSelectWord={mockOnSelectWord}
-        onSelectCategory={mockOnSelectCategory}
-        onSetMaxQuestions={mockOnSetMaxQuestions}
-        onSetDifficulty={mockOnSetDifficulty}
-        mode="translate"
-        onSetMode={mockOnSetMode}
-        currentQuestionId="test-id-1"
-      />,
-    );
+    const { rerender } = renderHamburgerMenu();
 
     let hamburgerButton = screen.getByLabelText("Toggle menu");
     fireEvent.click(hamburgerButton);
@@ -100,22 +77,7 @@ describe("HamburgerMenu", () => {
     // Close menu and rerender with typingtutor mode
     fireEvent.click(hamburgerButton);
 
-    rerender(
-      <HamburgerMenu
-        words={mockWords}
-        allQuestions={mockWords}
-        currentCategory={undefined}
-        currentMaxQuestions={undefined}
-        currentDifficulty="medium"
-        onSelectWord={mockOnSelectWord}
-        onSelectCategory={mockOnSelectCategory}
-        onSetMaxQuestions={mockOnSetMaxQuestions}
-        onSetDifficulty={mockOnSetDifficulty}
-        mode="typingtutor"
-        onSetMode={mockOnSetMode}
-        currentQuestionId="test-id-1"
-      />,
-    );
+    rerender(<HamburgerMenu {...defaultProps} mode="typingtutor" />);
 
     hamburgerButton = screen.getByLabelText("Toggle menu");
     fireEvent.click(hamburgerButton);
@@ -126,22 +88,7 @@ describe("HamburgerMenu", () => {
   });
 
   it("should call onSetMode with 'translate' when Translate mode is clicked", () => {
-    render(
-      <HamburgerMenu
-        words={mockWords}
-        allQuestions={mockWords}
-        currentCategory={undefined}
-        currentMaxQuestions={undefined}
-        currentDifficulty="medium"
-        onSelectWord={mockOnSelectWord}
-        onSelectCategory={mockOnSelectCategory}
-        onSetMaxQuestions={mockOnSetMaxQuestions}
-        onSetDifficulty={mockOnSetDifficulty}
-        mode="typingtutor"
-        onSetMode={mockOnSetMode}
-        currentQuestionId="test-id-1"
-      />,
-    );
+    renderHamburgerMenu({ mode: "typingtutor" });
 
     const hamburgerButton = screen.getByLabelText("Toggle menu");
     fireEvent.click(hamburgerButton);
@@ -154,22 +101,7 @@ describe("HamburgerMenu", () => {
   });
 
   it("should call onSetMode with 'typingtutor' when Typing tutor mode is clicked", () => {
-    render(
-      <HamburgerMenu
-        words={mockWords}
-        allQuestions={mockWords}
-        currentCategory={undefined}
-        currentMaxQuestions={undefined}
-        currentDifficulty="medium"
-        onSelectWord={mockOnSelectWord}
-        onSelectCategory={mockOnSelectCategory}
-        onSetMaxQuestions={mockOnSetMaxQuestions}
-        onSetDifficulty={mockOnSetDifficulty}
-        mode="translate"
-        onSetMode={mockOnSetMode}
-        currentQuestionId="test-id-1"
-      />,
-    );
+    renderHamburgerMenu();
 
     const hamburgerButton = screen.getByLabelText("Toggle menu");
     fireEvent.click(hamburgerButton);
@@ -182,22 +114,7 @@ describe("HamburgerMenu", () => {
   });
 
   it("should close menu after clicking either mode button", () => {
-    render(
-      <HamburgerMenu
-        words={mockWords}
-        allQuestions={mockWords}
-        currentCategory={undefined}
-        currentMaxQuestions={undefined}
-        currentDifficulty="medium"
-        onSelectWord={mockOnSelectWord}
-        onSelectCategory={mockOnSelectCategory}
-        onSetMaxQuestions={mockOnSetMaxQuestions}
-        onSetDifficulty={mockOnSetDifficulty}
-        mode="translate"
-        onSetMode={mockOnSetMode}
-        currentQuestionId="test-id-1"
-      />,
-    );
+    renderHamburgerMenu();
 
     const hamburgerButton = screen.getByLabelText("Toggle menu");
     fireEvent.click(hamburgerButton);

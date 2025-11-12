@@ -87,17 +87,23 @@ export function makeSinoKoreanNumber(value: number): string | undefined {
 function generateRandomNumber(difficulty: Difficulty): number {
   const random = Math.random();
 
-  if (random < 0.2 || difficulty === "easy") {
+  if (random < 0.2) {
     return getRandomInt(1, 99);
   } else if (random < 0.4) {
-    if (Math.random() < 0.75) {
+    if (difficulty === "easy") {
+      // Return a number between 100 and 900 that's divisible by 100
+      return getRandomInt(1, 9) * 100;
+    } else if (Math.random() < 0.66 || difficulty === "medium") {
       // Return a number between 100 and 990 that's divisible by 10
       return getRandomInt(10, 99) * 10;
     } else {
       return getRandomInt(100, 999);
     }
-  } else if (random < 0.6 || difficulty === "medium") {
-    if (Math.random() < 0.75) {
+  } else if (random < 0.6) {
+    if (difficulty === "easy") {
+      // Return a number between 1,000 and 9,000 that's divisible by 1,000
+      return getRandomInt(1, 9) * 1_000;
+    } else if (Math.random() < 0.66 || difficulty === "medium") {
       // Return a number between 1,000 and 9,900 that's divisible by 100
       return getRandomInt(10, 99) * 100;
     } else {
@@ -105,7 +111,10 @@ function generateRandomNumber(difficulty: Difficulty): number {
       return getRandomInt(100, 999) * 10;
     }
   } else if (random < 0.8) {
-    if (Math.random() < 0.75) {
+    if (difficulty === "easy") {
+      // Return a number between 10,000 and 90,000 that's divisible by 10,000
+      return getRandomInt(1, 9) * 10_000;
+    } else if (Math.random() < 0.66 || difficulty === "medium") {
       // Return a number between 10,000 and 99,000 that's divisible by 1,000
       return getRandomInt(10, 99) * 1_000;
     } else {
@@ -113,8 +122,13 @@ function generateRandomNumber(difficulty: Difficulty): number {
       return getRandomInt(100, 999) * 100;
     }
   } else {
-    // Return a number between 100,000 and 990,000 that's divisible by 10,000
-    return getRandomInt(10, 99) * 10_000;
+    if (difficulty === "easy") {
+      // Return a number between 100,000 and 900,000 that's divisible by 100,000
+      return getRandomInt(1, 9) * 100_000;
+    } else {
+      // Return a number between 100,000 and 990,000 that's divisible by 10,000
+      return getRandomInt(10, 99) * 10_000;
+    }
   }
 }
 

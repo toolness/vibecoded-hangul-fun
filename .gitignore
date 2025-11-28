@@ -29,3 +29,5 @@ src/assets/database/*
 
 .claude
 .cache
+
+vocabulary.md

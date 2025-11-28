@@ -684,6 +684,38 @@ async function downloadFile(
   writeFileSync(filepath, Buffer.from(buffer));
 }
 
+function generateMarkdownContent(
+  words: WordDatabaseRow[],
+  sentences: SentenceDatabaseRow[],
+): string {
+  const lines: string[] = [];
+
+  lines.push("# Vocabulary");
+  lines.push("");
+  lines.push(
+    `Generated on ${new Date().toISOString().split("T")[0]} - ${words.length} words, ${sentences.length} sentences`,
+  );
+  lines.push("");
+
+  // Words section
+  lines.push("## Words");
+  lines.push("");
+  for (const word of words) {
+    lines.push(`- **${word.hangul}** (${word.name})`);
+  }
+  lines.push("");
+
+  // Sentences section
+  lines.push("## Sentences");
+  lines.push("");
+  for (const sentence of sentences) {
+    lines.push(`- ${sentence.text}`);
+  }
+  lines.push("");
+
+  return lines.join("\n");
+}
+
 const run = async () => {
   const args = parseArgs({
     options: CLI_ARGS,
@@ -800,6 +832,13 @@ const run = async () => {
   writeFileSync(dbPath, JSON.stringify(database, null, 2));
 
   console.log(`Wrote ${dbPath}.`);
+
+  // Write markdown file with all words and sentences
+  const markdownPath = "vocabulary.md";
+  const markdownContent = generateMarkdownContent(words, sentences);
+  writeFileSync(markdownPath, markdownContent);
+
+  console.log(`Wrote ${markdownPath}.`);
 };
 
 async function makeHash(value: string): Promise<string> {

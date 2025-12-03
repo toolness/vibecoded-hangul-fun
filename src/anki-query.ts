@@ -82,3 +82,18 @@ export function getRecentlyIncorrectCardsSync(
     db.close();
   }
 }
+
+export function getRootAnkiDir(): string {
+  // https://docs.ankiweb.net/files.html
+  // Implemented by GitHub Copilot.
+  const platform = process.platform;
+  if (platform === "darwin") {
+    // macOS
+    return `${process.env.HOME}/Library/Application Support/Anki2`;
+  } else if (platform === "win32") {
+    // Windows
+    return `${process.env.APPDATA}\\Anki2`;
+  } else {
+    throw new Error("Unsupported OS for Anki directory");
+  }
+}

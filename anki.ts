@@ -7,6 +7,7 @@ import { stringify } from "csv-stringify/sync";
 import path from "path";
 import { createHash } from "crypto";
 import { parseArgs, type ParseArgsOptionsConfig } from "util";
+import { getRootAnkiDir } from "./src/anki-query.ts";
 
 const CLI_ARGS = {
   /** The Anki user (used to find Anki directory to put static assets). */
@@ -365,21 +366,6 @@ function getDesktopDir(): string {
     return `${process.env.USERPROFILE}\\Desktop`;
   } else {
     throw new Error("Unsupported OS for desktop directory");
-  }
-}
-
-function getRootAnkiDir(): string {
-  // https://docs.ankiweb.net/files.html
-  // Implemented by GitHub Copilot.
-  const platform = process.platform;
-  if (platform === "darwin") {
-    // macOS
-    return `${process.env.HOME}/Library/Application Support/Anki2`;
-  } else if (platform === "win32") {
-    // Windows
-    return `${process.env.APPDATA}\\Anki2`;
-  } else {
-    throw new Error("Unsupported OS for Anki directory");
   }
 }
 

@@ -1,4 +1,4 @@
-import Database from "better-sqlite3";
+import type { Database } from "better-sqlite3";
 
 export interface RecentlyIncorrectCard {
   flds: string;
@@ -8,7 +8,7 @@ export interface RecentlyIncorrectCard {
 export interface GetRecentlyIncorrectCardsOptions {
   noteTypes: string[];
   maxAgeInDays: number;
-  dbPath: string;
+  db: Database;
 }
 
 /**
@@ -22,13 +22,11 @@ export interface GetRecentlyIncorrectCardsOptions {
 export function getRecentlyIncorrectCardsSync(
   options: GetRecentlyIncorrectCardsOptions,
 ): RecentlyIncorrectCard[] {
-  const { noteTypes, maxAgeInDays, dbPath } = options;
+  const { noteTypes, maxAgeInDays, db } = options;
 
   if (noteTypes.length === 0) {
     return [];
   }
-
-  const db = new Database(dbPath, { readonly: true });
 
   try {
     // Anki's notetypes table uses a custom "unicase" collation for case-insensitive

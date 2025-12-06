@@ -15,6 +15,7 @@ import {
   createInitialState,
   type Mode,
   type Difficulty,
+  type Ordering,
   type QuizState,
   type QuizAction,
   EMPTY_QUESTION,
@@ -79,6 +80,7 @@ function App({
     mode,
     category,
     maxQuestions,
+    ordering,
     difficulty,
     allQuestions,
     allQuestionsFiltered,
@@ -104,6 +106,10 @@ function App({
     dispatch({ type: "SET_OPTIONS", difficulty: newDifficulty });
   };
 
+  const handleSetOrdering = (newOrdering: Ordering) => {
+    dispatch({ type: "SET_OPTIONS", ordering: newOrdering });
+  };
+
   const handleSetAutoAdvance = (newAutoAdvance: boolean) => {
     dispatch({ type: "SET_OPTIONS", autoAdvance: newAutoAdvance });
   };
@@ -127,11 +133,13 @@ function App({
         currentCategory={category}
         currentMaxQuestions={maxQuestions}
         currentDifficulty={difficulty}
+        currentOrdering={ordering}
         autoAdvance={state.autoAdvance}
         onSelectWord={handleWordSelection}
         onSelectCategory={handleSetCategory}
         onSetMaxQuestions={handleSetMaxQuestions}
         onSetDifficulty={handleSetDifficulty}
+        onSetOrdering={handleSetOrdering}
         onSetAutoAdvance={handleSetAutoAdvance}
         mode={mode}
         onSetMode={handleSetMode}

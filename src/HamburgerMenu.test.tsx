@@ -20,6 +20,7 @@ describe("HamburgerMenu", () => {
   const mockOnSelectCategory = vi.fn();
   const mockOnSetMaxQuestions = vi.fn();
   const mockOnSetDifficulty = vi.fn();
+  const mockOnSetOrdering = vi.fn();
   const mockOnSetAutoAdvance = vi.fn();
 
   const defaultProps: ComponentProps<typeof HamburgerMenu> = {
@@ -28,11 +29,13 @@ describe("HamburgerMenu", () => {
     currentCategory: undefined,
     currentMaxQuestions: undefined,
     currentDifficulty: "medium",
+    currentOrdering: "created-by",
     autoAdvance: false,
     onSelectWord: mockOnSelectWord,
     onSelectCategory: mockOnSelectCategory,
     onSetMaxQuestions: mockOnSetMaxQuestions,
     onSetDifficulty: mockOnSetDifficulty,
+    onSetOrdering: mockOnSetOrdering,
     onSetAutoAdvance: mockOnSetAutoAdvance,
     mode: "translate",
     onSetMode: mockOnSetMode,

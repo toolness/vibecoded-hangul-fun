@@ -4,10 +4,11 @@ import WordSelectionModal from "./WordSelectionModal";
 import CategorySelectionModal from "./CategorySelectionModal";
 import MaxQuestionsModal from "./MaxQuestionsModal";
 import DifficultyModal from "./DifficultyModal";
+import OrderingModal from "./OrderingModal";
 import AboutModal from "./AboutModal";
 import Toast from "./Toast";
 import type { AppCard } from "./AppCard";
-import type { Mode, Difficulty } from "./quizStateReducer";
+import type { Mode, Difficulty, Ordering } from "./quizStateReducer";
 
 const MODE_NAMES: { [k in Mode]: string } = {
   translate: "Translate",
@@ -25,11 +26,13 @@ interface HamburgerMenuProps {
   currentCategory: string | undefined;
   currentMaxQuestions: number | undefined;
   currentDifficulty: Difficulty;
+  currentOrdering: Ordering;
   autoAdvance: boolean;
   onSelectWord: (word: AppCard) => void;
   onSelectCategory: (category: string | undefined) => void;
   onSetMaxQuestions: (maxQuestions: number | undefined) => void;
   onSetDifficulty: (difficulty: Difficulty) => void;
+  onSetOrdering: (ordering: Ordering) => void;
   onSetAutoAdvance: (autoAdvance: boolean) => void;
   mode: Mode;
   onSetMode: (mode: Mode) => void;
@@ -42,11 +45,13 @@ function HamburgerMenu({
   currentCategory,
   currentMaxQuestions,
   currentDifficulty,
+  currentOrdering,
   autoAdvance,
   onSelectWord,
   onSelectCategory,
   onSetMaxQuestions,
   onSetDifficulty,
+  onSetOrdering,
   onSetAutoAdvance,
   mode,
   onSetMode,
@@ -58,6 +63,7 @@ function HamburgerMenu({
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [isMaxQuestionsModalOpen, setIsMaxQuestionsModalOpen] = useState(false);
   const [isDifficultyModalOpen, setIsDifficultyModalOpen] = useState(false);
+  const [isOrderingModalOpen, setIsOrderingModalOpen] = useState(false);
   const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const previousFocusRef = useRef<HTMLElement | null>(null);
@@ -88,6 +94,12 @@ function HamburgerMenu({
     setIsMenuOpen(false);
     previousFocusRef.current = document.activeElement as HTMLElement;
     setIsDifficultyModalOpen(true);
+  };
+
+  const handleOrdering = () => {
+    setIsMenuOpen(false);
+    previousFocusRef.current = document.activeElement as HTMLElement;
+    setIsOrderingModalOpen(true);
   };
 
   const handleAbout = () => {
@@ -123,6 +135,11 @@ function HamburgerMenu({
   const handleDifficultySet = (difficulty: Difficulty) => {
     onSetDifficulty(difficulty);
     setIsDifficultyModalOpen(false);
+  };
+
+  const handleOrderingSet = (ordering: Ordering) => {
+    onSetOrdering(ordering);
+    setIsOrderingModalOpen(false);
   };
 
   const handleWordSelected = (word: AppCard) => {
@@ -174,6 +191,9 @@ function HamburgerMenu({
             </button>
             <button className="menu-link" onClick={handleMaxQuestions}>
               Max words&hellip;
+            </button>
+            <button className="menu-link" onClick={handleOrdering}>
+              Ordering&hellip;
             </button>
             <button className="menu-link" onClick={handleChooseWord}>
               Choose word&hellip;
@@ -242,6 +262,15 @@ function HamburgerMenu({
           currentDifficulty={currentDifficulty}
           onSetDifficulty={handleDifficultySet}
           onClose={() => setIsDifficultyModalOpen(false)}
+          previousFocus={previousFocusRef.current}
+        />
+      )}
+
+      {isOrderingModalOpen && (
+        <OrderingModal
+          currentOrdering={currentOrdering}
+          onSetOrdering={handleOrderingSet}
+          onClose={() => setIsOrderingModalOpen(false)}
           previousFocus={previousFocusRef.current}
         />
       )}

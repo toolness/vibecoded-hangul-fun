@@ -437,6 +437,7 @@ async function downloadWords(args: {
       let category = "";
       let notes = "";
       let isTranslation = false;
+      let lastIncorrect: string | undefined;
 
       // Extract Name
       if (
@@ -564,6 +565,16 @@ async function downloadWords(args: {
         isTranslation = properties["Is translation?"].checkbox === true;
       }
 
+      // Extract Last incorrect date (optional)
+      if (
+        properties["Last incorrect"] &&
+        properties["Last incorrect"].type === "date" &&
+        properties["Last incorrect"].date &&
+        properties["Last incorrect"].date.start
+      ) {
+        lastIncorrect = properties["Last incorrect"].date.start;
+      }
+
       // Check Disabled flag (optional)
       const isDisabled =
         properties.Disabled &&
@@ -637,6 +648,7 @@ async function downloadWords(args: {
         notes,
         minimalPairs: minimalPairs.length > 0 ? minimalPairs : undefined,
         exampleSentence,
+        lastIncorrect,
       };
 
       entries.push(row);

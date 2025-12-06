@@ -3,6 +3,7 @@ import { DatabaseHelper } from "./database-helper";
 import { makeEmptyDatabase } from "./database-spec";
 import { makeRestaurantOrderingCard } from "./restaurantOrdering";
 import { makeSinoKoreanNumberCard } from "./sinoKoreanNumber";
+import { sortByOrderingAndName } from "./util";
 
 export const SPECIAL_SINO_KOREAN_NUMBER_CATEGORY = "Special: Money" as const;
 
@@ -24,6 +25,8 @@ export type Mode =
 
 export type Difficulty = "easy" | "medium" | "hard";
 
+export type Ordering = "created-by" | "last-incorrect";
+
 const MODES: Record<Mode, true> = {
   translate: true,
   typingtutor: true,
@@ -42,6 +45,7 @@ export interface QuizOptions {
   category: string | undefined;
   maxQuestions: number | undefined;
   autoAdvance: boolean;
+  ordering: Ordering;
   difficulty: Difficulty;
   mode: Mode;
   dbHelper: DatabaseHelper;
@@ -62,6 +66,7 @@ const DEFAULT_OPTIONS: QuizOptions = {
   maxQuestions: undefined,
   autoAdvance: false,
   difficulty: "medium",
+  ordering: "created-by",
   dbHelper: new DatabaseHelper(makeEmptyDatabase()),
 };
 
@@ -129,7 +134,15 @@ export const createInitialState = (
   options: Partial<QuizOptions> = {},
   initialQuestionId: string | undefined = undefined,
 ): QuizState => {
-  const { mode, category, maxQuestions, difficulty, dbHelper, autoAdvance } = {
+  const {
+    mode,
+    category,
+    maxQuestions,
+    ordering,
+    difficulty,
+    dbHelper,
+    autoAdvance,
+  } = {
     ...DEFAULT_OPTIONS,
     ...options,
   };
@@ -142,15 +155,20 @@ export const createInitialState = (
     }
     return card;
   });
-  const allQuestionsFiltered = filterQuestionsForMode(
-    allQuestions,
-    mode,
-  ).filter((question) => {
-    if (!category) {
-      return true;
-    }
-    return question.category === category;
-  });
+  let allQuestionsFiltered = filterQuestionsForMode(allQuestions, mode).filter(
+    (question) => {
+      if (!category) {
+        return true;
+      }
+      return question.category === category;
+    },
+  );
+  if (ordering === "last-incorrect") {
+    allQuestionsFiltered = allQuestionsFiltered.filter((question) =>
+      Boolean(question.lastIncorrect),
+    );
+  }
+  sortByOrderingAndName(ordering, allQuestionsFiltered);
   const remainingQuestions = allQuestionsFiltered.slice(0, maxQuestions);
   shuffleInPlace(remainingQuestions);
 
@@ -175,6 +193,7 @@ export const createInitialState = (
     category,
     maxQuestions,
     autoAdvance,
+    ordering,
     difficulty,
     showAnswer: false,
     mode,

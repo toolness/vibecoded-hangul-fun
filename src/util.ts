@@ -1,20 +1,45 @@
 import type { WordDatabaseRow } from "./database-spec";
+import type { Ordering } from "./quizStateReducer";
 
-type WithCreatedTimeAndName = Pick<WordDatabaseRow, "createdTime" | "name">;
+type Sortable = Pick<WordDatabaseRow, "createdTime" | "lastIncorrect" | "name">;
 
 /**
- * Sort entries in-place by created time,
- * newest first, breaking ties by name.
+ * Sorts entries in-place by the given ordering:
+ *
+ *   * `created-by`: Created time, newest first, breaking ties by name.
+ *
+ *   * `last-incorrect`: Last incorrect, newest first, breaking ties by name.
+ *     Entries without a "Last incorrect" field will be at the end.
  */
-export function sortByDateAndName(rows: WithCreatedTimeAndName[]) {
-  rows.sort((a, b) => {
-    const dateA = new Date(a.createdTime).getTime();
-    const dateB = new Date(b.createdTime).getTime();
-    if (dateA === dateB) {
-      return a.name.localeCompare(b.name);
-    }
-    return dateB - dateA;
-  });
+export function sortByOrderingAndName(ordering: Ordering, rows: Sortable[]) {
+  if (ordering === "created-by") {
+    rows.sort((a, b) => {
+      const dateA = new Date(a.createdTime).getTime();
+      const dateB = new Date(b.createdTime).getTime();
+      if (dateA === dateB) {
+        return a.name.localeCompare(b.name);
+      }
+      return dateB - dateA;
+    });
+  } else if (ordering === "last-incorrect") {
+    rows.sort((a, b) => {
+      const dateA = a.lastIncorrect || "1970-01-01";
+      const dateB = b.lastIncorrect || "1970-01-01";
+      if (dateA === dateB) {
+        return a.name.localeCompare(b.name);
+      }
+      return dateB.localeCompare(dateA);
+    });
+  } else {
+    unreachable(ordering);
+  }
+}
+
+/**
+ * Simple function for ensuring branching logic is exhaustive.
+ */
+export function unreachable(value: never): never {
+  throw new Error(`Unreachable code reached with unexpected value: ${value}`);
 }
 
 /**

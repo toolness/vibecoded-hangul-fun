@@ -9,12 +9,14 @@ describe("quizReducer", () => {
     id: "test-id-1",
     name: "hello",
     hangul: "안녕",
+    createdTime: "2025-12-06T16:11:00.000Z",
   });
 
   const mockQuestion2: AppCard = createTestAppCard({
     id: "test-id-2",
     name: "goodbye",
     hangul: "안녕히",
+    createdTime: "2025-11-06T16:11:00.000Z",
   });
 
   const mockQuestions = [mockQuestion, mockQuestion2];

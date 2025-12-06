@@ -6,7 +6,7 @@ import { DB_JSON_ASSET, getAssetUrl } from "./assets.ts";
 import { validateMode } from "./quizStateReducer.ts";
 import type { Database } from "./database-spec.ts";
 import type { AppCard, FillInTheBlankItem } from "./AppCard.ts";
-import { convertWordsToUnderscores, sortByDateAndName } from "./util.ts";
+import { convertWordsToUnderscores } from "./util.ts";
 import { DatabaseHelper } from "./database-helper.ts";
 import { makeRestaurantOrderingCard } from "./restaurantOrdering.ts";
 import { makeSinoKoreanNumberCard } from "./sinoKoreanNumber.ts";
@@ -98,8 +98,6 @@ function createInitialRows(database: Database): {
 
   result.push(makeRestaurantOrderingCard(dbHelper));
   result.push(makeSinoKoreanNumberCard("medium"));
-
-  sortByDateAndName(result);
 
   return { cards: result, dbHelper };
 }

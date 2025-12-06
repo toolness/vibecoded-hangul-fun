@@ -20,7 +20,7 @@ import {
   makeEmptyDatabase,
 } from "./src/database-spec.ts";
 import {
-  sortByDateAndName,
+  sortByOrderingAndName,
   findMostRecentModificationTime,
   mergeEntries,
 } from "./src/util.ts";
@@ -655,7 +655,7 @@ async function downloadWords(args: {
     }
   }
 
-  sortByDateAndName(entries);
+  sortByOrderingAndName("created-by", entries);
 
   return entries;
 }
@@ -815,7 +815,7 @@ const run = async () => {
   );
 
   // Sort the merged words data
-  sortByDateAndName(words);
+  sortByOrderingAndName("created-by", words);
 
   console.log(
     `Final database has ${words.length} words and ${sentences.length} sentences.`,

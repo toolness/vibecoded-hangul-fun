@@ -1,7 +1,11 @@
 import type { Database } from "better-sqlite3";
 
 export interface RecentlyIncorrectCard {
-  flds: string;
+  /**
+   * This is the DB row from our DB, _not_ the Anki GUID. See
+   * [ref:hangul-anki-id] for more details.
+   */
+  id: string;
   lastIncorrectTimestamp: number;
 }
 
@@ -73,7 +77,7 @@ export function getRecentlyIncorrectCardsSync(
     }[];
 
     return rows.map((row) => ({
-      flds: row.flds,
+      id: row.flds.split("\x1F")[0],
       lastIncorrectTimestamp: row.last_incorrect_ms,
     }));
   } finally {

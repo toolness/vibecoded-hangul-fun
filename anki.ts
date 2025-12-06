@@ -72,6 +72,8 @@ type BaseCsvRow = {
    *
    * We need to be sure to write this as the very first column of
    * the CSV to ensure Anki can properly update rows and such.
+   *
+   * [tag:hangul-anki-id]
    */
   id: string;
 

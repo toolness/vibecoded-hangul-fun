@@ -6,6 +6,7 @@
   "scripts": {
     "ci": "npm run typecheck && prettier . --check && npm run test && vite build --logLevel warn",
     "download": "node --experimental-transform-types download.ts",
+    "upload": "npm run download && node --experimental-transform-types upload.ts",
     "anki": "node --experimental-transform-types anki.ts",
     "typecheck": "tsc -b && npm run lint",
     "test": "vitest run",

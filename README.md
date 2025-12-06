@@ -40,7 +40,9 @@ You will need to create an internal Notion integration:
 
 https://developers.notion.com/docs/create-a-notion-integration
 
-The integration only needs read-only permission.
+The integration only needs read-only permission, unless you want
+to update the DB's information to reflect your Anki cards, in
+which case you'll also need update permission.
 
 #### Words data source
 
@@ -147,6 +149,11 @@ Anki installation's media collection. It will also write a CSV
 that you can import into Anki.
 
 See [`anki.ts`](./anki.ts) for more details.
+
+### Updating the "Last incorrect" field in the database
+
+If you have a "Last incorrect" field in your database, you can update
+it to reflect the state of your Anki deck by running `npm run upload`.
 
 ### Type checking
 

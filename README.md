@@ -73,6 +73,8 @@ with the following schema:
   or song lyric that uses the word. This can be used to show the
   sentence on the back of each word's flash card, to provide
   context for it.
+- `Last incorrect` - Date, an optional field containing the date
+  when you didn't recall an Anki card corresponding to the word.
 - `Disabled` - Checkbox, a boolean indicating whether to
   include this word in the app at all. This is essentially
   a way to "soft delete" a row.

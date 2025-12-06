@@ -24,6 +24,7 @@ import {
   findMostRecentModificationTime,
   mergeEntries,
 } from "./src/util.ts";
+import { getHangulNotionDbConfig } from "./src/notion-db.ts";
 import { ASSETS_DIR, DB_JSON_ASSET, getAssetFilePath } from "./src/assets.ts";
 import { parseArgs, type ParseArgsOptionsConfig } from "util";
 import loadXxhash from "xxhash-wasm";
@@ -47,18 +48,6 @@ const CLI_ARGS = {
 } satisfies ParseArgsOptionsConfig;
 
 dotenv.config();
-
-const NOTION_API_KEY = process.env.NOTION_API_KEY;
-
-if (!NOTION_API_KEY) {
-  throw new Error("Please define NOTION_API_KEY!");
-}
-
-const NOTION_DS_ID = process.env.NOTION_DS_ID;
-
-if (!NOTION_DS_ID) {
-  throw new Error("Please define NOTION_DS_ID!");
-}
 
 const CACHE_DIR = ".cache";
 
@@ -723,8 +712,9 @@ const run = async () => {
   const {
     values: { overwrite },
   } = args;
+  const config = getHangulNotionDbConfig(process.env);
   const notion = new CachingNotionClient({
-    notion: new Client({ auth: NOTION_API_KEY }),
+    notion: new Client({ auth: config.apiKey }),
     isOffline: args.values.offline,
   });
 
@@ -760,7 +750,7 @@ const run = async () => {
   const downloadQueue = new Queue({ concurrency: 5, autostart: false });
 
   const wordsDataSource = await notion.retrieveDataSource({
-    data_source_id: NOTION_DS_ID,
+    data_source_id: config.dataSourceId,
   });
   const downloader: NotionDownloader = async (download) => {
     const downloadInfo = await getDownloadInfo(download);
@@ -783,7 +773,7 @@ const run = async () => {
   });
   const newWords = await downloadWords({
     notion,
-    dataSourceId: NOTION_DS_ID,
+    dataSourceId: config.dataSourceId,
     sentences: new Map<string, BaseSentence>(
       newSentences
         .filter((s) => !s.disabled)

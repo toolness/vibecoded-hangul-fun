@@ -11,7 +11,17 @@ export interface DynamicCardCreateOptions {
  * Represents a card whose content is dynamically (randomly)
  * generated at runtime.
  */
-export interface DynamicCard {
+export type DynamicCard = Omit<
+  AppCard,
+  "id" | "notionId" | "category" | "createdTime" | "lastModifiedTime"
+> & {
+  notionId?: string;
+};
+
+/**
+ * This is responsible for creating {@link DynamicCard} instances.
+ */
+export interface DynamicCardFactory {
   /**
    * Dynamic cards are identified by a unique category name.
    *
@@ -23,22 +33,19 @@ export interface DynamicCard {
   /**
    * Create a random dynamic card and return it.
    *
-   * The card is expected to have a category matching
-   * {@link DynamicCard.category}.
-   *
    * This will be the only card of its type (category) in the
    * deck.
    */
-  create(options: DynamicCardCreateOptions): AppCard;
+  create(options: DynamicCardCreateOptions): DynamicCard;
 }
 
 export class DynamicCardManager {
-  private readonly cards: DynamicCard[];
-  private readonly cardCategoryMap: Map<string, DynamicCard>;
+  private readonly factories: DynamicCardFactory[];
+  private readonly factoryCategoryMap: Map<string, DynamicCardFactory>;
 
-  constructor(cards: DynamicCard[] = []) {
-    this.cards = cards;
-    this.cardCategoryMap = new Map(cards.map((card) => [card.category, card]));
+  constructor(factories: DynamicCardFactory[] = []) {
+    this.factories = factories;
+    this.factoryCategoryMap = new Map(factories.map((f) => [f.category, f]));
   }
 
   /**
@@ -46,7 +53,7 @@ export class DynamicCardManager {
    * returns them all.
    */
   createAll(options: DynamicCardCreateOptions): AppCard[] {
-    return this.cards.map((card) => card.create(options));
+    return this.factories.map((f) => this.createCard(f, options));
   }
 
   /**
@@ -57,12 +64,30 @@ export class DynamicCardManager {
   regenerate(cards: AppCard[], options: DynamicCardCreateOptions): AppCard[] {
     return cards.map((card) => {
       if (card.category) {
-        const dynamicCard = this.cardCategoryMap.get(card.category ?? "");
-        if (dynamicCard) {
-          return dynamicCard.create(options);
+        const factory = this.factoryCategoryMap.get(card.category ?? "");
+        if (factory) {
+          return this.createCard(factory, options);
         }
       }
       return card;
     });
+  }
+
+  private createCard(
+    factory: DynamicCardFactory,
+    options: DynamicCardCreateOptions,
+  ): AppCard {
+    return {
+      notionId: undefined,
+      ...factory.create(options),
+      id: factory.category, // TODO: Maybe slugify this ID?
+      category: factory.category,
+
+      // We don't want this to constantly show up at the top of the deck
+      // when it's ordered reverse chronologically, so just hard-code a
+      // time in the past for now.
+      createdTime: "2025-09-17T05:26:00.000Z",
+      lastModifiedTime: "2025-09-17T05:26:00.000Z",
+    };
   }
 }

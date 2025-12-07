@@ -1,4 +1,4 @@
-import type { DynamicCard } from "./DynamicCard";
+import type { DynamicCardFactory } from "./DynamicCard";
 import { EMPTY_QUESTION, type Difficulty } from "./quizStateReducer";
 import { getRandomInt, verifyExists } from "./util";
 
@@ -142,7 +142,7 @@ function getUsCurrencyString(won: number): string {
   }
 }
 
-export const SinoKoreanNumberDynamicCard: DynamicCard = {
+export const SinoKoreanNumberDynamicCard: DynamicCardFactory = {
   category: "Special: Money",
   create({ difficulty }) {
     const number = generateRandomNumber(difficulty);
@@ -155,16 +155,6 @@ export const SinoKoreanNumberDynamicCard: DynamicCard = {
     }
 
     return {
-      id: "special-sino-korean-number",
-      category: this.category,
-      notionId: undefined,
-
-      // We don't want this to constantly show up at the top of the deck
-      // when it's ordered reverse chronologically, so just hard-code a
-      // time in the past for now.
-      createdTime: "2025-09-17T05:26:00.000Z",
-      lastModifiedTime: "2025-09-17T05:26:00.000Z",
-
       name: answer,
       isTranslation: true,
       hangul: answer,

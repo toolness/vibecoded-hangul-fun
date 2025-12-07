@@ -1,4 +1,4 @@
-import type { DynamicCard } from "./DynamicCard";
+import type { DynamicCardFactory } from "./DynamicCard";
 import { EMPTY_QUESTION } from "./quizStateReducer";
 import {
   convertWordsToUnderscores,
@@ -77,7 +77,7 @@ const FOODS: FoodItem[] = [
   { name: "사과", unit: thingy },
 ];
 
-export const RestaurantOrderingDynamicCard: DynamicCard = {
+export const RestaurantOrderingDynamicCard: DynamicCardFactory = {
   category: "Special: Restaurant Ordering",
   create({ dbHelper }) {
     const getWord = (hangul: string) => dbHelper.wordHangulMap.get(hangul);
@@ -102,16 +102,7 @@ export const RestaurantOrderingDynamicCard: DynamicCard = {
     const notes = `"${translation}"`;
 
     return {
-      id: "special-restaurant-ordering",
-      category: this.category,
       notionId: foodWord.id,
-
-      // We don't want this to constantly show up at the top of the deck
-      // when it's ordered reverse chronologically, so just hard-code a
-      // time in the past for now.
-      createdTime: "2025-09-17T05:26:00.000Z",
-      lastModifiedTime: "2025-09-17T05:26:00.000Z",
-
       name: translation,
       isTranslation: true,
       hangul: answer,

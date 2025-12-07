@@ -1,20 +1,8 @@
 import { hasPictures, type AppCard } from "./AppCard";
 import { DatabaseHelper } from "./database-helper";
 import { makeEmptyDatabase } from "./database-spec";
-import { makeRestaurantOrderingCard } from "./restaurantOrdering";
-import { makeSinoKoreanNumberCard } from "./sinoKoreanNumber";
+import { DynamicCardManager } from "./DynamicCard";
 import { sortByOrderingAndName } from "./util";
-
-export const SPECIAL_SINO_KOREAN_NUMBER_CATEGORY = "Special: Money" as const;
-
-export const SPECIAL_SINO_KOREAN_NUMBER_ID =
-  "special-sino-korean-number" as const;
-
-export const SPECIAL_RESTAURANT_ORDERING_CATEGORY =
-  "Special: Restaurant Ordering" as const;
-
-export const SPECIAL_RESTAURANT_ORDERING_ID =
-  "special-restaurant-ordering" as const;
 
 export type Mode =
   | "translate"
@@ -49,6 +37,7 @@ export interface QuizOptions {
   difficulty: Difficulty;
   mode: Mode;
   dbHelper: DatabaseHelper;
+  dynamicCardManager: DynamicCardManager;
 }
 
 export interface QuizState extends QuizOptions {
@@ -68,6 +57,7 @@ const DEFAULT_OPTIONS: QuizOptions = {
   difficulty: "medium",
   ordering: "created-by",
   dbHelper: new DatabaseHelper(makeEmptyDatabase()),
+  dynamicCardManager: new DynamicCardManager(),
 };
 
 export const EMPTY_QUESTION: AppCard = {
@@ -141,19 +131,15 @@ export const createInitialState = (
     ordering,
     difficulty,
     dbHelper,
+    dynamicCardManager,
     autoAdvance,
   } = {
     ...DEFAULT_OPTIONS,
     ...options,
   };
-  allQuestions = allQuestions.map((card) => {
-    // Re-generate the dynamic cards so they have new random values.
-    if (card.id === SPECIAL_RESTAURANT_ORDERING_ID) {
-      return makeRestaurantOrderingCard(dbHelper);
-    } else if (card.id === SPECIAL_SINO_KOREAN_NUMBER_ID) {
-      return makeSinoKoreanNumberCard(difficulty);
-    }
-    return card;
+  allQuestions = dynamicCardManager.regenerate(allQuestions, {
+    difficulty,
+    dbHelper,
   });
   let allQuestionsFiltered = filterQuestionsForMode(allQuestions, mode).filter(
     (question) => {
@@ -198,6 +184,7 @@ export const createInitialState = (
     showAnswer: false,
     mode,
     dbHelper,
+    dynamicCardManager,
   };
 };
 

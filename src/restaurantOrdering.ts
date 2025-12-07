@@ -1,16 +1,16 @@
 import type { AppCard } from "./AppCard";
 import type { DatabaseHelper } from "./database-helper";
-import {
-  EMPTY_QUESTION,
-  SPECIAL_RESTAURANT_ORDERING_CATEGORY,
-  SPECIAL_RESTAURANT_ORDERING_ID,
-} from "./quizStateReducer";
+import type { DynamicCard } from "./DynamicCard";
+import { EMPTY_QUESTION } from "./quizStateReducer";
 import {
   convertWordsToUnderscores,
   getRandomItem,
   isDefined,
   verifyExists,
 } from "./util";
+
+const SPECIAL_RESTAURANT_ORDERING_CATEGORY =
+  "Special: Restaurant Ordering" as const;
 
 type KoreanNumber = {
   number: number;
@@ -110,7 +110,7 @@ export function makeRestaurantOrderingCard(dbHelper: DatabaseHelper): AppCard {
   const notes = `"${translation}"`;
 
   return {
-    id: SPECIAL_RESTAURANT_ORDERING_ID,
+    id: "special-restaurant-ordering",
     category: SPECIAL_RESTAURANT_ORDERING_CATEGORY,
     notionId: foodWord.id,
 
@@ -137,3 +137,10 @@ export function makeRestaurantOrderingCard(dbHelper: DatabaseHelper): AppCard {
     extraWords: [food.unit.hangul, amount.long].map(getWord).filter(isDefined),
   };
 }
+
+export const RestaurantOrderingDynamicCard: DynamicCard = {
+  category: SPECIAL_RESTAURANT_ORDERING_CATEGORY,
+  create({ dbHelper }) {
+    return makeRestaurantOrderingCard(dbHelper);
+  },
+};

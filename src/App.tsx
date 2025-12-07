@@ -31,6 +31,7 @@ import NotionLogo from "./assets/Notion_Logo.svg";
 import WikipediaLogo from "./assets/Wikipedia_Logo.svg";
 import type { DatabaseHelper } from "./database-helper";
 import { AppCardPictures } from "./AppCardPictures";
+import type { DynamicCardManager } from "./DynamicCard";
 
 const MODE_PROMPT: Record<Mode, string> = {
   typingtutor: "Type this Hangul:",
@@ -53,11 +54,13 @@ function App({
   initialRows,
   initialQuestionId,
   dbHelper,
+  dynamicCardManager,
 }: {
   initialMode: Mode;
   initialRows: AppCard[];
   initialQuestionId?: string;
   dbHelper: DatabaseHelper;
+  dynamicCardManager: DynamicCardManager;
 }) {
   const vocalizer = useKoreanVocalizer();
 
@@ -71,6 +74,7 @@ function App({
         maxQuestions: undefined,
         difficulty: "medium",
         dbHelper,
+        dynamicCardManager,
       },
       initialQuestionId,
     );

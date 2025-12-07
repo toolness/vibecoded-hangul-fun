@@ -8,8 +8,9 @@ import type { Database } from "./database-spec.ts";
 import type { AppCard, FillInTheBlankItem } from "./AppCard.ts";
 import { convertWordsToUnderscores } from "./util.ts";
 import { DatabaseHelper } from "./database-helper.ts";
-import { makeRestaurantOrderingCard } from "./restaurantOrdering.ts";
-import { makeSinoKoreanNumberCard } from "./sinoKoreanNumber.ts";
+import { RestaurantOrderingDynamicCard } from "./restaurantOrdering.ts";
+import { SinoKoreanNumberDynamicCard } from "./sinoKoreanNumber.ts";
+import { DynamicCardManager } from "./DynamicCard.ts";
 
 const DATABASE_JSON_URL = getAssetUrl(DB_JSON_ASSET);
 
@@ -30,9 +31,14 @@ window.history.replaceState(
 function createInitialRows(database: Database): {
   cards: AppCard[];
   dbHelper: DatabaseHelper;
+  dynamicCardManager: DynamicCardManager;
 } {
   const result: AppCard[] = [];
   const dbHelper = new DatabaseHelper(database);
+  const dynamicCardManager = new DynamicCardManager([
+    RestaurantOrderingDynamicCard,
+    SinoKoreanNumberDynamicCard,
+  ]);
 
   for (const word of database.words) {
     result.push({
@@ -96,13 +102,21 @@ function createInitialRows(database: Database): {
     }
   }
 
-  result.push(makeRestaurantOrderingCard(dbHelper));
-  result.push(makeSinoKoreanNumberCard("medium"));
+  result.push(
+    ...dynamicCardManager.createAll({
+      dbHelper,
+      difficulty: "medium",
+    }),
+  );
 
-  return { cards: result, dbHelper };
+  return { cards: result, dbHelper, dynamicCardManager };
 }
 
-const { cards: initialRows, dbHelper } = createInitialRows(databaseJson);
+const {
+  cards: initialRows,
+  dbHelper,
+  dynamicCardManager,
+} = createInitialRows(databaseJson);
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -111,6 +125,7 @@ createRoot(document.getElementById("root")!).render(
       initialRows={initialRows}
       initialQuestionId={initialId}
       dbHelper={dbHelper}
+      dynamicCardManager={dynamicCardManager}
     />
   </StrictMode>,
 );

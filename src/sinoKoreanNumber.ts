@@ -1,11 +1,9 @@
 import type { AppCard } from "./AppCard";
-import {
-  EMPTY_QUESTION,
-  SPECIAL_SINO_KOREAN_NUMBER_CATEGORY,
-  SPECIAL_SINO_KOREAN_NUMBER_ID,
-  type Difficulty,
-} from "./quizStateReducer";
+import type { DynamicCard } from "./DynamicCard";
+import { EMPTY_QUESTION, type Difficulty } from "./quizStateReducer";
 import { getRandomInt, verifyExists } from "./util";
+
+const SPECIAL_SINO_KOREAN_NUMBER_CATEGORY = "Special: Money" as const;
 
 type SinoKoreanNumber = {
   number: number;
@@ -163,7 +161,7 @@ export function makeSinoKoreanNumberCard(difficulty: Difficulty): AppCard {
   }
 
   return {
-    id: SPECIAL_SINO_KOREAN_NUMBER_ID,
+    id: "special-sino-korean-number",
     category: SPECIAL_SINO_KOREAN_NUMBER_CATEGORY,
     notionId: undefined,
 
@@ -195,3 +193,10 @@ export function makeSinoKoreanNumberCard(difficulty: Difficulty): AppCard {
     notes: `₩${numberString} is ${usCurrencyString}.`,
   };
 }
+
+export const SinoKoreanNumberDynamicCard: DynamicCard = {
+  category: SPECIAL_SINO_KOREAN_NUMBER_CATEGORY,
+  create({ difficulty }) {
+    return makeSinoKoreanNumberCard(difficulty);
+  },
+};

@@ -7,11 +7,13 @@ import type { Mode } from "./quizStateReducer";
 import { createTestAppCard } from "./test/testHelpers";
 import { DatabaseHelper } from "./database-helper";
 import { makeEmptyDatabase } from "./database-spec";
+import { DynamicCardManager } from "./DynamicCard";
 
 function TestApp(props: { initialMode?: Mode }) {
   return (
     <App
       dbHelper={new DatabaseHelper(makeEmptyDatabase())}
+      dynamicCardManager={new DynamicCardManager()}
       initialMode={props.initialMode ?? "picture"}
       initialRows={[
         createTestAppCard({

@@ -22,6 +22,12 @@ export interface DynamicCard {
 
   /**
    * Create a random dynamic card and return it.
+   *
+   * The card is expected to have a category matching
+   * {@link DynamicCard.category}.
+   *
+   * This will be the only card of its type (category) in the
+   * deck.
    */
   create(options: DynamicCardCreateOptions): AppCard;
 }

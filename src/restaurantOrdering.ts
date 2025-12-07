@@ -1,5 +1,3 @@
-import type { AppCard } from "./AppCard";
-import type { DatabaseHelper } from "./database-helper";
 import type { DynamicCard } from "./DynamicCard";
 import { EMPTY_QUESTION } from "./quizStateReducer";
 import {
@@ -8,9 +6,6 @@ import {
   isDefined,
   verifyExists,
 } from "./util";
-
-const SPECIAL_RESTAURANT_ORDERING_CATEGORY =
-  "Special: Restaurant Ordering" as const;
 
 type KoreanNumber = {
   number: number;
@@ -82,65 +77,58 @@ const FOODS: FoodItem[] = [
   { name: "사과", unit: thingy },
 ];
 
-/**
- * Randomly generates a restaurant ordering card.
- *
- * This should be the only card of its type in the deck.
- */
-export function makeRestaurantOrderingCard(dbHelper: DatabaseHelper): AppCard {
-  const getWord = (hangul: string) => dbHelper.wordHangulMap.get(hangul);
-  const foodsWithPictures = FOODS.filter((food) =>
-    Boolean(getWord(food.name)?.picture),
-  );
-  if (foodsWithPictures.length === 0) {
-    return EMPTY_QUESTION;
-  }
-  const food = getRandomItem(foodsWithPictures);
-  const foodWord = verifyExists(getWord(food.name));
-  const foodPicture = verifyExists(foodWord.picture);
-  const amount = getRandomItem(KOREAN_NUMBERS);
-  const amountHangul: string = amount.short ?? amount.long;
-  const answer = `${food.name} ${amountHangul} ${food.unit.hangul}`;
-  const englishUnits: string = food.unit.english
-    ? amount.number === 1
-      ? `${food.unit.english} of `
-      : `${food.unit.english}s of `
-    : ``;
-  const translation = `Please give me ${amount.number} ${englishUnits}${foodWord.name.toLocaleLowerCase()}.`;
-  const notes = `"${translation}"`;
-
-  return {
-    id: "special-restaurant-ordering",
-    category: SPECIAL_RESTAURANT_ORDERING_CATEGORY,
-    notionId: foodWord.id,
-
-    // We don't want this to constantly show up at the top of the deck
-    // when it's ordered reverse chronologically, so just hard-code a
-    // time in the past for now.
-    createdTime: "2025-09-17T05:26:00.000Z",
-    lastModifiedTime: "2025-09-17T05:26:00.000Z",
-
-    name: translation,
-    isTranslation: true,
-    hangul: answer,
-    fullHangul: `${answer} 주세요`,
-    fillInTheBlankItems: [
-      {
-        type: "fill-in",
-        blankValue: `${convertWordsToUnderscores(food.name)} ${amount.number} ${convertWordsToUnderscores(food.unit.hangul)}`,
-        answer,
-      },
-      { type: "content", value: " 주세요" },
-    ],
-    picture: foodPicture,
-    notes,
-    extraWords: [food.unit.hangul, amount.long].map(getWord).filter(isDefined),
-  };
-}
-
 export const RestaurantOrderingDynamicCard: DynamicCard = {
-  category: SPECIAL_RESTAURANT_ORDERING_CATEGORY,
+  category: "Special: Restaurant Ordering",
   create({ dbHelper }) {
-    return makeRestaurantOrderingCard(dbHelper);
+    const getWord = (hangul: string) => dbHelper.wordHangulMap.get(hangul);
+    const foodsWithPictures = FOODS.filter((food) =>
+      Boolean(getWord(food.name)?.picture),
+    );
+    if (foodsWithPictures.length === 0) {
+      return EMPTY_QUESTION;
+    }
+    const food = getRandomItem(foodsWithPictures);
+    const foodWord = verifyExists(getWord(food.name));
+    const foodPicture = verifyExists(foodWord.picture);
+    const amount = getRandomItem(KOREAN_NUMBERS);
+    const amountHangul: string = amount.short ?? amount.long;
+    const answer = `${food.name} ${amountHangul} ${food.unit.hangul}`;
+    const englishUnits: string = food.unit.english
+      ? amount.number === 1
+        ? `${food.unit.english} of `
+        : `${food.unit.english}s of `
+      : ``;
+    const translation = `Please give me ${amount.number} ${englishUnits}${foodWord.name.toLocaleLowerCase()}.`;
+    const notes = `"${translation}"`;
+
+    return {
+      id: "special-restaurant-ordering",
+      category: this.category,
+      notionId: foodWord.id,
+
+      // We don't want this to constantly show up at the top of the deck
+      // when it's ordered reverse chronologically, so just hard-code a
+      // time in the past for now.
+      createdTime: "2025-09-17T05:26:00.000Z",
+      lastModifiedTime: "2025-09-17T05:26:00.000Z",
+
+      name: translation,
+      isTranslation: true,
+      hangul: answer,
+      fullHangul: `${answer} 주세요`,
+      fillInTheBlankItems: [
+        {
+          type: "fill-in",
+          blankValue: `${convertWordsToUnderscores(food.name)} ${amount.number} ${convertWordsToUnderscores(food.unit.hangul)}`,
+          answer,
+        },
+        { type: "content", value: " 주세요" },
+      ],
+      picture: foodPicture,
+      notes,
+      extraWords: [food.unit.hangul, amount.long]
+        .map(getWord)
+        .filter(isDefined),
+    };
   },
 };

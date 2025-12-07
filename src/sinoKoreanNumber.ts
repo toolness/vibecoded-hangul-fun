@@ -1,9 +1,6 @@
-import type { AppCard } from "./AppCard";
 import type { DynamicCard } from "./DynamicCard";
 import { EMPTY_QUESTION, type Difficulty } from "./quizStateReducer";
 import { getRandomInt, verifyExists } from "./util";
-
-const SPECIAL_SINO_KOREAN_NUMBER_CATEGORY = "Special: Money" as const;
 
 type SinoKoreanNumber = {
   number: number;
@@ -145,58 +142,49 @@ function getUsCurrencyString(won: number): string {
   }
 }
 
-/**
- * Randomly generates a Sino-Korean number card.
- *
- * This should be the only card of its type in the deck.
- */
-export function makeSinoKoreanNumberCard(difficulty: Difficulty): AppCard {
-  const number = generateRandomNumber(difficulty);
-  const numberString = number.toLocaleString("en-US");
-  const answer = makeSinoKoreanNumber(number);
-  const usCurrencyString = getUsCurrencyString(number);
-
-  if (!answer) {
-    return EMPTY_QUESTION;
-  }
-
-  return {
-    id: "special-sino-korean-number",
-    category: SPECIAL_SINO_KOREAN_NUMBER_CATEGORY,
-    notionId: undefined,
-
-    // We don't want this to constantly show up at the top of the deck
-    // when it's ordered reverse chronologically, so just hard-code a
-    // time in the past for now.
-    createdTime: "2025-09-17T05:26:00.000Z",
-    lastModifiedTime: "2025-09-17T05:26:00.000Z",
-
-    name: answer,
-    isTranslation: true,
-    hangul: answer,
-    alternativeHangulAnswers: [
-      // This looks weird, but a lot of speech-to-text systems
-      // will insert numbers instead of Hangul for spoken Korean
-      // numbers.
-      //
-      // The downside is that the user can simply type the number
-      // and trivially "win", but it's not like we're keeping
-      // score or anything.
-      numberString,
-      // Also include the number without commas.
-      number.toString(),
-    ],
-    picture: {
-      type: "emojis",
-      emojis: `₩${numberString}`,
-    },
-    notes: `₩${numberString} is ${usCurrencyString}.`,
-  };
-}
-
 export const SinoKoreanNumberDynamicCard: DynamicCard = {
-  category: SPECIAL_SINO_KOREAN_NUMBER_CATEGORY,
+  category: "Special: Money",
   create({ difficulty }) {
-    return makeSinoKoreanNumberCard(difficulty);
+    const number = generateRandomNumber(difficulty);
+    const numberString = number.toLocaleString("en-US");
+    const answer = makeSinoKoreanNumber(number);
+    const usCurrencyString = getUsCurrencyString(number);
+
+    if (!answer) {
+      return EMPTY_QUESTION;
+    }
+
+    return {
+      id: "special-sino-korean-number",
+      category: this.category,
+      notionId: undefined,
+
+      // We don't want this to constantly show up at the top of the deck
+      // when it's ordered reverse chronologically, so just hard-code a
+      // time in the past for now.
+      createdTime: "2025-09-17T05:26:00.000Z",
+      lastModifiedTime: "2025-09-17T05:26:00.000Z",
+
+      name: answer,
+      isTranslation: true,
+      hangul: answer,
+      alternativeHangulAnswers: [
+        // This looks weird, but a lot of speech-to-text systems
+        // will insert numbers instead of Hangul for spoken Korean
+        // numbers.
+        //
+        // The downside is that the user can simply type the number
+        // and trivially "win", but it's not like we're keeping
+        // score or anything.
+        numberString,
+        // Also include the number without commas.
+        number.toString(),
+      ],
+      picture: {
+        type: "emojis",
+        emojis: `₩${numberString}`,
+      },
+      notes: `₩${numberString} is ${usCurrencyString}.`,
+    };
   },
 };

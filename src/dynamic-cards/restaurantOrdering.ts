@@ -13,7 +13,7 @@ type KoreanNumber = {
   short?: string;
 };
 
-const KOREAN_NUMBERS: KoreanNumber[] = [
+export const KOREAN_NUMBERS: KoreanNumber[] = [
   { number: 1, long: "하나", short: "한" },
   { number: 2, long: "둘", short: "두" },
   { number: 3, long: "셋", short: "세" },

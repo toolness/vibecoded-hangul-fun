@@ -1,6 +1,6 @@
-import type { DynamicCardFactory } from "./DynamicCard";
-import { EMPTY_QUESTION, type Difficulty } from "./quizStateReducer";
-import { getRandomInt, verifyExists } from "./util";
+import type { DynamicCardFactory } from "../DynamicCard";
+import { EMPTY_QUESTION, type Difficulty } from "../quizStateReducer";
+import { getRandomInt, verifyExists } from "../util";
 
 type SinoKoreanNumber = {
   number: number;

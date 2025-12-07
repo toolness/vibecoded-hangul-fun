@@ -1,11 +1,11 @@
-import type { DynamicCardFactory } from "./DynamicCard";
-import { EMPTY_QUESTION } from "./quizStateReducer";
+import type { DynamicCardFactory } from "../DynamicCard";
+import { EMPTY_QUESTION } from "../quizStateReducer";
 import {
   convertWordsToUnderscores,
   getRandomItem,
   isDefined,
   verifyExists,
-} from "./util";
+} from "../util";
 
 type KoreanNumber = {
   number: number;

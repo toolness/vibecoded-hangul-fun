@@ -8,8 +8,8 @@ import type { Database } from "./database-spec.ts";
 import type { AppCard, FillInTheBlankItem } from "./AppCard.ts";
 import { convertWordsToUnderscores } from "./util.ts";
 import { DatabaseHelper } from "./database-helper.ts";
-import { RestaurantOrderingDynamicCard } from "./restaurantOrdering.ts";
-import { SinoKoreanNumberDynamicCard } from "./sinoKoreanNumber.ts";
+import { RestaurantOrderingDynamicCard } from "./dynamic-cards/restaurantOrdering.ts";
+import { SinoKoreanNumberDynamicCard } from "./dynamic-cards/sinoKoreanNumber.ts";
 import { DynamicCardManager } from "./DynamicCard.ts";
 
 const DATABASE_JSON_URL = getAssetUrl(DB_JSON_ASSET);

@@ -5,7 +5,13 @@ import { KOREAN_NUMBERS } from "./restaurantOrdering";
 import { makeSinoKoreanNumber } from "./sinoKoreanNumber";
 
 function generateRandomMinute(difficulty: Difficulty): number {
-  if (difficulty === "hard") {
+  if (difficulty === "easy") {
+    const random = Math.random();
+    if (random > 0.25) {
+      return 0;
+    }
+    return 30;
+  } else if (difficulty === "hard") {
     return getRandomInt(0, 59);
   }
   const tensDigit = getRandomInt(0, 5) * 10;

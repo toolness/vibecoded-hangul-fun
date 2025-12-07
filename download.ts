@@ -24,7 +24,7 @@ import {
   findMostRecentModificationTime,
   mergeEntries,
 } from "./src/util.ts";
-import { getHangulNotionDbConfig } from "./src/notion-db.ts";
+import { getHangulNotionDbConfig } from "./src/cli/notion-db.ts";
 import { ASSETS_DIR, DB_JSON_ASSET, getAssetFilePath } from "./src/assets.ts";
 import { parseArgs, type ParseArgsOptionsConfig } from "util";
 import loadXxhash from "xxhash-wasm";

@@ -3,8 +3,8 @@ import dotenv from "dotenv";
 import {
   getRootAnkiDir,
   getRecentlyIncorrectCardsSync,
-} from "./src/anki-query.ts";
-import { getHangulNotionDbConfig } from "./src/notion-db.ts";
+} from "./src/cli/anki-query.ts";
+import { getHangulNotionDbConfig } from "./src/cli/notion-db.ts";
 import { parseArgs, type ParseArgsOptionsConfig } from "util";
 import path from "path";
 import Database from "better-sqlite3";

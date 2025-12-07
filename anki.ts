@@ -7,7 +7,7 @@ import { stringify } from "csv-stringify/sync";
 import path from "path";
 import { createHash } from "crypto";
 import { parseArgs, type ParseArgsOptionsConfig } from "util";
-import { getRootAnkiDir } from "./src/anki-query.ts";
+import { getRootAnkiDir } from "./src/cli/anki-query.ts";
 
 const CLI_ARGS = {
   /** The Anki user (used to find Anki directory to put static assets). */

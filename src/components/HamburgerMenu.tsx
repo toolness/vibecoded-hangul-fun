@@ -7,8 +7,8 @@ import DifficultyModal from "./DifficultyModal";
 import OrderingModal from "./OrderingModal";
 import AboutModal from "./AboutModal";
 import Toast from "./Toast";
-import type { AppCard } from "./AppCard";
-import type { Mode, Difficulty, Ordering } from "./quizStateReducer";
+import type { AppCard } from "../AppCard";
+import type { Mode, Difficulty, Ordering } from "../quizStateReducer";
 
 const MODE_NAMES: { [k in Mode]: string } = {
   translate: "Translate",

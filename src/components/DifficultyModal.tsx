@@ -1,6 +1,6 @@
 import "./DifficultyModal.css";
 import Modal from "./Modal";
-import type { Difficulty } from "./quizStateReducer";
+import type { Difficulty } from "../quizStateReducer";
 
 interface DifficultyModalProps {
   currentDifficulty: Difficulty;

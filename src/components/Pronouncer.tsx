@@ -1,6 +1,6 @@
 import { useCallback, useRef } from "react";
-import SpeakerIcon from "./assets/Speaker_Icon.svg";
-import type { Vocalizer } from "./speech";
+import SpeakerIcon from "../assets/Speaker_Icon.svg";
+import type { Vocalizer } from "../speech";
 
 export function Pronouncer(props: {
   audioUrl: string | undefined;

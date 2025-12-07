@@ -1,5 +1,5 @@
-import { getAssetUrl } from "./assets";
-import type { WordPicture } from "./database-spec";
+import { getAssetUrl } from "../assets";
+import type { WordPicture } from "../database-spec";
 
 export function WordPicture({ picture }: { picture: WordPicture | undefined }) {
   if (!picture) {

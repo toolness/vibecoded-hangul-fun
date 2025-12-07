@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import HamburgerMenu from "./HamburgerMenu";
-import type { AppCard } from "./AppCard";
-import { createTestAppCard } from "./test/testHelpers";
+import type { AppCard } from "../AppCard";
+import { createTestAppCard } from "../test/testHelpers";
 import type { ComponentProps } from "react";
 
 describe("HamburgerMenu", () => {

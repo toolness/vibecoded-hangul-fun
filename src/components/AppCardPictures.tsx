@@ -1,4 +1,4 @@
-import type { AppCard } from "./AppCard";
+import type { AppCard } from "../AppCard";
 import { WordPicture } from "./WordPicture";
 
 export function AppCardPictures(props: { card: AppCard }) {

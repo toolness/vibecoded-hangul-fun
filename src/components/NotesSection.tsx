@@ -1,7 +1,7 @@
-import type { AppCard } from "./AppCard";
+import type { AppCard } from "../AppCard";
 import { Pronouncer } from "./Pronouncer";
-import { getAssetUrl } from "./assets";
-import type { Vocalizer } from "./speech";
+import { getAssetUrl } from "../assets";
+import type { Vocalizer } from "../speech";
 
 interface NotesSectionProps {
   currentQuestion: AppCard;

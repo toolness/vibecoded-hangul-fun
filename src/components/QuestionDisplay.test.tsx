@@ -1,8 +1,8 @@
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import QuestionDisplay from "./QuestionDisplay";
-import type { AppCard } from "./AppCard";
-import { createTestAppCard } from "./test/testHelpers";
+import type { AppCard } from "../AppCard";
+import { createTestAppCard } from "../test/testHelpers";
 
 describe("QuestionDisplay", () => {
   const mockQuestionWithUrl: AppCard = createTestAppCard({

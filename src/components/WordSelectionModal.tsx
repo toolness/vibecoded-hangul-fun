@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import Select from "react-select";
 import type { SingleValue } from "react-select";
 import "./WordSelectionModal.css";
-import type { AppCard } from "./AppCard";
+import type { AppCard } from "../AppCard";
 import Modal from "./Modal";
 
 interface WordOption {

@@ -1,4 +1,4 @@
-import type { FillInTheBlankItem } from "./AppCard";
+import type { FillInTheBlankItem } from "../AppCard";
 
 export function FillInTheBlank(props: {
   items: FillInTheBlankItem[];

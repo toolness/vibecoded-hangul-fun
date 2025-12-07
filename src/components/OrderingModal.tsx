@@ -1,6 +1,6 @@
 import "./DifficultyModal.css";
 import Modal from "./Modal";
-import type { Ordering } from "./quizStateReducer";
+import type { Ordering } from "../quizStateReducer";
 
 interface OrderingModalProps {
   currentOrdering: Ordering;

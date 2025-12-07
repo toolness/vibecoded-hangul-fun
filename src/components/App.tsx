@@ -8,8 +8,8 @@ import {
   useMemo,
   useCallback,
 } from "react";
-import type { AppCard } from "./AppCard";
-import { calculateCorrectKeystrokes } from "./calculateCorrectKeystrokes";
+import type { AppCard } from "../AppCard";
+import { calculateCorrectKeystrokes } from "../calculateCorrectKeystrokes";
 import {
   quizReducer,
   createInitialState,
@@ -19,19 +19,19 @@ import {
   type QuizState,
   type QuizAction,
   EMPTY_QUESTION,
-} from "./quizStateReducer";
-import { useKoreanVocalizer } from "./speech";
+} from "../quizStateReducer";
+import { useKoreanVocalizer } from "../speech";
 import HamburgerMenu from "./HamburgerMenu";
 import QuestionDisplay from "./QuestionDisplay";
 import Confetti from "./Confetti";
 import { Pronouncer } from "./Pronouncer";
-import { getAssetUrl } from "./assets";
+import { getAssetUrl } from "../assets";
 import NotesSection from "./NotesSection";
-import NotionLogo from "./assets/Notion_Logo.svg";
-import WikipediaLogo from "./assets/Wikipedia_Logo.svg";
-import type { DatabaseHelper } from "./database-helper";
+import NotionLogo from "../assets/Notion_Logo.svg";
+import WikipediaLogo from "../assets/Wikipedia_Logo.svg";
+import type { DatabaseHelper } from "../database-helper";
 import { AppCardPictures } from "./AppCardPictures";
-import type { DynamicCardManager } from "./DynamicCard";
+import type { DynamicCardManager } from "../DynamicCard";
 
 const MODE_PROMPT: Record<Mode, string> = {
   typingtutor: "Type this Hangul:",

@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import "./WordSelectionModal.css";
 import "./CategorySelectionModal.css";
-import type { AppCard } from "./AppCard";
+import type { AppCard } from "../AppCard";
 import Modal from "./Modal";
 
 interface CategorySelectionModalProps {

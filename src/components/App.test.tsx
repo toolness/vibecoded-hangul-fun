@@ -3,11 +3,11 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import App from "./App";
 import "@testing-library/jest-dom";
-import type { Mode } from "./quizStateReducer";
-import { createTestAppCard } from "./test/testHelpers";
-import { DatabaseHelper } from "./database-helper";
-import { makeEmptyDatabase } from "./database-spec";
-import { DynamicCardManager } from "./DynamicCard";
+import type { Mode } from "../quizStateReducer";
+import { createTestAppCard } from "../test/testHelpers";
+import { DatabaseHelper } from "../database-helper";
+import { makeEmptyDatabase } from "../database-spec";
+import { DynamicCardManager } from "../DynamicCard";
 
 function TestApp(props: { initialMode?: Mode }) {
   return (

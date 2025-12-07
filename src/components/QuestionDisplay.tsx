@@ -1,7 +1,7 @@
-import type { AppCard } from "./AppCard";
-import type { Mode } from "./quizStateReducer";
-import { type Vocalizer } from "./speech";
-import { getAssetUrl } from "./assets";
+import type { AppCard } from "../AppCard";
+import type { Mode } from "../quizStateReducer";
+import { type Vocalizer } from "../speech";
+import { getAssetUrl } from "../assets";
 import { Pronouncer } from "./Pronouncer";
 import { FillInTheBlank } from "./FillInTheBlank";
 import { AppCardPictures } from "./AppCardPictures";

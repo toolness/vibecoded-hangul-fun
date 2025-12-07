@@ -1,7 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
-import App from "./App.tsx";
+import App from "./components/App.tsx";
 import { DB_JSON_ASSET, getAssetUrl } from "./assets.ts";
 import { validateMode } from "./quizStateReducer.ts";
 import type { Database } from "./database-spec.ts";

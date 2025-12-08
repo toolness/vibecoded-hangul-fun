@@ -36,7 +36,7 @@ The content can also be exported to
 
 ### Prerequisites
 
-You will need NodeJS 23 or above.
+You will need NodeJS 22 or above.
 
 You will also need to create an internal Notion integration:
 

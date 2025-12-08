@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "ci": "npm run typecheck && prettier . --check && npm run test && vite build --logLevel warn",
-    "download": "node download.ts",
-    "upload": "npm run download && node upload.ts",
-    "anki": "node anki.ts",
+    "download": "node --experimental-strip-types download.ts",
+    "upload": "npm run download && node --experimental-strip-types upload.ts",
+    "anki": "node --experimental-strip-types anki.ts",
     "typecheck": "tsc -b && npm run lint",
     "test": "vitest run",
     "test:watch": "vitest watch",

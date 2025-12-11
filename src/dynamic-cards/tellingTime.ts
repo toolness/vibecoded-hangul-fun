@@ -59,6 +59,7 @@ export function makeHangulForTime(
   if (minute === 0) {
     return {
       hangul: hourHangul,
+      alternativeHangulAnswers: [`${hour}시`],
     };
   }
 
@@ -68,18 +69,16 @@ export function makeHangulForTime(
     return;
   }
 
-  const hangul = `${hourHangul} ${minuteNumberHangul}분`;
+  const result = {
+    hangul: `${hourHangul} ${minuteNumberHangul}분`,
+    alternativeHangulAnswers: [`${hour}시 ${minute}분`],
+  };
 
   if (minute === 30) {
-    return {
-      hangul,
-      alternativeHangulAnswers: [`${hourHangul} 반`],
-    };
+    result.alternativeHangulAnswers.push(`${hourHangul} 반`, `${hour}시 반`);
   }
 
-  return {
-    hangul,
-  };
+  return result;
 }
 
 export function makeEnglishTimeString(hour: number, minute: number): string {

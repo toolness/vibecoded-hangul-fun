@@ -14,6 +14,7 @@ import {
 } from "./src/database-spec.ts";
 import { DB_JSON_ASSET, getAssetFilePath } from "./src/assets.ts";
 import { existsSync, readFileSync } from "fs";
+import Queue from "queue";
 
 dotenv.config();
 
@@ -62,23 +63,31 @@ async function main() {
     rowDateMap.set(row.id, dateString);
   }
   const jsonDatabase = getJsonDatabase();
+  const uploadQueue = new Queue({ concurrency: 5, autostart: false });
   for (const word of jsonDatabase.words) {
     const date = rowDateMap.get(word.id);
     if (date && word.lastIncorrect !== date) {
-      const response = await client.pages.update({
-        page_id: word.id,
-        properties: {
-          "Last incorrect": {
-            date: {
-              start: date,
+      uploadQueue.push(async () => {
+        const response = await client.pages.update({
+          page_id: word.id,
+          properties: {
+            "Last incorrect": {
+              date: {
+                start: date,
+              },
             },
           },
-        },
+        });
+        console.log(
+          `Updated word ${response.id} with last incorrect date ${date}.`,
+        );
       });
-      console.log(
-        `Updated word ${response.id} with last incorrect date ${date}.`,
-      );
     }
+  }
+
+  // Start processing and wait for all uploads to complete.
+  if (uploadQueue.length > 0) {
+    await uploadQueue.start();
   }
 
   console.log("Done.");

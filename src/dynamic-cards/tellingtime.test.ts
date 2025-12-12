@@ -5,19 +5,23 @@ describe("makeHangulForTime", () => {
   it("works", () => {
     expect(makeHangulForTime(3, 10)).toEqual({
       hangul: "세시 십분",
+      alternativeHangulAnswers: ["3시 10분"],
     });
     expect(makeHangulForTime(5, 25)).toEqual({
       hangul: "다섯시 이십오분",
+      alternativeHangulAnswers: ["5시 25분"],
     });
     expect(makeHangulForTime(8, 30)).toEqual({
       hangul: "여덟시 삼십분",
-      alternativeHangulAnswers: ["여덟시 반"],
+      alternativeHangulAnswers: ["8시 30분", "여덟시 반", "8시 반"],
     });
     expect(makeHangulForTime(12, 45)).toEqual({
       hangul: "열두시 사십오분",
+      alternativeHangulAnswers: ["12시 45분"],
     });
     expect(makeHangulForTime(12, 0)).toEqual({
       hangul: "열두시",
+      alternativeHangulAnswers: ["12시"],
     });
   });
 });

@@ -14,7 +14,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build --base /vibecoded-hangul-fun/",
     "build:local": "tsc -b && vite build",
-    "deploy": "npm run build && gh-pages -d dist",
+    "deploy": "gh workflow run deploy.yml",
     "lint": "eslint .",
     "prettier": "prettier . --write",
     "preview": "vite preview"
@@ -31,7 +31,6 @@
     "canvas-confetti": "^1.9.3",
     "csv-stringify": "^6.6.0",
     "dotenv": "^17.0.1",
-    "gh-pages": "^6.3.0",
     "prettier": "^3.6.2",
     "queue": "^7.0.0",
     "react": "^19.1.0",

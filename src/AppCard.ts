@@ -24,6 +24,12 @@ export type AppCard = WordDatabaseRow & {
   fullHangul?: string;
 
   /**
+   * If this is set, it means that the audio is a core part of
+   * the card and should be played as soon as it appears.
+   */
+  autoPlayAudio?: boolean;
+
+  /**
    * Alternative answers that we'll accept as correct,
    * in addition to `hangul`.
    *

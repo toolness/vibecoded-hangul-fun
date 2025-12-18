@@ -141,6 +141,7 @@ export const TellingTimeAudioOnlyDynamicCard: DynamicCardFactory = {
       hangul: englishTimeString,
       // This is the actual Hangul to be spoken by TTS.
       fullHangul,
+      autoPlayAudio: true,
       picture: {
         type: "emojis",
         emojis: `🕰️👂`,

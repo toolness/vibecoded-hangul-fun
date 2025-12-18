@@ -78,6 +78,7 @@ function QuestionDisplay({
             : undefined
         }
         hangul={currentQuestion.fullHangul ?? currentQuestion.hangul}
+        autoPlay={currentQuestion.autoPlayAudio}
         vocalizer={vocalizer}
       />
     </div>

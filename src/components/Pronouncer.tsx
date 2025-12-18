@@ -1,4 +1,4 @@
-import { useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import SpeakerIcon from "../assets/Speaker_Icon.svg";
 import type { Vocalizer } from "../speech";
 
@@ -6,10 +6,19 @@ export function Pronouncer(props: {
   audioUrl: string | undefined;
   hangul: string;
   vocalizer: Vocalizer | null;
+  autoPlay?: boolean;
 }) {
-  const { audioUrl, hangul, vocalizer } = props;
+  const { audioUrl, hangul, vocalizer, autoPlay } = props;
   const audioRef = useRef<HTMLAudioElement>(null);
   const showSpeakerIcon = Boolean(vocalizer || audioUrl);
+  const playAudio = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = 0;
+      audioRef.current.play();
+    } else if (vocalizer) {
+      vocalizer(hangul);
+    }
+  }, [hangul, vocalizer]);
   const handleSpeakerPointerDown = useCallback(
     (e: React.PointerEvent | React.KeyboardEvent) => {
       // Preventing the default behavior will ensure that
@@ -20,16 +29,16 @@ export function Pronouncer(props: {
       // the speaker icon to hear the word said aloud,
       // to translate it more accurately).
       e.preventDefault();
-
-      if (audioRef.current) {
-        audioRef.current.currentTime = 0;
-        audioRef.current.play();
-      } else if (vocalizer) {
-        vocalizer(hangul);
-      }
+      playAudio();
     },
-    [hangul, vocalizer],
+    [playAudio],
   );
+
+  useEffect(() => {
+    if (autoPlay) {
+      playAudio();
+    }
+  }, [autoPlay, playAudio]);
 
   return (
     <>

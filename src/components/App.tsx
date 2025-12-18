@@ -9,7 +9,7 @@ import {
   useCallback,
 } from "react";
 import type { AppCard } from "../AppCard";
-import { calculateCorrectKeystrokes } from "../calculateCorrectKeystrokes";
+import { calculateBestAnswer } from "../calculateCorrectKeystrokes";
 import {
   quizReducer,
   createInitialState,
@@ -398,14 +398,13 @@ function TypingModeAnswerer(props: AnswererProps) {
 
   const { currentQuestion, userInput, showAnswer, mode } = state;
 
-  const { correct, total } = calculateCorrectKeystrokes(
-    currentQuestion.hangul || "",
+  const { correct, total, isCompletelyCorrect } = calculateBestAnswer({
+    possibleAnswers: [
+      currentQuestion.hangul,
+      ...(currentQuestion.alternativeHangulAnswers ?? []),
+    ],
     userInput,
-  );
-  const isCompletelyCorrect = [
-    currentQuestion.hangul,
-    ...(currentQuestion.alternativeHangulAnswers ?? []),
-  ].some((hangul) => userInput === hangul);
+  });
 
   // Trigger confetti when user completes the word correctly
   useEffect(() => {

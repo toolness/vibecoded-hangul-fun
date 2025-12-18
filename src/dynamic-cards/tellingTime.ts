@@ -113,3 +113,38 @@ export const TellingTimeDynamicCard: DynamicCardFactory = {
     };
   },
 };
+
+/**
+ * This is a hack that allows me to listen to the time in
+ * Korean and type in the English time (e.g. "8:02") as the answer,
+ * without having to add a brand-new mode to the app.
+ */
+export const TellingTimeAudioOnlyDynamicCard: DynamicCardFactory = {
+  category: "Special: Time (audio only)",
+  create({ difficulty }) {
+    const hour = getRandomInt(1, 12);
+    const minute = generateRandomMinute(difficulty);
+    const result = makeHangulForTime(hour, minute);
+    const englishTimeString = makeEnglishTimeString(hour, minute);
+
+    if (!result) {
+      return EMPTY_QUESTION;
+    }
+
+    const { hangul: fullHangul } = result;
+
+    return {
+      name: englishTimeString,
+      isTranslation: true,
+      // Note that the "hangul" is actually the English time,
+      // b/c that's what the user needs to type.
+      hangul: englishTimeString,
+      // This is the actual Hangul to be spoken by TTS.
+      fullHangul,
+      picture: {
+        type: "emojis",
+        emojis: `🕰️👂`,
+      },
+    };
+  },
+};

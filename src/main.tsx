@@ -11,7 +11,10 @@ import { DatabaseHelper } from "./database-helper.ts";
 import { RestaurantOrderingDynamicCard } from "./dynamic-cards/restaurantOrdering.ts";
 import { SinoKoreanNumberDynamicCard } from "./dynamic-cards/sinoKoreanNumber.ts";
 import { DynamicCardManager } from "./DynamicCard.ts";
-import { TellingTimeDynamicCard } from "./dynamic-cards/tellingTime.ts";
+import {
+  TellingTimeAudioOnlyDynamicCard,
+  TellingTimeDynamicCard,
+} from "./dynamic-cards/tellingTime.ts";
 
 const DATABASE_JSON_URL = getAssetUrl(DB_JSON_ASSET);
 
@@ -40,6 +43,7 @@ function createInitialRows(database: Database): {
     RestaurantOrderingDynamicCard,
     SinoKoreanNumberDynamicCard,
     TellingTimeDynamicCard,
+    TellingTimeAudioOnlyDynamicCard,
   ]);
 
   for (const word of database.words) {

@@ -15,6 +15,10 @@ describe("makeHangulForTime", () => {
       hangul: "여덟시 삼십분",
       alternativeHangulAnswers: ["8시 30분", "여덟시 반", "8시 반"],
     });
+    expect(makeHangulForTime(8, 30, { preferShortestAnswer: true })).toEqual({
+      hangul: "여덟시 반",
+      alternativeHangulAnswers: ["8시 30분", "여덟시 삼십분", "8시 반"],
+    });
     expect(makeHangulForTime(12, 45)).toEqual({
       hangul: "열두시 사십오분",
       alternativeHangulAnswers: ["12시 45분"],

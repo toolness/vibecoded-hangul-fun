@@ -1,6 +1,6 @@
 import type { DynamicCardFactory } from "../DynamicCard";
 import { EMPTY_QUESTION, type Difficulty } from "../quizStateReducer";
-import { getRandomInt } from "../util";
+import { getRandomBoolean, getRandomInt } from "../util";
 import { KOREAN_NUMBERS } from "./restaurantOrdering";
 import { makeSinoKoreanNumber } from "./sinoKoreanNumber";
 
@@ -42,6 +42,9 @@ export function makeKoreanNumberForHour(value: number): string | undefined {
 export function makeHangulForTime(
   hour: number,
   minute: number,
+  options?: {
+    preferShortestAnswer?: boolean;
+  },
 ):
   | undefined
   | {
@@ -49,6 +52,7 @@ export function makeHangulForTime(
       alternativeHangulAnswers?: string[];
     } {
   const hourNumberHangul = makeKoreanNumberForHour(hour);
+  const preferShortestAnswer = options?.preferShortestAnswer ?? false;
 
   if (!hourNumberHangul) {
     return;
@@ -69,13 +73,21 @@ export function makeHangulForTime(
     return;
   }
 
+  const longHangul = `${hourHangul} ${minuteNumberHangul}분`;
   const result = {
-    hangul: `${hourHangul} ${minuteNumberHangul}분`,
+    hangul: longHangul,
     alternativeHangulAnswers: [`${hour}시 ${minute}분`],
   };
 
   if (minute === 30) {
-    result.alternativeHangulAnswers.push(`${hourHangul} 반`, `${hour}시 반`);
+    const shortHangul = `${hourHangul} 반`;
+    if (preferShortestAnswer) {
+      result.hangul = shortHangul;
+      result.alternativeHangulAnswers.push(longHangul);
+    } else {
+      result.alternativeHangulAnswers.push(shortHangul);
+    }
+    result.alternativeHangulAnswers.push(`${hour}시 반`);
   }
 
   return result;
@@ -92,7 +104,9 @@ export const TellingTimeDynamicCard: DynamicCardFactory = {
   create({ difficulty }) {
     const hour = getRandomInt(1, 12);
     const minute = generateRandomMinute(difficulty);
-    const result = makeHangulForTime(hour, minute);
+    const result = makeHangulForTime(hour, minute, {
+      preferShortestAnswer: getRandomBoolean(),
+    });
     const englishTimeString = makeEnglishTimeString(hour, minute);
 
     if (!result) {
@@ -124,7 +138,9 @@ export const TellingTimeAudioOnlyDynamicCard: DynamicCardFactory = {
   create({ difficulty }) {
     const hour = getRandomInt(1, 12);
     const minute = generateRandomMinute(difficulty);
-    const result = makeHangulForTime(hour, minute);
+    const result = makeHangulForTime(hour, minute, {
+      preferShortestAnswer: getRandomBoolean(),
+    });
     const englishTimeString = makeEnglishTimeString(hour, minute);
 
     if (!result) {

@@ -103,6 +103,10 @@ export function getRandomItem<T>(list: T[]): T {
   return list[randomIndex];
 }
 
+export function getRandomBoolean(): boolean {
+  return getRandomItem([true, false]);
+}
+
 /**
  * Return a random integer within the given range, inclusive.
  */

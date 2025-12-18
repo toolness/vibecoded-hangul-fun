@@ -44,7 +44,10 @@ export function calculateBestAnswer(args: {
       };
     }
 
-    if (correct >= bestAnswer.correct && total <= bestAnswer.total) {
+    if (
+      correct > bestAnswer.correct ||
+      (correct === bestAnswer.correct && total <= bestAnswer.total)
+    ) {
       bestAnswer = {
         answer,
         total,

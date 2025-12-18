@@ -1,5 +1,8 @@
 import { describe, it, expect } from "vitest";
-import { calculateCorrectKeystrokes } from "./calculateCorrectKeystrokes";
+import {
+  calculateCorrectKeystrokes,
+  calculateBestAnswer,
+} from "./calculateCorrectKeystrokes";
 
 describe("calculateCorrectJamos", () => {
   it("should handle empty correct hangul string", () => {
@@ -83,5 +86,67 @@ describe("calculateCorrectJamos", () => {
     const result = calculateCorrectKeystrokes("테스트", "테스트");
     expect(result.correct).toBe(6); // ㅌㅔㅅㅡㅌㅡ
     expect(result.total).toBe(6);
+  });
+});
+
+describe("calculateBestAnswer", () => {
+  it("should return exact match when user input matches an answer", () => {
+    const result = calculateBestAnswer({
+      possibleAnswers: ["안녕", "감사", "사랑"],
+      userInput: "감사",
+    });
+    expect(result.answer).toBe("감사");
+    expect(result.isCompletelyCorrect).toBe(true);
+  });
+
+  it("should return the answer with the most matching keystrokes", () => {
+    const result = calculateBestAnswer({
+      possibleAnswers: ["가나", "안녕", "다라"],
+      userInput: "안",
+    });
+    expect(result.answer).toBe("안녕");
+    expect(result.correct).toBe(3);
+    expect(result.isCompletelyCorrect).toBe(false);
+  });
+
+  it("should prefer shorter answers when correct counts are equal", () => {
+    const result = calculateBestAnswer({
+      possibleAnswers: ["안녕하세요", "안녕"],
+      userInput: "안녕",
+    });
+    expect(result.answer).toBe("안녕");
+    expect(result.isCompletelyCorrect).toBe(true);
+  });
+
+  it("should handle empty user input", () => {
+    const result = calculateBestAnswer({
+      possibleAnswers: ["안녕", "감사"],
+      userInput: "",
+    });
+    expect(result.correct).toBe(0);
+    expect(result.isCompletelyCorrect).toBe(false);
+  });
+
+  it("should handle single possible answer", () => {
+    const result = calculateBestAnswer({
+      possibleAnswers: ["안녕"],
+      userInput: "안",
+    });
+    expect(result.answer).toBe("안녕");
+    expect(result.correct).toBe(3);
+    expect(result.total).toBe(6);
+    expect(result.isCompletelyCorrect).toBe(false);
+  });
+
+  it("should prioritize correct keystrokes over shorter length", () => {
+    // "가" is shorter (2 keystrokes) but has 0 correct
+    // "안녕" is longer (6 keystrokes) but has 3 correct
+    // The answer with more correct keystrokes should win regardless of order
+    const result = calculateBestAnswer({
+      possibleAnswers: ["가", "안녕"],
+      userInput: "안",
+    });
+    expect(result.answer).toBe("안녕");
+    expect(result.correct).toBe(3);
   });
 });

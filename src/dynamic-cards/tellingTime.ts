@@ -139,6 +139,11 @@ export const TellingTimeAudioOnlyDynamicCard: DynamicCardFactory = {
       // Note that the "hangul" is actually the English time,
       // b/c that's what the user needs to type.
       hangul: englishTimeString,
+      alternativeHangulAnswers: [
+        // Allow users to substitute a space instead of a colon for
+        // faster typing.
+        englishTimeString.replace(":", " "),
+      ],
       // This is the actual Hangul to be spoken by TTS.
       fullHangul,
       autoPlayAudio: true,

@@ -12,6 +12,13 @@ interface QuestionDisplayProps {
   vocalizer: Vocalizer | null;
 }
 
+const AUTO_PLAY_AUDIO_MODES: Set<Mode> = new Set([
+  "reversepicture",
+  "translate",
+  "typingtutor",
+  "minimalpair",
+]);
+
 function QuestionDisplay({
   currentQuestion,
   mode,
@@ -78,7 +85,9 @@ function QuestionDisplay({
             : undefined
         }
         hangul={currentQuestion.fullHangul ?? currentQuestion.hangul}
-        autoPlay={currentQuestion.autoPlayAudio}
+        autoPlay={
+          currentQuestion.autoPlayAudio ?? AUTO_PLAY_AUDIO_MODES.has(mode)
+        }
         vocalizer={vocalizer}
       />
     </div>

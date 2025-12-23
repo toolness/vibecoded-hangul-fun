@@ -40,19 +40,26 @@ interface SubtitleSegment {
 const imageSegments: ImageSegment[] = [];
 const subtitleSegments: SubtitleSegment[] = [];
 
+// Collect all words from all segments into a flat list
+interface WordWithTiming {
+  text: string;
+  startTime: number;
+  endTime: number;
+  isSegmentStart: boolean;
+}
+const allWords: WordWithTiming[] = [];
+
 for (const segment of timings.segments) {
-  const segmentText: string = segment.text;
-  const segmentStartTime: number = segment.start_time;
-  const segmentEndTime: number = segment.end_time;
-  subtitleSegments.push({
-    startTime: segmentStartTime,
-    endTime: segmentEndTime,
-    text: segmentText,
-  });
+  let isFirst = true;
   for (const word of segment.words) {
     const text: string = word.text;
     const startTime: number = word.start_time;
     const endTime: number = word.end_time;
+
+    allWords.push({ text, startTime, endTime, isSegmentStart: isFirst });
+    isFirst = false;
+
+    // Handle image segments
     const trimmed = text.trim().replace(/[,.]/g, "");
     const vocabWord = wordMapping[trimmed];
     if (vocabWord) {
@@ -63,6 +70,63 @@ for (const segment of timings.segments) {
       }
     }
   }
+}
+
+// Group words into subtitle chunks based on sentence-ending punctuation
+// A subtitle ends when we hit a word ending with . ! ? or ]
+let currentSubtitleText = "";
+let currentSubtitleStart: number | null = null;
+let currentSubtitleEnd: number = 0;
+
+for (const word of allWords) {
+  const text = word.text;
+
+  // Skip pure whitespace tokens but track them for spacing
+  if (text.trim() === "") {
+    if (currentSubtitleText) {
+      currentSubtitleText += " ";
+    }
+    continue;
+  }
+
+  // Start a new subtitle if needed
+  if (currentSubtitleStart === null) {
+    currentSubtitleStart = word.startTime;
+  }
+
+  // Add space before segment start if we're continuing a subtitle
+  if (
+    word.isSegmentStart &&
+    currentSubtitleText &&
+    !currentSubtitleText.endsWith(" ")
+  ) {
+    currentSubtitleText += " ";
+  }
+
+  currentSubtitleText += text;
+  currentSubtitleEnd = word.endTime;
+
+  // Check if this word ends a sentence (ends with . ! ? or ])
+  const endsWithPunctuation = /[.!?\]]$/.test(text.trim());
+
+  if (endsWithPunctuation && currentSubtitleText.trim()) {
+    subtitleSegments.push({
+      startTime: currentSubtitleStart,
+      endTime: currentSubtitleEnd,
+      text: currentSubtitleText.trim(),
+    });
+    currentSubtitleText = "";
+    currentSubtitleStart = null;
+  }
+}
+
+// Don't forget any remaining text
+if (currentSubtitleText.trim() && currentSubtitleStart !== null) {
+  subtitleSegments.push({
+    startTime: currentSubtitleStart,
+    endTime: currentSubtitleEnd,
+    text: currentSubtitleText.trim(),
+  });
 }
 
 // Deduplicate images by filepath, keeping the unique file paths

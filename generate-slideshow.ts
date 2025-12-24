@@ -525,14 +525,16 @@ function buildFFmpegCommand(args: {
 // ============================================================================
 
 function main() {
+  const baseName = "friend-and-trip";
+
   // Load resources
   const dbRows = loadDatabase();
   const dbHelper = new DatabaseHelper(dbRows);
   const wordMapping = loadJson<Record<string, string[]>>(
-    "friend-and-trip-mapping.json",
+    `${baseName}.mapping.json`,
   );
   const timings = loadJson<ElevenLabsTimingsData>(
-    "friend-and-trip-timings.json",
+    `${baseName}.elevenlabs.json`,
   );
 
   // Build subtitles from word timings
@@ -562,8 +564,8 @@ function main() {
 
   // FFmpeg options
   const ffmpegOptions: FFmpegOptions = {
-    audioPath: "friend-and-trip.mp3",
-    outputPath: "friend-and-trip.mp4",
+    audioPath: `${baseName}.mp3`,
+    outputPath: `${baseName}.mp4`,
     frameWidth: 640,
     frameHeight: 480,
     fontPath: "/System/Library/Fonts/AppleSDGothicNeo.ttc",

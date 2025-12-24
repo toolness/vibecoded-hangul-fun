@@ -198,6 +198,30 @@ function calculateImageLayout(filepaths: string[]): ImageLayout[] {
   const images = filepaths.slice(0, MAX_IMAGES);
   if (images.length === 0) return [];
 
+  // Special case: single image that would be upscaled - use native size instead
+  if (images.length === 1) {
+    const filepath = images[0];
+    const dims = imageDimensions.get(filepath)!;
+
+    // Check if native size fits and would be upscaled
+    if (
+      dims.width <= FRAME_WIDTH &&
+      dims.height <= IMAGE_AREA_HEIGHT &&
+      dims.height < IMAGE_AREA_HEIGHT
+    ) {
+      // Use native size, centered
+      return [
+        {
+          filepath,
+          x: (FRAME_WIDTH - dims.width) / 2,
+          y: (IMAGE_AREA_HEIGHT - dims.height) / 2,
+          scaledWidth: dims.width,
+          scaledHeight: dims.height,
+        },
+      ];
+    }
+  }
+
   // Determine row configuration
   const needsTwoRows = images.length > MAX_IMAGES_PER_ROW;
   const row1Images = needsTwoRows

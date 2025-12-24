@@ -130,7 +130,7 @@ function wrapText(args: { text: string; maxCharsPerLine: number }): string[] {
 
 function buildSubtitlesFromElevenLabsTimings(args: {
   timings: ElevenLabsTimingsData;
-  wordMapping: Record<string, string | null>;
+  wordMapping: Record<string, string[]>;
   dbHelper: DatabaseHelper;
 }): SubtitleSegment[] {
   const { timings, wordMapping, dbHelper } = args;
@@ -141,7 +141,7 @@ function buildSubtitlesFromElevenLabsTimings(args: {
     startTime: number;
     endTime: number;
     isSegmentStart: boolean;
-    imageFilepath: string | null;
+    imageFilepaths: string[];
   }
 
   const allWords: WordWithTiming[] = [];
@@ -153,14 +153,16 @@ function buildSubtitlesFromElevenLabsTimings(args: {
       const startTime = word.start_time;
       const endTime = word.end_time;
 
-      // Check if this word has an associated image
-      let imageFilepath: string | null = null;
+      // Check if this word has associated images (can be multiple for compound words)
+      const imageFilepaths: string[] = [];
       const trimmed = text.trim().replace(/[,.]/g, "");
-      const vocabWord = wordMapping[trimmed];
-      if (vocabWord) {
-        const row = dbHelper.wordHangulMap.get(vocabWord);
-        if (row && row.picture?.type === "local-image") {
-          imageFilepath = join(ASSETS_DIR, row.picture.filename);
+      const vocabWords = wordMapping[trimmed];
+      if (vocabWords) {
+        for (const vocabWord of vocabWords) {
+          const row = dbHelper.wordHangulMap.get(vocabWord);
+          if (row && row.picture?.type === "local-image") {
+            imageFilepaths.push(join(ASSETS_DIR, row.picture.filename));
+          }
         }
       }
 
@@ -169,7 +171,7 @@ function buildSubtitlesFromElevenLabsTimings(args: {
         startTime,
         endTime,
         isSegmentStart: isFirst,
-        imageFilepath,
+        imageFilepaths,
       });
       isFirst = false;
     }
@@ -210,12 +212,11 @@ function buildSubtitlesFromElevenLabsTimings(args: {
     currentSubtitleText += text;
     currentSubtitleEnd = word.endTime;
 
-    // Collect image if this word has one (dedupe within subtitle)
-    if (
-      word.imageFilepath &&
-      !currentSubtitleImages.includes(word.imageFilepath)
-    ) {
-      currentSubtitleImages.push(word.imageFilepath);
+    // Collect images from this word (dedupe within subtitle)
+    for (const filepath of word.imageFilepaths) {
+      if (!currentSubtitleImages.includes(filepath)) {
+        currentSubtitleImages.push(filepath);
+      }
     }
 
     // Check if this word ends a sentence (ends with . ! ? or ])
@@ -527,7 +528,7 @@ function main() {
   // Load resources
   const dbRows = loadDatabase();
   const dbHelper = new DatabaseHelper(dbRows);
-  const wordMapping = loadJson<Record<string, string | null>>(
+  const wordMapping = loadJson<Record<string, string[]>>(
     "friend-and-trip-mapping.json",
   );
   const timings = loadJson<ElevenLabsTimingsData>(

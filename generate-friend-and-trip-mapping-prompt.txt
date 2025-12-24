@@ -8,15 +8,18 @@ they'll be in an adjectival or nominalized form, etc).
 I want you to create a JSON object that maps words from friend-and-trip-words.txt
 to words in vocabulary.md.
 
+The values should be arrays of strings, since a single word can map to multiple
+vocab words (e.g., compound words like "노래방" could map to ["노래", "방"]).
+
 If there are any words in the first file that don't appear in any form in the
-second, you can set them to null.
+second, simply omit them from the mapping (don't include null entries).
 
 Here's an example of something you might output:
 
 {
-  "친구를": "친구",
-  "애교": null,
-  "갔다": "가다"
+  "친구를": ["친구"],
+  "갔다": ["가다"],
+  "노래방에": ["노래", "방"]
 }
 
 You only need to look at friend-and-trip-words.txt and vocabulary.md. Don't look

@@ -15,7 +15,9 @@ interface ImageDimensions {
 }
 
 interface SubtitleSegment {
+  /** Start time in seconds */
   startTime: number;
+  /** End time in seconds */
   endTime: number;
   text: string;
   images: string[]; // filepaths of images for this subtitle
@@ -29,18 +31,18 @@ interface ImageLayout {
   scaledHeight: number;
 }
 
-interface WordTiming {
+interface ElevenLabsWordTiming {
   text: string;
   start_time: number;
   end_time: number;
 }
 
-interface SegmentTiming {
-  words: WordTiming[];
+interface ElevenLabsSegmentTiming {
+  words: ElevenLabsWordTiming[];
 }
 
-interface TimingsData {
-  segments: SegmentTiming[];
+interface ElevenLabsTimingsData {
+  segments: ElevenLabsSegmentTiming[];
 }
 
 interface LayoutOptions {
@@ -126,8 +128,8 @@ function wrapText(args: { text: string; maxCharsPerLine: number }): string[] {
 // Subtitle Building
 // ============================================================================
 
-function buildSubtitlesFromWordTimings(args: {
-  timings: TimingsData;
+function buildSubtitlesFromElevenLabsTimings(args: {
+  timings: ElevenLabsTimingsData;
   wordMapping: Record<string, string | null>;
   dbHelper: DatabaseHelper;
 }): SubtitleSegment[] {
@@ -528,10 +530,12 @@ function main() {
   const wordMapping = loadJson<Record<string, string | null>>(
     "friend-and-trip-mapping.json",
   );
-  const timings = loadJson<TimingsData>("friend-and-trip-timings.json");
+  const timings = loadJson<ElevenLabsTimingsData>(
+    "friend-and-trip-timings.json",
+  );
 
   // Build subtitles from word timings
-  const subtitles = buildSubtitlesFromWordTimings({
+  const subtitles = buildSubtitlesFromElevenLabsTimings({
     timings,
     wordMapping,
     dbHelper,

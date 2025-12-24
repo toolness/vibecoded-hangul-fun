@@ -1,7 +1,7 @@
 import { type Database } from "./src/database-spec.ts";
 import { ASSETS_DIR, DB_JSON_ASSET, getAssetFilePath } from "./src/assets.ts";
 import { DatabaseHelper } from "./src/database-helper.ts";
-import { readFileSync } from "fs";
+import { existsSync, readFileSync } from "fs";
 import { join } from "path";
 import { execFileSync } from "child_process";
 
@@ -45,6 +45,22 @@ interface ElevenLabsTimingsData {
   segments: ElevenLabsSegmentTiming[];
 }
 
+interface WhisperTranscriptionSegment {
+  timestamps: {
+    from: string;
+    to: string;
+  };
+  offsets: {
+    from: number; // milliseconds
+    to: number; // milliseconds
+  };
+  text: string;
+}
+
+interface WhisperTimingsData {
+  transcription: WhisperTranscriptionSegment[];
+}
+
 interface LayoutOptions {
   frameWidth: number;
   frameHeight: number;
@@ -81,7 +97,7 @@ function loadDatabase(): Database {
 
 function getImageDimensions(filepath: string): ImageDimensions {
   const result = execFileSync("ffprobe", [
-    "-v",
+    "-loglevel",
     "error",
     "-select_streams",
     "v:0",
@@ -242,6 +258,111 @@ function buildSubtitlesFromElevenLabsTimings(args: {
       endTime: currentSubtitleEnd,
       text: currentSubtitleText.trim(),
       images: currentSubtitleImages,
+    });
+  }
+
+  return subtitleSegments;
+}
+
+/**
+ * Pre-processes whisper transcription segments to remove duplicates and
+ * hallucinations. Whisper sometimes produces many repeated segments with
+ * the same text and tiny durations, which can cause ffmpeg to be extremely
+ * slow due to the massive filter graph.
+ */
+function deduplicateWhisperSegments(
+  segments: WhisperTranscriptionSegment[],
+): WhisperTranscriptionSegment[] {
+  const result: WhisperTranscriptionSegment[] = [];
+
+  for (const segment of segments) {
+    const text = segment.text.trim();
+    if (!text) continue;
+
+    // Skip segments with zero or negative duration
+    if (segment.offsets.to <= segment.offsets.from) continue;
+
+    const last = result[result.length - 1];
+
+    if (last && last.text.trim() === text) {
+      // Same text as previous segment - merge by extending the end time
+      // Keep the earlier start time and later end time
+      last.offsets = {
+        from: Math.min(last.offsets.from, segment.offsets.from),
+        to: Math.max(last.offsets.to, segment.offsets.to),
+      };
+      last.timestamps = {
+        from: last.timestamps.from,
+        to: segment.timestamps.to,
+      };
+    } else {
+      // Different text - add as new segment
+      result.push({
+        ...segment,
+        offsets: { ...segment.offsets },
+        timestamps: { ...segment.timestamps },
+      });
+    }
+  }
+
+  // Filter out segments that are still very short (< 200ms) after merging
+  // These are likely hallucination artifacts
+  const minDurationMs = 200;
+  const filtered = result.filter(
+    (seg) => seg.offsets.to - seg.offsets.from >= minDurationMs,
+  );
+
+  console.log(
+    `Whisper segments: ${segments.length} -> ${result.length} (merged) -> ${filtered.length} (filtered)`,
+  );
+
+  return filtered;
+}
+
+function buildSubtitlesFromWhisperTimings(args: {
+  timings: WhisperTimingsData;
+  wordMapping: Record<string, string[]>;
+  dbHelper: DatabaseHelper;
+}): SubtitleSegment[] {
+  const { timings, wordMapping, dbHelper } = args;
+  const subtitleSegments: SubtitleSegment[] = [];
+
+  // Pre-process to remove duplicates and hallucinations
+  const cleanedSegments = deduplicateWhisperSegments(timings.transcription);
+
+  for (const segment of cleanedSegments) {
+    const text = segment.text.trim();
+
+    // Convert milliseconds to seconds
+    const startTime = segment.offsets.from / 1000;
+    const endTime = segment.offsets.to / 1000;
+
+    // Collect images by matching words in the segment text
+    const images: string[] = [];
+
+    // Split text into words and look up each one
+    const words = text.split(/\s+/);
+    for (const word of words) {
+      const trimmed = word.replace(/[,."'"!?[\]]/g, "");
+      const vocabWords = wordMapping[trimmed];
+      if (vocabWords) {
+        for (const vocabWord of vocabWords) {
+          const row = dbHelper.wordHangulMap.get(vocabWord);
+          if (row && row.picture?.type === "local-image") {
+            const filepath = join(ASSETS_DIR, row.picture.filename);
+            if (!images.includes(filepath)) {
+              images.push(filepath);
+            }
+          }
+        }
+      }
+    }
+
+    subtitleSegments.push({
+      startTime,
+      endTime,
+      text,
+      images,
     });
   }
 
@@ -411,7 +532,7 @@ function buildFFmpegCommand(args: {
   const uniqueFilepaths = [...new Set(subtitles.flatMap((s) => s.images))];
 
   // Build input args
-  const inputArgs: string[] = [];
+  const inputArgs: string[] = ["-loglevel", "error"];
 
   // Black background
   inputArgs.push(
@@ -541,24 +662,50 @@ function main() {
   const wordMapping = loadJson<Record<string, string[]>>(
     `${baseName}.mapping.json`,
   );
-  const timings = loadJson<ElevenLabsTimingsData>(
-    `${baseName}.elevenlabs.json`,
-  );
 
-  // Build subtitles from word timings
-  const subtitles = buildSubtitlesFromElevenLabsTimings({
-    timings,
-    wordMapping,
-    dbHelper,
-  });
+  // Detect timing file format and build subtitles accordingly
+  const elevenLabsPath = `${baseName}.elevenlabs.json`;
+  const whisperPath = `${baseName}.whisper.json`;
+
+  let subtitles: SubtitleSegment[];
+  let totalDuration: number;
+
+  if (existsSync(elevenLabsPath)) {
+    console.log(`Using ElevenLabs timing data: ${elevenLabsPath}`);
+    const timings = loadJson<ElevenLabsTimingsData>(elevenLabsPath);
+
+    subtitles = buildSubtitlesFromElevenLabsTimings({
+      timings,
+      wordMapping,
+      dbHelper,
+    });
+
+    // Calculate total duration from ElevenLabs data
+    const lastSegment = timings.segments[timings.segments.length - 1];
+    const lastWord = lastSegment.words[lastSegment.words.length - 1];
+    totalDuration = Math.ceil(lastWord.end_time) + 1;
+  } else if (existsSync(whisperPath)) {
+    console.log(`Using Whisper timing data: ${whisperPath}`);
+    const timings = loadJson<WhisperTimingsData>(whisperPath);
+
+    subtitles = buildSubtitlesFromWhisperTimings({
+      timings,
+      wordMapping,
+      dbHelper,
+    });
+
+    // Calculate total duration from Whisper data (offsets are in milliseconds)
+    const lastSegment = timings.transcription[timings.transcription.length - 1];
+    totalDuration = Math.ceil(lastSegment.offsets.to / 1000) + 1;
+  } else {
+    console.error(
+      `Error: No timing file found. Expected one of:\n  ${elevenLabsPath}\n  ${whisperPath}`,
+    );
+    process.exit(1);
+  }
 
   // Build dimensions cache
   const dimensionsCache = buildDimensionsCache(subtitles);
-
-  // Calculate total duration
-  const lastSegment = timings.segments[timings.segments.length - 1];
-  const lastWord = lastSegment.words[lastSegment.words.length - 1];
-  const totalDuration = Math.ceil(lastWord.end_time) + 1;
 
   // Layout options
   const layoutOptions: LayoutOptions = {

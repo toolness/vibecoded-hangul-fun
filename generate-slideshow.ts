@@ -525,7 +525,15 @@ function buildFFmpegCommand(args: {
 // ============================================================================
 
 function main() {
-  const baseName = "friend-and-trip";
+  const mp3Path = process.argv[2];
+  if (!mp3Path || !mp3Path.endsWith(".mp3")) {
+    console.error("Usage: npx tsx generate-slideshow.ts <mp3-file>");
+    console.error(
+      "Example: npx tsx generate-slideshow.ts stories/friend-and-trip.mp3",
+    );
+    process.exit(1);
+  }
+  const baseName = mp3Path.slice(0, -4); // Remove .mp3 extension
 
   // Load resources
   const dbRows = loadDatabase();

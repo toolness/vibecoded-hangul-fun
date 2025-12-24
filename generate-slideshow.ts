@@ -5,6 +5,69 @@ import { readFileSync } from "fs";
 import { join } from "path";
 import { execFileSync } from "child_process";
 
+// ============================================================================
+// Types
+// ============================================================================
+
+interface ImageDimensions {
+  width: number;
+  height: number;
+}
+
+interface SubtitleSegment {
+  startTime: number;
+  endTime: number;
+  text: string;
+  images: string[]; // filepaths of images for this subtitle
+}
+
+interface ImageLayout {
+  filepath: string;
+  x: number;
+  y: number;
+  scaledWidth: number;
+  scaledHeight: number;
+}
+
+interface WordTiming {
+  text: string;
+  start_time: number;
+  end_time: number;
+}
+
+interface SegmentTiming {
+  words: WordTiming[];
+}
+
+interface TimingsData {
+  segments: SegmentTiming[];
+}
+
+interface LayoutOptions {
+  frameWidth: number;
+  frameHeight: number;
+  subtitleAreaHeight: number;
+  maxImagesPerRow: number;
+  maxImages: number;
+  rowGap: number;
+}
+
+interface FFmpegOptions {
+  audioPath: string;
+  outputPath: string;
+  frameWidth: number;
+  frameHeight: number;
+  fontPath: string;
+  totalDuration: number;
+  fontSize: number;
+  lineHeight: number;
+  maxCharsPerLine: number;
+}
+
+// ============================================================================
+// Utility Functions
+// ============================================================================
+
 function loadJson<T>(filename: string): T {
   const data = readFileSync(filename, "utf-8");
   return JSON.parse(data);
@@ -12,11 +75,6 @@ function loadJson<T>(filename: string): T {
 
 function loadDatabase(): Database {
   return loadJson(getAssetFilePath(DB_JSON_ASSET));
-}
-
-interface ImageDimensions {
-  width: number;
-  height: number;
 }
 
 function getImageDimensions(filepath: string): ImageDimensions {
@@ -38,310 +96,7 @@ function getImageDimensions(filepath: string): ImageDimensions {
   };
 }
 
-const dbRows = loadDatabase();
-
-const dbHelper = new DatabaseHelper(dbRows);
-
-const wordMapping = loadJson<Record<string, string | null>>(
-  "friend-and-trip-mapping.json",
-);
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const timings = loadJson<any>("friend-and-trip-timings.json");
-
-interface SubtitleSegment {
-  startTime: number;
-  endTime: number;
-  text: string;
-  images: string[]; // filepaths of images for this subtitle
-}
-
-const subtitleSegments: SubtitleSegment[] = [];
-
-// Collect all words from all segments into a flat list
-interface WordWithTiming {
-  text: string;
-  startTime: number;
-  endTime: number;
-  isSegmentStart: boolean;
-  imageFilepath: string | null; // image associated with this word, if any
-}
-const allWords: WordWithTiming[] = [];
-
-for (const segment of timings.segments) {
-  let isFirst = true;
-  for (const word of segment.words) {
-    const text: string = word.text;
-    const startTime: number = word.start_time;
-    const endTime: number = word.end_time;
-
-    // Check if this word has an associated image
-    let imageFilepath: string | null = null;
-    const trimmed = text.trim().replace(/[,.]/g, "");
-    const vocabWord = wordMapping[trimmed];
-    if (vocabWord) {
-      const row = dbHelper.wordHangulMap.get(vocabWord);
-      if (row && row.picture?.type === "local-image") {
-        imageFilepath = join(ASSETS_DIR, row.picture.filename);
-      }
-    }
-
-    allWords.push({
-      text,
-      startTime,
-      endTime,
-      isSegmentStart: isFirst,
-      imageFilepath,
-    });
-    isFirst = false;
-  }
-}
-
-// Group words into subtitle chunks based on sentence-ending punctuation
-// A subtitle ends when we hit a word ending with . ! ? or ]
-let currentSubtitleText = "";
-let currentSubtitleStart: number | null = null;
-let currentSubtitleEnd: number = 0;
-let currentSubtitleImages: string[] = [];
-
-for (const word of allWords) {
-  const text = word.text;
-
-  // Skip pure whitespace tokens but track them for spacing
-  if (text.trim() === "") {
-    if (currentSubtitleText) {
-      currentSubtitleText += " ";
-    }
-    continue;
-  }
-
-  // Start a new subtitle if needed
-  if (currentSubtitleStart === null) {
-    currentSubtitleStart = word.startTime;
-  }
-
-  // Add space before segment start if we're continuing a subtitle
-  if (
-    word.isSegmentStart &&
-    currentSubtitleText &&
-    !currentSubtitleText.endsWith(" ")
-  ) {
-    currentSubtitleText += " ";
-  }
-
-  currentSubtitleText += text;
-  currentSubtitleEnd = word.endTime;
-
-  // Collect image if this word has one (dedupe within subtitle)
-  if (
-    word.imageFilepath &&
-    !currentSubtitleImages.includes(word.imageFilepath)
-  ) {
-    currentSubtitleImages.push(word.imageFilepath);
-  }
-
-  // Check if this word ends a sentence (ends with . ! ? or ])
-  const endsWithPunctuation = /[.!?\]]$/.test(text.trim());
-
-  if (endsWithPunctuation && currentSubtitleText.trim()) {
-    subtitleSegments.push({
-      startTime: currentSubtitleStart,
-      endTime: currentSubtitleEnd,
-      text: currentSubtitleText.trim(),
-      images: currentSubtitleImages,
-    });
-    currentSubtitleText = "";
-    currentSubtitleStart = null;
-    currentSubtitleImages = [];
-  }
-}
-
-// Don't forget any remaining text
-if (currentSubtitleText.trim() && currentSubtitleStart !== null) {
-  subtitleSegments.push({
-    startTime: currentSubtitleStart,
-    endTime: currentSubtitleEnd,
-    text: currentSubtitleText.trim(),
-    images: currentSubtitleImages,
-  });
-}
-
-// Deduplicate images by filepath, keeping the unique file paths
-const uniqueFilepaths = [...new Set(subtitleSegments.flatMap((s) => s.images))];
-
-// Get dimensions for all unique images
-const imageDimensions = new Map<string, ImageDimensions>();
-for (const filepath of uniqueFilepaths) {
-  imageDimensions.set(filepath, getImageDimensions(filepath));
-}
-
-// Layout constants
-const FRAME_WIDTH = 640;
-const FRAME_HEIGHT = 480;
-const SUBTITLE_AREA_HEIGHT = 80; // Reserve space at bottom for subtitles
-const IMAGE_AREA_HEIGHT = FRAME_HEIGHT - SUBTITLE_AREA_HEIGHT;
-const MAX_IMAGES_PER_ROW = 5;
-const MAX_IMAGES = 10;
-const ROW_GAP = 10; // Gap between rows
-
-// Calculate layout for a set of images
-interface ImageLayout {
-  filepath: string;
-  x: number;
-  y: number;
-  scaledWidth: number;
-  scaledHeight: number;
-}
-
-function calculateImageLayout(filepaths: string[]): ImageLayout[] {
-  // Truncate to max images
-  const images = filepaths.slice(0, MAX_IMAGES);
-  if (images.length === 0) return [];
-
-  // Special case: single image that would be upscaled - use native size instead
-  if (images.length === 1) {
-    const filepath = images[0];
-    const dims = imageDimensions.get(filepath)!;
-
-    // Check if native size fits and would be upscaled
-    if (
-      dims.width <= FRAME_WIDTH &&
-      dims.height <= IMAGE_AREA_HEIGHT &&
-      dims.height < IMAGE_AREA_HEIGHT
-    ) {
-      // Use native size, centered
-      return [
-        {
-          filepath,
-          x: (FRAME_WIDTH - dims.width) / 2,
-          y: (IMAGE_AREA_HEIGHT - dims.height) / 2,
-          scaledWidth: dims.width,
-          scaledHeight: dims.height,
-        },
-      ];
-    }
-  }
-
-  // Determine row configuration
-  const needsTwoRows = images.length > MAX_IMAGES_PER_ROW;
-  const row1Images = needsTwoRows
-    ? images.slice(0, Math.ceil(images.length / 2))
-    : images;
-  const row2Images = needsTwoRows
-    ? images.slice(Math.ceil(images.length / 2))
-    : [];
-
-  // Calculate uniform height for each row
-  const rowHeight = needsTwoRows
-    ? (IMAGE_AREA_HEIGHT - ROW_GAP) / 2
-    : IMAGE_AREA_HEIGHT;
-
-  const layouts: ImageLayout[] = [];
-
-  // Helper to layout a single row
-  function layoutRow(
-    rowImages: string[],
-    rowY: number,
-    targetHeight: number,
-  ): ImageLayout[] {
-    const rowLayouts: ImageLayout[] = [];
-
-    // Scale each image to target height and calculate total width
-    const scaledImages = rowImages.map((filepath) => {
-      const dims = imageDimensions.get(filepath)!;
-      const scale = targetHeight / dims.height;
-      return {
-        filepath,
-        scaledWidth: dims.width * scale,
-        scaledHeight: targetHeight,
-      };
-    });
-
-    // Calculate total width and check if we need to shrink
-    let totalWidth = scaledImages.reduce(
-      (sum, img) => sum + img.scaledWidth,
-      0,
-    );
-
-    // If too wide, scale down proportionally
-    if (totalWidth > FRAME_WIDTH) {
-      const shrinkFactor = FRAME_WIDTH / totalWidth;
-      for (const img of scaledImages) {
-        img.scaledWidth *= shrinkFactor;
-        img.scaledHeight *= shrinkFactor;
-      }
-      totalWidth = FRAME_WIDTH;
-    }
-
-    // Center the row horizontally
-    let currentX = (FRAME_WIDTH - totalWidth) / 2;
-
-    for (const img of scaledImages) {
-      rowLayouts.push({
-        filepath: img.filepath,
-        x: currentX,
-        y: rowY + (targetHeight - img.scaledHeight) / 2, // Center vertically in row
-        scaledWidth: img.scaledWidth,
-        scaledHeight: img.scaledHeight,
-      });
-      currentX += img.scaledWidth;
-    }
-
-    return rowLayouts;
-  }
-
-  // Layout row 1
-  const row1Y = needsTwoRows ? 0 : (IMAGE_AREA_HEIGHT - rowHeight) / 2;
-  layouts.push(...layoutRow(row1Images, row1Y, rowHeight));
-
-  // Layout row 2 if needed
-  if (needsTwoRows) {
-    const row2Y = rowHeight + ROW_GAP;
-    layouts.push(...layoutRow(row2Images, row2Y, rowHeight));
-  }
-
-  return layouts;
-}
-
-// Find total duration from the last segment end time
-const lastSegment = timings.segments[timings.segments.length - 1];
-const lastWord = lastSegment.words[lastSegment.words.length - 1];
-const totalDuration: number = Math.ceil(lastWord.end_time) + 1;
-
-// Build ffmpeg command
-// Input 0: black background
-// Input 1..N: images (one per unique filepath)
-// Last input: audio
-
-const inputArgs: string[] = [];
-
-// Black background
-inputArgs.push(
-  "-f",
-  "lavfi",
-  "-i",
-  `color=c=black:s=640x480:d=${totalDuration}`,
-);
-
-// Add each unique image as an input
-for (const filepath of uniqueFilepaths) {
-  inputArgs.push("-loop", "1", "-t", String(totalDuration), "-i", filepath);
-}
-
-// Audio input
-const audioPath = "friend-and-trip.mp3";
-inputArgs.push("-i", audioPath);
-
-// Build the filter complex
-// For each segment, overlay the corresponding image at the right time
-const filepathToInputIndex = new Map<string, number>();
-uniqueFilepaths.forEach((fp, i) => {
-  filepathToInputIndex.set(fp, i + 1); // +1 because input 0 is the background
-});
-
-// Escape text for ffmpeg drawtext filter
 function escapeDrawtext(text: string): string {
-  // Escape special characters for drawtext: \ ' : %
   return text
     .replace(/\\/g, "\\\\\\\\")
     .replace(/'/g, "'\\\\\\''")
@@ -349,14 +104,13 @@ function escapeDrawtext(text: string): string {
     .replace(/%/g, "\\%");
 }
 
-// Wrap text to fit within a certain character limit per line
-function wrapText(text: string, maxCharsPerLine: number): string[] {
-  const words = text.split(" ");
+function wrapText(args: { text: string; maxCharsPerLine: number }): string[] {
+  const words = args.text.split(" ");
   const lines: string[] = [];
   let currentLine = "";
 
   for (const word of words) {
-    if (currentLine.length + word.length + 1 <= maxCharsPerLine) {
+    if (currentLine.length + word.length + 1 <= args.maxCharsPerLine) {
       currentLine += (currentLine ? " " : "") + word;
     } else {
       if (currentLine) lines.push(currentLine);
@@ -368,101 +122,466 @@ function wrapText(text: string, maxCharsPerLine: number): string[] {
   return lines;
 }
 
-// Korean font path for macOS
-const koreanFontPath = "/System/Library/Fonts/AppleSDGothicNeo.ttc";
+// ============================================================================
+// Subtitle Building
+// ============================================================================
 
-// Build overlay chain for images
-// For each subtitle, we show all its images with calculated layout positions
-let filterComplex = "";
-let currentOutput = "0:v";
-let overlayIndex = 0;
+function buildSubtitlesFromWordTimings(args: {
+  timings: TimingsData;
+  wordMapping: Record<string, string | null>;
+  dbHelper: DatabaseHelper;
+}): SubtitleSegment[] {
+  const { timings, wordMapping, dbHelper } = args;
 
-for (const subtitle of subtitleSegments) {
-  const layout = calculateImageLayout(subtitle.images);
-
-  for (const img of layout) {
-    const inputIndex = filepathToInputIndex.get(img.filepath)!;
-    const outputLabel = `v${overlayIndex}`;
-
-    // Scale the image to the calculated size, then overlay at the calculated position
-    // Use scale2ref to scale relative to the input, or just scale directly
-    const scaleW = Math.round(img.scaledWidth);
-    const scaleH = Math.round(img.scaledHeight);
-    const posX = Math.round(img.x);
-    const posY = Math.round(img.y);
-
-    // Create a scaled version of the image and overlay it
-    filterComplex += `[${inputIndex}:v]scale=${scaleW}:${scaleH}[scaled${overlayIndex}];`;
-    filterComplex += `[${currentOutput}][scaled${overlayIndex}]overlay=x=${posX}:y=${posY}:enable='between(t,${subtitle.startTime},${subtitle.endTime})'[${outputLabel}];`;
-
-    currentOutput = outputLabel;
-    overlayIndex++;
+  // Collect all words from all segments into a flat list
+  interface WordWithTiming {
+    text: string;
+    startTime: number;
+    endTime: number;
+    isSegmentStart: boolean;
+    imageFilepath: string | null;
   }
-}
 
-// Add drawtext filters for subtitles (with wrapping and Korean font)
-const fontSize = 24;
-const lineHeight = 30;
-const maxCharsPerLine = 30;
+  const allWords: WordWithTiming[] = [];
 
-// Build all subtitle draw operations
-interface SubtitleDraw {
-  text: string;
-  startTime: number;
-  endTime: number;
-  yOffset: number; // 0 for top line, 1 for second line, etc.
-  totalLines: number;
-}
+  for (const segment of timings.segments) {
+    let isFirst = true;
+    for (const word of segment.words) {
+      const text = word.text;
+      const startTime = word.start_time;
+      const endTime = word.end_time;
 
-const subtitleDraws: SubtitleDraw[] = [];
-for (const seg of subtitleSegments) {
-  const lines = wrapText(seg.text, maxCharsPerLine);
-  for (let lineIdx = 0; lineIdx < lines.length; lineIdx++) {
-    subtitleDraws.push({
-      text: lines[lineIdx],
-      startTime: seg.startTime,
-      endTime: seg.endTime,
-      yOffset: lineIdx,
-      totalLines: lines.length,
+      // Check if this word has an associated image
+      let imageFilepath: string | null = null;
+      const trimmed = text.trim().replace(/[,.]/g, "");
+      const vocabWord = wordMapping[trimmed];
+      if (vocabWord) {
+        const row = dbHelper.wordHangulMap.get(vocabWord);
+        if (row && row.picture?.type === "local-image") {
+          imageFilepath = join(ASSETS_DIR, row.picture.filename);
+        }
+      }
+
+      allWords.push({
+        text,
+        startTime,
+        endTime,
+        isSegmentStart: isFirst,
+        imageFilepath,
+      });
+      isFirst = false;
+    }
+  }
+
+  // Group words into subtitle chunks based on sentence-ending punctuation
+  const subtitleSegments: SubtitleSegment[] = [];
+  let currentSubtitleText = "";
+  let currentSubtitleStart: number | null = null;
+  let currentSubtitleEnd = 0;
+  let currentSubtitleImages: string[] = [];
+
+  for (const word of allWords) {
+    const text = word.text;
+
+    // Skip pure whitespace tokens but track them for spacing
+    if (text.trim() === "") {
+      if (currentSubtitleText) {
+        currentSubtitleText += " ";
+      }
+      continue;
+    }
+
+    // Start a new subtitle if needed
+    if (currentSubtitleStart === null) {
+      currentSubtitleStart = word.startTime;
+    }
+
+    // Add space before segment start if we're continuing a subtitle
+    if (
+      word.isSegmentStart &&
+      currentSubtitleText &&
+      !currentSubtitleText.endsWith(" ")
+    ) {
+      currentSubtitleText += " ";
+    }
+
+    currentSubtitleText += text;
+    currentSubtitleEnd = word.endTime;
+
+    // Collect image if this word has one (dedupe within subtitle)
+    if (
+      word.imageFilepath &&
+      !currentSubtitleImages.includes(word.imageFilepath)
+    ) {
+      currentSubtitleImages.push(word.imageFilepath);
+    }
+
+    // Check if this word ends a sentence (ends with . ! ? or ])
+    const endsWithPunctuation = /[.!?\]]$/.test(text.trim());
+
+    if (endsWithPunctuation && currentSubtitleText.trim()) {
+      subtitleSegments.push({
+        startTime: currentSubtitleStart,
+        endTime: currentSubtitleEnd,
+        text: currentSubtitleText.trim(),
+        images: currentSubtitleImages,
+      });
+      currentSubtitleText = "";
+      currentSubtitleStart = null;
+      currentSubtitleImages = [];
+    }
+  }
+
+  // Don't forget any remaining text
+  if (currentSubtitleText.trim() && currentSubtitleStart !== null) {
+    subtitleSegments.push({
+      startTime: currentSubtitleStart,
+      endTime: currentSubtitleEnd,
+      text: currentSubtitleText.trim(),
+      images: currentSubtitleImages,
     });
   }
+
+  return subtitleSegments;
 }
 
-subtitleDraws.forEach((draw, i) => {
-  const escapedText = escapeDrawtext(draw.text);
-  const outputLabel = i === subtitleDraws.length - 1 ? "vout" : `sub${i}`;
-  // Position from bottom: for 2 lines, first line at h-90, second at h-60
-  const yPos = `h-${60 + (draw.totalLines - 1 - draw.yOffset) * lineHeight}`;
-  filterComplex += `[${currentOutput}]drawtext=text='${escapedText}':fontfile='${koreanFontPath}':fontsize=${fontSize}:fontcolor=white:borderw=2:bordercolor=black:x=(w-text_w)/2:y=${yPos}:enable='between(t,${draw.startTime},${draw.endTime})'[${outputLabel}]`;
-  if (i < subtitleDraws.length - 1) {
-    filterComplex += ";";
+// ============================================================================
+// Image Dimension Cache
+// ============================================================================
+
+function buildDimensionsCache(
+  subtitles: SubtitleSegment[],
+): Map<string, ImageDimensions> {
+  const uniqueFilepaths = [...new Set(subtitles.flatMap((s) => s.images))];
+  const cache = new Map<string, ImageDimensions>();
+
+  for (const filepath of uniqueFilepaths) {
+    cache.set(filepath, getImageDimensions(filepath));
   }
-  currentOutput = outputLabel;
-});
 
-const audioInputIndex = uniqueFilepaths.length + 1;
+  return cache;
+}
 
-const outputArgs = [
-  "-filter_complex",
-  filterComplex,
-  "-map",
-  "[vout]",
-  "-map",
-  `${audioInputIndex}:a`,
-  "-c:v",
-  "libx264",
-  "-c:a",
-  "aac",
-  "-shortest",
-  "-y",
-  "friend-and-trip.mp4",
-];
+// ============================================================================
+// Image Layout Calculation
+// ============================================================================
 
-const ffmpegArgs = [...inputArgs, ...outputArgs];
+function calculateImageLayout(args: {
+  filepaths: string[];
+  dimensionsCache: Map<string, ImageDimensions>;
+  options: LayoutOptions;
+}): ImageLayout[] {
+  const { filepaths, dimensionsCache, options } = args;
+  const {
+    frameWidth,
+    frameHeight,
+    subtitleAreaHeight,
+    maxImagesPerRow,
+    maxImages,
+    rowGap,
+  } = options;
 
-console.log("Running ffmpeg...");
-console.log("ffmpeg", ffmpegArgs.join(" "));
+  const imageAreaHeight = frameHeight - subtitleAreaHeight;
 
-execFileSync("ffmpeg", ffmpegArgs, { stdio: "inherit" });
+  // Truncate to max images
+  const images = filepaths.slice(0, maxImages);
+  if (images.length === 0) return [];
 
-console.log("Done! Output: friend-and-trip.mp4");
+  // Special case: single image that would be upscaled - use native size instead
+  if (images.length === 1) {
+    const filepath = images[0];
+    const dims = dimensionsCache.get(filepath)!;
+
+    if (
+      dims.width <= frameWidth &&
+      dims.height <= imageAreaHeight &&
+      dims.height < imageAreaHeight
+    ) {
+      return [
+        {
+          filepath,
+          x: (frameWidth - dims.width) / 2,
+          y: (imageAreaHeight - dims.height) / 2,
+          scaledWidth: dims.width,
+          scaledHeight: dims.height,
+        },
+      ];
+    }
+  }
+
+  // Determine row configuration
+  const needsTwoRows = images.length > maxImagesPerRow;
+  const row1Images = needsTwoRows
+    ? images.slice(0, Math.ceil(images.length / 2))
+    : images;
+  const row2Images = needsTwoRows
+    ? images.slice(Math.ceil(images.length / 2))
+    : [];
+
+  const rowHeight = needsTwoRows
+    ? (imageAreaHeight - rowGap) / 2
+    : imageAreaHeight;
+
+  const layouts: ImageLayout[] = [];
+
+  function layoutRow(
+    rowImages: string[],
+    rowY: number,
+    targetHeight: number,
+  ): ImageLayout[] {
+    const rowLayouts: ImageLayout[] = [];
+
+    const scaledImages = rowImages.map((filepath) => {
+      const dims = dimensionsCache.get(filepath)!;
+      const scale = targetHeight / dims.height;
+      return {
+        filepath,
+        scaledWidth: dims.width * scale,
+        scaledHeight: targetHeight,
+      };
+    });
+
+    let totalWidth = scaledImages.reduce(
+      (sum, img) => sum + img.scaledWidth,
+      0,
+    );
+
+    if (totalWidth > frameWidth) {
+      const shrinkFactor = frameWidth / totalWidth;
+      for (const img of scaledImages) {
+        img.scaledWidth *= shrinkFactor;
+        img.scaledHeight *= shrinkFactor;
+      }
+      totalWidth = frameWidth;
+    }
+
+    let currentX = (frameWidth - totalWidth) / 2;
+
+    for (const img of scaledImages) {
+      rowLayouts.push({
+        filepath: img.filepath,
+        x: currentX,
+        y: rowY + (targetHeight - img.scaledHeight) / 2,
+        scaledWidth: img.scaledWidth,
+        scaledHeight: img.scaledHeight,
+      });
+      currentX += img.scaledWidth;
+    }
+
+    return rowLayouts;
+  }
+
+  const row1Y = needsTwoRows ? 0 : (imageAreaHeight - rowHeight) / 2;
+  layouts.push(...layoutRow(row1Images, row1Y, rowHeight));
+
+  if (needsTwoRows) {
+    const row2Y = rowHeight + rowGap;
+    layouts.push(...layoutRow(row2Images, row2Y, rowHeight));
+  }
+
+  return layouts;
+}
+
+// ============================================================================
+// FFmpeg Command Builder
+// ============================================================================
+
+function buildFFmpegCommand(args: {
+  subtitles: SubtitleSegment[];
+  dimensionsCache: Map<string, ImageDimensions>;
+  layoutOptions: LayoutOptions;
+  ffmpegOptions: FFmpegOptions;
+}): string[] {
+  const { subtitles, dimensionsCache, layoutOptions, ffmpegOptions } = args;
+  const {
+    audioPath,
+    outputPath,
+    frameWidth,
+    frameHeight,
+    fontPath,
+    totalDuration,
+    fontSize,
+    lineHeight,
+    maxCharsPerLine,
+  } = ffmpegOptions;
+
+  const uniqueFilepaths = [...new Set(subtitles.flatMap((s) => s.images))];
+
+  // Build input args
+  const inputArgs: string[] = [];
+
+  // Black background
+  inputArgs.push(
+    "-f",
+    "lavfi",
+    "-i",
+    `color=c=black:s=${frameWidth}x${frameHeight}:d=${totalDuration}`,
+  );
+
+  // Add each unique image as an input
+  for (const filepath of uniqueFilepaths) {
+    inputArgs.push("-loop", "1", "-t", String(totalDuration), "-i", filepath);
+  }
+
+  // Audio input
+  inputArgs.push("-i", audioPath);
+
+  // Build filepath to input index mapping
+  const filepathToInputIndex = new Map<string, number>();
+  uniqueFilepaths.forEach((fp, i) => {
+    filepathToInputIndex.set(fp, i + 1);
+  });
+
+  // Build filter complex
+  let filterComplex = "";
+  let currentOutput = "0:v";
+  let overlayIndex = 0;
+
+  // Image overlays
+  for (const subtitle of subtitles) {
+    const layout = calculateImageLayout({
+      filepaths: subtitle.images,
+      dimensionsCache,
+      options: layoutOptions,
+    });
+
+    for (const img of layout) {
+      const inputIndex = filepathToInputIndex.get(img.filepath)!;
+      const outputLabel = `v${overlayIndex}`;
+
+      const scaleW = Math.round(img.scaledWidth);
+      const scaleH = Math.round(img.scaledHeight);
+      const posX = Math.round(img.x);
+      const posY = Math.round(img.y);
+
+      filterComplex += `[${inputIndex}:v]scale=${scaleW}:${scaleH}[scaled${overlayIndex}];`;
+      filterComplex += `[${currentOutput}][scaled${overlayIndex}]overlay=x=${posX}:y=${posY}:enable='between(t,${subtitle.startTime},${subtitle.endTime})'[${outputLabel}];`;
+
+      currentOutput = outputLabel;
+      overlayIndex++;
+    }
+  }
+
+  // Subtitle text overlays
+  interface SubtitleDraw {
+    text: string;
+    startTime: number;
+    endTime: number;
+    yOffset: number;
+    totalLines: number;
+  }
+
+  const subtitleDraws: SubtitleDraw[] = [];
+  for (const seg of subtitles) {
+    const lines = wrapText({ text: seg.text, maxCharsPerLine });
+    for (let lineIdx = 0; lineIdx < lines.length; lineIdx++) {
+      subtitleDraws.push({
+        text: lines[lineIdx],
+        startTime: seg.startTime,
+        endTime: seg.endTime,
+        yOffset: lineIdx,
+        totalLines: lines.length,
+      });
+    }
+  }
+
+  subtitleDraws.forEach((draw, i) => {
+    const escapedText = escapeDrawtext(draw.text);
+    const outputLabel = i === subtitleDraws.length - 1 ? "vout" : `sub${i}`;
+    const yPos = `h-${60 + (draw.totalLines - 1 - draw.yOffset) * lineHeight}`;
+    filterComplex += `[${currentOutput}]drawtext=text='${escapedText}':fontfile='${fontPath}':fontsize=${fontSize}:fontcolor=white:borderw=2:bordercolor=black:x=(w-text_w)/2:y=${yPos}:enable='between(t,${draw.startTime},${draw.endTime})'[${outputLabel}]`;
+    if (i < subtitleDraws.length - 1) {
+      filterComplex += ";";
+    }
+    currentOutput = outputLabel;
+  });
+
+  const audioInputIndex = uniqueFilepaths.length + 1;
+
+  const outputArgs = [
+    "-filter_complex",
+    filterComplex,
+    "-map",
+    "[vout]",
+    "-map",
+    `${audioInputIndex}:a`,
+    "-c:v",
+    "libx264",
+    "-c:a",
+    "aac",
+    "-shortest",
+    "-y",
+    outputPath,
+  ];
+
+  return [...inputArgs, ...outputArgs];
+}
+
+// ============================================================================
+// Main
+// ============================================================================
+
+function main() {
+  // Load resources
+  const dbRows = loadDatabase();
+  const dbHelper = new DatabaseHelper(dbRows);
+  const wordMapping = loadJson<Record<string, string | null>>(
+    "friend-and-trip-mapping.json",
+  );
+  const timings = loadJson<TimingsData>("friend-and-trip-timings.json");
+
+  // Build subtitles from word timings
+  const subtitles = buildSubtitlesFromWordTimings({
+    timings,
+    wordMapping,
+    dbHelper,
+  });
+
+  // Build dimensions cache
+  const dimensionsCache = buildDimensionsCache(subtitles);
+
+  // Calculate total duration
+  const lastSegment = timings.segments[timings.segments.length - 1];
+  const lastWord = lastSegment.words[lastSegment.words.length - 1];
+  const totalDuration = Math.ceil(lastWord.end_time) + 1;
+
+  // Layout options
+  const layoutOptions: LayoutOptions = {
+    frameWidth: 640,
+    frameHeight: 480,
+    subtitleAreaHeight: 80,
+    maxImagesPerRow: 5,
+    maxImages: 10,
+    rowGap: 10,
+  };
+
+  // FFmpeg options
+  const ffmpegOptions: FFmpegOptions = {
+    audioPath: "friend-and-trip.mp3",
+    outputPath: "friend-and-trip.mp4",
+    frameWidth: 640,
+    frameHeight: 480,
+    fontPath: "/System/Library/Fonts/AppleSDGothicNeo.ttc",
+    totalDuration,
+    fontSize: 24,
+    lineHeight: 30,
+    maxCharsPerLine: 30,
+  };
+
+  // Build and run ffmpeg command
+  const ffmpegArgs = buildFFmpegCommand({
+    subtitles,
+    dimensionsCache,
+    layoutOptions,
+    ffmpegOptions,
+  });
+
+  console.log("Running ffmpeg...");
+  console.log("ffmpeg", ffmpegArgs.join(" "));
+
+  execFileSync("ffmpeg", ffmpegArgs, { stdio: "inherit" });
+
+  console.log(`Done! Output: ${ffmpegOptions.outputPath}`);
+}
+
+main();

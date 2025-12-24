@@ -32,16 +32,5 @@ src/assets/database/*
 
 vocabulary.md
 
-*.mapping.json
-*.elevenlabs.json
-*.whisper.json
-
-friend-and-trip-words.txt
-friend-and-trip.mp3
-friend-and-trip.mp4
-story.txt
-story.plain.txt
-story.mapping.json
-story.mp3
-story.whisper.json
+stories
 models

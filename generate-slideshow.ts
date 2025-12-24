@@ -502,6 +502,59 @@ function calculateImageLayout(args: {
 }
 
 // ============================================================================
+// Image Preprocessing
+// ============================================================================
+
+/**
+ * Pre-flattens images onto white backgrounds to handle transparency.
+ * Returns a map from original filepath to flattened filepath.
+ */
+function flattenImagesWithWhiteBackground(args: {
+  filepaths: string[];
+  dimensionsCache: Map<string, ImageDimensions>;
+  tempDir: string;
+}): Map<string, string> {
+  const { filepaths, dimensionsCache, tempDir } = args;
+  const mapping = new Map<string, string>();
+
+  console.log(
+    `Flattening ${filepaths.length} images onto white backgrounds...`,
+  );
+
+  for (const filepath of filepaths) {
+    const filename = filepath.split("/").pop()!;
+    const flattenedPath = join(tempDir, `flat_${filename}`);
+    const dims = dimensionsCache.get(filepath)!;
+
+    // Use ffmpeg to composite image onto white background with correct size
+    execFileSync(
+      "ffmpeg",
+      [
+        "-loglevel",
+        "error",
+        "-f",
+        "lavfi",
+        "-i",
+        `color=white:s=${dims.width}x${dims.height}`,
+        "-i",
+        filepath,
+        "-filter_complex",
+        "[0][1]overlay=0:0",
+        "-frames:v",
+        "1",
+        "-y",
+        flattenedPath,
+      ],
+      { stdio: "pipe" },
+    );
+
+    mapping.set(filepath, flattenedPath);
+  }
+
+  return mapping;
+}
+
+// ============================================================================
 // Parallel Segment Rendering
 // ============================================================================
 
@@ -584,6 +637,7 @@ function createVideoSegments(args: {
 function buildSegmentFFmpegArgs(args: {
   segment: VideoSegment;
   dimensionsCache: Map<string, ImageDimensions>;
+  flattenedImages: Map<string, string>;
   layoutOptions: LayoutOptions;
   fontPath: string;
   fontSize: number;
@@ -593,6 +647,7 @@ function buildSegmentFFmpegArgs(args: {
   const {
     segment,
     dimensionsCache,
+    flattenedImages,
     layoutOptions,
     fontPath,
     fontSize,
@@ -624,16 +679,17 @@ function buildSegmentFFmpegArgs(args: {
     ];
   }
 
-  // Add images as inputs
+  // Add images as inputs (use flattened versions for proper transparency handling)
   const images = segment.subtitle.images;
   for (const filepath of images) {
+    const flattenedPath = flattenedImages.get(filepath) ?? filepath;
     inputArgs.push(
       "-loop",
       "1",
       "-t",
       String(segment.duration),
       "-i",
-      filepath,
+      flattenedPath,
     );
   }
 
@@ -750,6 +806,7 @@ function renderSegment(args: string[]): Promise<void> {
 async function renderAllSegments(args: {
   segments: VideoSegment[];
   dimensionsCache: Map<string, ImageDimensions>;
+  flattenedImages: Map<string, string>;
   layoutOptions: LayoutOptions;
   fontPath: string;
   fontSize: number;
@@ -760,6 +817,7 @@ async function renderAllSegments(args: {
   const {
     segments,
     dimensionsCache,
+    flattenedImages,
     layoutOptions,
     fontPath,
     fontSize,
@@ -782,6 +840,7 @@ async function renderAllSegments(args: {
       const ffmpegArgs = buildSegmentFFmpegArgs({
         segment,
         dimensionsCache,
+        flattenedImages,
         layoutOptions,
         fontPath,
         fontSize,
@@ -967,12 +1026,21 @@ async function main() {
 
   console.log(`Created ${videoSegments.length} video segments`);
 
+  // Pre-flatten images with white backgrounds to handle transparency
+  const uniqueImages = [...new Set(subtitles.flatMap((s) => s.images))];
+  const flattenedImages = flattenImagesWithWhiteBackground({
+    filepaths: uniqueImages,
+    dimensionsCache,
+    tempDir,
+  });
+
   // Render all segments in parallel
   const concurrency = Math.max(1, cpus().length - 1); // Leave one CPU free
 
   await renderAllSegments({
     segments: videoSegments,
     dimensionsCache,
+    flattenedImages,
     layoutOptions,
     fontPath,
     fontSize,

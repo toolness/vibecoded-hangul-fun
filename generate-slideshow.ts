@@ -1,9 +1,16 @@
 import { type Database } from "./src/database-spec.ts";
 import { ASSETS_DIR, DB_JSON_ASSET, getAssetFilePath } from "./src/assets.ts";
 import { DatabaseHelper } from "./src/database-helper.ts";
-import { existsSync, readFileSync } from "fs";
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  unlinkSync,
+  writeFileSync,
+} from "fs";
 import { join } from "path";
-import { execFileSync } from "child_process";
+import { execFileSync, spawn } from "child_process";
+import { cpus } from "os";
 
 // ============================================================================
 // Types
@@ -68,18 +75,6 @@ interface LayoutOptions {
   maxImagesPerRow: number;
   maxImages: number;
   rowGap: number;
-}
-
-interface FFmpegOptions {
-  audioPath: string;
-  outputPath: string;
-  frameWidth: number;
-  frameHeight: number;
-  fontPath: string;
-  totalDuration: number;
-  fontSize: number;
-  lineHeight: number;
-  maxCharsPerLine: number;
 }
 
 // ============================================================================
@@ -507,145 +502,377 @@ function calculateImageLayout(args: {
 }
 
 // ============================================================================
-// FFmpeg Command Builder
+// Parallel Segment Rendering
 // ============================================================================
 
-function buildFFmpegCommand(args: {
+interface VideoSegment {
+  index: number;
+  startTime: number;
+  endTime: number;
+  duration: number;
+  subtitle: SubtitleSegment | null; // null for gap segments
+  outputPath: string;
+}
+
+/**
+ * Creates video segments including gaps between subtitles.
+ * Each segment will be rendered independently and then concatenated.
+ */
+function createVideoSegments(args: {
   subtitles: SubtitleSegment[];
+  totalDuration: number;
+  tempDir: string;
+}): VideoSegment[] {
+  const { subtitles, totalDuration, tempDir } = args;
+  const segments: VideoSegment[] = [];
+  let index = 0;
+  let currentTime = 0;
+
+  for (const subtitle of subtitles) {
+    // Add gap segment if there's a gap before this subtitle
+    if (subtitle.startTime > currentTime + 0.01) {
+      segments.push({
+        index: index++,
+        startTime: currentTime,
+        endTime: subtitle.startTime,
+        duration: subtitle.startTime - currentTime,
+        subtitle: null,
+        outputPath: join(
+          tempDir,
+          `segment_${String(index - 1).padStart(4, "0")}.mp4`,
+        ),
+      });
+    }
+
+    // Add subtitle segment
+    segments.push({
+      index: index++,
+      startTime: subtitle.startTime,
+      endTime: subtitle.endTime,
+      duration: subtitle.endTime - subtitle.startTime,
+      subtitle,
+      outputPath: join(
+        tempDir,
+        `segment_${String(index - 1).padStart(4, "0")}.mp4`,
+      ),
+    });
+
+    currentTime = subtitle.endTime;
+  }
+
+  // Add final gap if needed
+  if (currentTime < totalDuration - 0.01) {
+    segments.push({
+      index: index++,
+      startTime: currentTime,
+      endTime: totalDuration,
+      duration: totalDuration - currentTime,
+      subtitle: null,
+      outputPath: join(
+        tempDir,
+        `segment_${String(index - 1).padStart(4, "0")}.mp4`,
+      ),
+    });
+  }
+
+  return segments;
+}
+
+/**
+ * Builds ffmpeg args to render a single video segment.
+ */
+function buildSegmentFFmpegArgs(args: {
+  segment: VideoSegment;
   dimensionsCache: Map<string, ImageDimensions>;
   layoutOptions: LayoutOptions;
-  ffmpegOptions: FFmpegOptions;
+  fontPath: string;
+  fontSize: number;
+  lineHeight: number;
+  maxCharsPerLine: number;
 }): string[] {
-  const { subtitles, dimensionsCache, layoutOptions, ffmpegOptions } = args;
   const {
-    audioPath,
-    outputPath,
-    frameWidth,
-    frameHeight,
+    segment,
+    dimensionsCache,
+    layoutOptions,
     fontPath,
-    totalDuration,
     fontSize,
     lineHeight,
     maxCharsPerLine,
-  } = ffmpegOptions;
+  } = args;
+  const { frameWidth, frameHeight } = layoutOptions;
 
-  const uniqueFilepaths = [...new Set(subtitles.flatMap((s) => s.images))];
-
-  // Build input args
   const inputArgs: string[] = ["-loglevel", "error"];
 
-  // Black background
+  // Black background for segment duration
   inputArgs.push(
     "-f",
     "lavfi",
     "-i",
-    `color=c=black:s=${frameWidth}x${frameHeight}:d=${totalDuration}`,
+    `color=c=black:s=${frameWidth}x${frameHeight}:d=${segment.duration}:r=30`,
   );
 
-  // Add each unique image as an input
-  for (const filepath of uniqueFilepaths) {
-    inputArgs.push("-loop", "1", "-t", String(totalDuration), "-i", filepath);
+  // If this is a gap segment (no subtitle), just output black
+  if (!segment.subtitle) {
+    return [
+      ...inputArgs,
+      "-c:v",
+      "libx264",
+      "-preset",
+      "ultrafast",
+      "-y",
+      segment.outputPath,
+    ];
   }
 
-  // Audio input
-  inputArgs.push("-i", audioPath);
+  // Add images as inputs
+  const images = segment.subtitle.images;
+  for (const filepath of images) {
+    inputArgs.push(
+      "-loop",
+      "1",
+      "-t",
+      String(segment.duration),
+      "-i",
+      filepath,
+    );
+  }
 
-  // Build filepath to input index mapping
-  const filepathToInputIndex = new Map<string, number>();
-  uniqueFilepaths.forEach((fp, i) => {
-    filepathToInputIndex.set(fp, i + 1);
-  });
-
-  // Build filter complex
+  // Build filter complex for images and text
   let filterComplex = "";
   let currentOutput = "0:v";
   let overlayIndex = 0;
 
-  // Image overlays
-  for (const subtitle of subtitles) {
-    const layout = calculateImageLayout({
-      filepaths: subtitle.images,
-      dimensionsCache,
-      options: layoutOptions,
-    });
+  // Calculate image layout
+  const layout = calculateImageLayout({
+    filepaths: images,
+    dimensionsCache,
+    options: layoutOptions,
+  });
 
-    for (const img of layout) {
-      const inputIndex = filepathToInputIndex.get(img.filepath)!;
-      const outputLabel = `v${overlayIndex}`;
+  // Add image overlays (no enable condition needed - always on for this segment)
+  for (const img of layout) {
+    const inputIndex = images.indexOf(img.filepath) + 1;
+    const outputLabel = `v${overlayIndex}`;
 
-      const scaleW = Math.round(img.scaledWidth);
-      const scaleH = Math.round(img.scaledHeight);
-      const posX = Math.round(img.x);
-      const posY = Math.round(img.y);
+    const scaleW = Math.round(img.scaledWidth);
+    const scaleH = Math.round(img.scaledHeight);
+    const posX = Math.round(img.x);
+    const posY = Math.round(img.y);
 
-      filterComplex += `[${inputIndex}:v]scale=${scaleW}:${scaleH}[scaled${overlayIndex}];`;
-      filterComplex += `[${currentOutput}][scaled${overlayIndex}]overlay=x=${posX}:y=${posY}:enable='between(t,${subtitle.startTime},${subtitle.endTime})'[${outputLabel}];`;
+    filterComplex += `[${inputIndex}:v]scale=${scaleW}:${scaleH}[scaled${overlayIndex}];`;
+    filterComplex += `[${currentOutput}][scaled${overlayIndex}]overlay=x=${posX}:y=${posY}[${outputLabel}];`;
 
-      currentOutput = outputLabel;
-      overlayIndex++;
-    }
+    currentOutput = outputLabel;
+    overlayIndex++;
   }
 
-  // Subtitle text overlays
-  interface SubtitleDraw {
-    text: string;
-    startTime: number;
-    endTime: number;
-    yOffset: number;
-    totalLines: number;
-  }
+  // Add subtitle text
+  const lines = wrapText({ text: segment.subtitle.text, maxCharsPerLine });
+  for (let lineIdx = 0; lineIdx < lines.length; lineIdx++) {
+    const escapedText = escapeDrawtext(lines[lineIdx]);
+    const isLast = lineIdx === lines.length - 1;
+    const outputLabel = isLast ? "vout" : `sub${lineIdx}`;
+    const yPos = `h-${60 + (lines.length - 1 - lineIdx) * lineHeight}`;
 
-  const subtitleDraws: SubtitleDraw[] = [];
-  for (const seg of subtitles) {
-    const lines = wrapText({ text: seg.text, maxCharsPerLine });
-    for (let lineIdx = 0; lineIdx < lines.length; lineIdx++) {
-      subtitleDraws.push({
-        text: lines[lineIdx],
-        startTime: seg.startTime,
-        endTime: seg.endTime,
-        yOffset: lineIdx,
-        totalLines: lines.length,
-      });
-    }
-  }
+    filterComplex += `[${currentOutput}]drawtext=text='${escapedText}':fontfile='${fontPath}':fontsize=${fontSize}:fontcolor=white:borderw=2:bordercolor=black:x=(w-text_w)/2:y=${yPos}[${outputLabel}]`;
 
-  subtitleDraws.forEach((draw, i) => {
-    const escapedText = escapeDrawtext(draw.text);
-    const outputLabel = i === subtitleDraws.length - 1 ? "vout" : `sub${i}`;
-    const yPos = `h-${60 + (draw.totalLines - 1 - draw.yOffset) * lineHeight}`;
-    filterComplex += `[${currentOutput}]drawtext=text='${escapedText}':fontfile='${fontPath}':fontsize=${fontSize}:fontcolor=white:borderw=2:bordercolor=black:x=(w-text_w)/2:y=${yPos}:enable='between(t,${draw.startTime},${draw.endTime})'[${outputLabel}]`;
-    if (i < subtitleDraws.length - 1) {
+    if (!isLast) {
       filterComplex += ";";
     }
     currentOutput = outputLabel;
-  });
+  }
 
-  const audioInputIndex = uniqueFilepaths.length + 1;
+  // Handle case with images but text creates [vout]
+  // or no images and we need to add text to base
+  if (layout.length === 0 && lines.length > 0) {
+    // No images, just add text to base video
+    filterComplex = "";
+    currentOutput = "0:v";
+    for (let lineIdx = 0; lineIdx < lines.length; lineIdx++) {
+      const escapedText = escapeDrawtext(lines[lineIdx]);
+      const isLast = lineIdx === lines.length - 1;
+      const outputLabel = isLast ? "vout" : `sub${lineIdx}`;
+      const yPos = `h-${60 + (lines.length - 1 - lineIdx) * lineHeight}`;
+
+      filterComplex += `[${currentOutput}]drawtext=text='${escapedText}':fontfile='${fontPath}':fontsize=${fontSize}:fontcolor=white:borderw=2:bordercolor=black:x=(w-text_w)/2:y=${yPos}[${outputLabel}]`;
+
+      if (!isLast) {
+        filterComplex += ";";
+      }
+      currentOutput = outputLabel;
+    }
+  }
 
   const outputArgs = [
     "-filter_complex",
     filterComplex,
     "-map",
     "[vout]",
-    "-map",
-    `${audioInputIndex}:a`,
     "-c:v",
     "libx264",
-    "-c:a",
-    "aac",
-    "-shortest",
+    "-preset",
+    "ultrafast",
     "-y",
-    outputPath,
+    segment.outputPath,
   ];
 
   return [...inputArgs, ...outputArgs];
+}
+
+/**
+ * Renders a single segment using ffmpeg.
+ * Returns a promise that resolves when complete.
+ */
+function renderSegment(args: string[]): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const proc = spawn("ffmpeg", args, { stdio: "pipe" });
+    let stderr = "";
+
+    proc.stderr?.on("data", (data) => {
+      stderr += data.toString();
+    });
+
+    proc.on("close", (code) => {
+      if (code === 0) {
+        resolve();
+      } else {
+        reject(new Error(`ffmpeg failed with code ${code}: ${stderr}`));
+      }
+    });
+
+    proc.on("error", reject);
+  });
+}
+
+/**
+ * Renders all segments in parallel with a concurrency limit.
+ */
+async function renderAllSegments(args: {
+  segments: VideoSegment[];
+  dimensionsCache: Map<string, ImageDimensions>;
+  layoutOptions: LayoutOptions;
+  fontPath: string;
+  fontSize: number;
+  lineHeight: number;
+  maxCharsPerLine: number;
+  concurrency: number;
+}): Promise<void> {
+  const {
+    segments,
+    dimensionsCache,
+    layoutOptions,
+    fontPath,
+    fontSize,
+    lineHeight,
+    maxCharsPerLine,
+    concurrency,
+  } = args;
+
+  console.log(
+    `Rendering ${segments.length} segments with concurrency ${concurrency}...`,
+  );
+
+  let completed = 0;
+  const total = segments.length;
+
+  // Process segments in batches
+  for (let i = 0; i < segments.length; i += concurrency) {
+    const batch = segments.slice(i, i + concurrency);
+    const promises = batch.map((segment) => {
+      const ffmpegArgs = buildSegmentFFmpegArgs({
+        segment,
+        dimensionsCache,
+        layoutOptions,
+        fontPath,
+        fontSize,
+        lineHeight,
+        maxCharsPerLine,
+      });
+
+      return renderSegment(ffmpegArgs).then(() => {
+        completed++;
+        process.stdout.write(`\rRendered ${completed}/${total} segments`);
+      });
+    });
+
+    await Promise.all(promises);
+  }
+
+  console.log(); // newline after progress
+}
+
+/**
+ * Concatenates all segment videos and adds the audio track.
+ */
+function concatenateSegments(args: {
+  segments: VideoSegment[];
+  audioPath: string;
+  outputPath: string;
+  tempDir: string;
+}): void {
+  const { segments, audioPath, outputPath, tempDir } = args;
+
+  // Create concat file (use basename since concat file is in same directory)
+  const concatFilePath = join(tempDir, "concat.txt");
+  const concatContent = segments
+    .map((seg) => `file '${seg.outputPath.split("/").pop()}'`)
+    .join("\n");
+  writeFileSync(concatFilePath, concatContent);
+
+  console.log("Concatenating segments and adding audio...");
+
+  // Concatenate videos and add audio
+  execFileSync(
+    "ffmpeg",
+    [
+      "-loglevel",
+      "error",
+      "-f",
+      "concat",
+      "-safe",
+      "0",
+      "-i",
+      concatFilePath,
+      "-i",
+      audioPath,
+      "-c:v",
+      "copy",
+      "-c:a",
+      "aac",
+      "-shortest",
+      "-y",
+      outputPath,
+    ],
+    { stdio: "inherit" },
+  );
+}
+
+/**
+ * Cleans up temporary segment files.
+ */
+function cleanupTempFiles(tempDir: string, segments: VideoSegment[]): void {
+  for (const segment of segments) {
+    if (existsSync(segment.outputPath)) {
+      unlinkSync(segment.outputPath);
+    }
+  }
+  const concatFile = join(tempDir, "concat.txt");
+  if (existsSync(concatFile)) {
+    unlinkSync(concatFile);
+  }
+  // Try to remove temp directory (will fail if not empty, which is fine)
+  try {
+    unlinkSync(tempDir);
+  } catch {
+    // Directory not empty or doesn't exist, ignore
+  }
 }
 
 // ============================================================================
 // Main
 // ============================================================================
 
-function main() {
+async function main() {
   const mp3Path = process.argv[2];
   if (!mp3Path || !mp3Path.endsWith(".mp3")) {
     console.error("Usage: npx tsx generate-slideshow.ts <mp3-file>");
@@ -717,33 +944,59 @@ function main() {
     rowGap: 10,
   };
 
-  // FFmpeg options
-  const ffmpegOptions: FFmpegOptions = {
-    audioPath: `${baseName}.mp3`,
-    outputPath: `${baseName}.mp4`,
-    frameWidth: 640,
-    frameHeight: 480,
-    fontPath: "/System/Library/Fonts/AppleSDGothicNeo.ttc",
-    totalDuration,
-    fontSize: 24,
-    lineHeight: 30,
-    maxCharsPerLine: 30,
-  };
+  // Rendering options
+  const audioPath = `${baseName}.mp3`;
+  const outputPath = `${baseName}.mp4`;
+  const fontPath = "/System/Library/Fonts/AppleSDGothicNeo.ttc";
+  const fontSize = 24;
+  const lineHeight = 30;
+  const maxCharsPerLine = 30;
 
-  // Build and run ffmpeg command
-  const ffmpegArgs = buildFFmpegCommand({
+  // Create temp directory for segments
+  const tempDir = `${baseName}_segments`;
+  if (!existsSync(tempDir)) {
+    mkdirSync(tempDir);
+  }
+
+  // Create video segments (including gaps)
+  const videoSegments = createVideoSegments({
     subtitles,
-    dimensionsCache,
-    layoutOptions,
-    ffmpegOptions,
+    totalDuration,
+    tempDir,
   });
 
-  console.log("Running ffmpeg...");
-  console.log("ffmpeg", ffmpegArgs.join(" "));
+  console.log(`Created ${videoSegments.length} video segments`);
 
-  execFileSync("ffmpeg", ffmpegArgs, { stdio: "inherit" });
+  // Render all segments in parallel
+  const concurrency = Math.max(1, cpus().length - 1); // Leave one CPU free
 
-  console.log(`Done! Output: ${ffmpegOptions.outputPath}`);
+  await renderAllSegments({
+    segments: videoSegments,
+    dimensionsCache,
+    layoutOptions,
+    fontPath,
+    fontSize,
+    lineHeight,
+    maxCharsPerLine,
+    concurrency,
+  });
+
+  // Concatenate and add audio
+  concatenateSegments({
+    segments: videoSegments,
+    audioPath,
+    outputPath,
+    tempDir,
+  });
+
+  // Clean up temp files
+  console.log("Cleaning up temporary files...");
+  cleanupTempFiles(tempDir, videoSegments);
+
+  console.log(`Done! Output: ${outputPath}`);
 }
 
-main();
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

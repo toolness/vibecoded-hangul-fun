@@ -14,6 +14,30 @@ function loadDatabase(): Database {
   return loadJson(getAssetFilePath(DB_JSON_ASSET));
 }
 
+interface ImageDimensions {
+  width: number;
+  height: number;
+}
+
+function getImageDimensions(filepath: string): ImageDimensions {
+  const result = execFileSync("ffprobe", [
+    "-v",
+    "error",
+    "-select_streams",
+    "v:0",
+    "-show_entries",
+    "stream=width,height",
+    "-of",
+    "json",
+    filepath,
+  ]);
+  const data = JSON.parse(result.toString());
+  return {
+    width: data.streams[0].width,
+    height: data.streams[0].height,
+  };
+}
+
 const dbRows = loadDatabase();
 
 const dbHelper = new DatabaseHelper(dbRows);
@@ -25,19 +49,13 @@ const wordMapping = loadJson<Record<string, string | null>>(
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const timings = loadJson<any>("friend-and-trip-timings.json");
 
-interface ImageSegment {
-  startTime: number;
-  endTime: number;
-  filepath: string;
-}
-
 interface SubtitleSegment {
   startTime: number;
   endTime: number;
   text: string;
+  images: string[]; // filepaths of images for this subtitle
 }
 
-const imageSegments: ImageSegment[] = [];
 const subtitleSegments: SubtitleSegment[] = [];
 
 // Collect all words from all segments into a flat list
@@ -46,6 +64,7 @@ interface WordWithTiming {
   startTime: number;
   endTime: number;
   isSegmentStart: boolean;
+  imageFilepath: string | null; // image associated with this word, if any
 }
 const allWords: WordWithTiming[] = [];
 
@@ -56,19 +75,25 @@ for (const segment of timings.segments) {
     const startTime: number = word.start_time;
     const endTime: number = word.end_time;
 
-    allWords.push({ text, startTime, endTime, isSegmentStart: isFirst });
-    isFirst = false;
-
-    // Handle image segments
+    // Check if this word has an associated image
+    let imageFilepath: string | null = null;
     const trimmed = text.trim().replace(/[,.]/g, "");
     const vocabWord = wordMapping[trimmed];
     if (vocabWord) {
       const row = dbHelper.wordHangulMap.get(vocabWord);
       if (row && row.picture?.type === "local-image") {
-        const filepath = join(ASSETS_DIR, row.picture.filename);
-        imageSegments.push({ startTime, endTime, filepath });
+        imageFilepath = join(ASSETS_DIR, row.picture.filename);
       }
     }
+
+    allWords.push({
+      text,
+      startTime,
+      endTime,
+      isSegmentStart: isFirst,
+      imageFilepath,
+    });
+    isFirst = false;
   }
 }
 
@@ -77,6 +102,7 @@ for (const segment of timings.segments) {
 let currentSubtitleText = "";
 let currentSubtitleStart: number | null = null;
 let currentSubtitleEnd: number = 0;
+let currentSubtitleImages: string[] = [];
 
 for (const word of allWords) {
   const text = word.text;
@@ -106,6 +132,14 @@ for (const word of allWords) {
   currentSubtitleText += text;
   currentSubtitleEnd = word.endTime;
 
+  // Collect image if this word has one (dedupe within subtitle)
+  if (
+    word.imageFilepath &&
+    !currentSubtitleImages.includes(word.imageFilepath)
+  ) {
+    currentSubtitleImages.push(word.imageFilepath);
+  }
+
   // Check if this word ends a sentence (ends with . ! ? or ])
   const endsWithPunctuation = /[.!?\]]$/.test(text.trim());
 
@@ -114,9 +148,11 @@ for (const word of allWords) {
       startTime: currentSubtitleStart,
       endTime: currentSubtitleEnd,
       text: currentSubtitleText.trim(),
+      images: currentSubtitleImages,
     });
     currentSubtitleText = "";
     currentSubtitleStart = null;
+    currentSubtitleImages = [];
   }
 }
 
@@ -126,11 +162,122 @@ if (currentSubtitleText.trim() && currentSubtitleStart !== null) {
     startTime: currentSubtitleStart,
     endTime: currentSubtitleEnd,
     text: currentSubtitleText.trim(),
+    images: currentSubtitleImages,
   });
 }
 
 // Deduplicate images by filepath, keeping the unique file paths
-const uniqueFilepaths = [...new Set(imageSegments.map((s) => s.filepath))];
+const uniqueFilepaths = [...new Set(subtitleSegments.flatMap((s) => s.images))];
+
+// Get dimensions for all unique images
+const imageDimensions = new Map<string, ImageDimensions>();
+for (const filepath of uniqueFilepaths) {
+  imageDimensions.set(filepath, getImageDimensions(filepath));
+}
+
+// Layout constants
+const FRAME_WIDTH = 640;
+const FRAME_HEIGHT = 480;
+const SUBTITLE_AREA_HEIGHT = 80; // Reserve space at bottom for subtitles
+const IMAGE_AREA_HEIGHT = FRAME_HEIGHT - SUBTITLE_AREA_HEIGHT;
+const MAX_IMAGES_PER_ROW = 5;
+const MAX_IMAGES = 10;
+const ROW_GAP = 10; // Gap between rows
+
+// Calculate layout for a set of images
+interface ImageLayout {
+  filepath: string;
+  x: number;
+  y: number;
+  scaledWidth: number;
+  scaledHeight: number;
+}
+
+function calculateImageLayout(filepaths: string[]): ImageLayout[] {
+  // Truncate to max images
+  const images = filepaths.slice(0, MAX_IMAGES);
+  if (images.length === 0) return [];
+
+  // Determine row configuration
+  const needsTwoRows = images.length > MAX_IMAGES_PER_ROW;
+  const row1Images = needsTwoRows
+    ? images.slice(0, Math.ceil(images.length / 2))
+    : images;
+  const row2Images = needsTwoRows
+    ? images.slice(Math.ceil(images.length / 2))
+    : [];
+
+  // Calculate uniform height for each row
+  const rowHeight = needsTwoRows
+    ? (IMAGE_AREA_HEIGHT - ROW_GAP) / 2
+    : IMAGE_AREA_HEIGHT;
+
+  const layouts: ImageLayout[] = [];
+
+  // Helper to layout a single row
+  function layoutRow(
+    rowImages: string[],
+    rowY: number,
+    targetHeight: number,
+  ): ImageLayout[] {
+    const rowLayouts: ImageLayout[] = [];
+
+    // Scale each image to target height and calculate total width
+    const scaledImages = rowImages.map((filepath) => {
+      const dims = imageDimensions.get(filepath)!;
+      const scale = targetHeight / dims.height;
+      return {
+        filepath,
+        scaledWidth: dims.width * scale,
+        scaledHeight: targetHeight,
+      };
+    });
+
+    // Calculate total width and check if we need to shrink
+    let totalWidth = scaledImages.reduce(
+      (sum, img) => sum + img.scaledWidth,
+      0,
+    );
+
+    // If too wide, scale down proportionally
+    if (totalWidth > FRAME_WIDTH) {
+      const shrinkFactor = FRAME_WIDTH / totalWidth;
+      for (const img of scaledImages) {
+        img.scaledWidth *= shrinkFactor;
+        img.scaledHeight *= shrinkFactor;
+      }
+      totalWidth = FRAME_WIDTH;
+    }
+
+    // Center the row horizontally
+    let currentX = (FRAME_WIDTH - totalWidth) / 2;
+
+    for (const img of scaledImages) {
+      rowLayouts.push({
+        filepath: img.filepath,
+        x: currentX,
+        y: rowY + (targetHeight - img.scaledHeight) / 2, // Center vertically in row
+        scaledWidth: img.scaledWidth,
+        scaledHeight: img.scaledHeight,
+      });
+      currentX += img.scaledWidth;
+    }
+
+    return rowLayouts;
+  }
+
+  // Layout row 1
+  const row1Y = needsTwoRows ? 0 : (IMAGE_AREA_HEIGHT - rowHeight) / 2;
+  layouts.push(...layoutRow(row1Images, row1Y, rowHeight));
+
+  // Layout row 2 if needed
+  if (needsTwoRows) {
+    const row2Y = rowHeight + ROW_GAP;
+    layouts.push(...layoutRow(row2Images, row2Y, rowHeight));
+  }
+
+  return layouts;
+}
 
 // Find total duration from the last segment end time
 const lastSegment = timings.segments[timings.segments.length - 1];
@@ -201,17 +348,33 @@ function wrapText(text: string, maxCharsPerLine: number): string[] {
 const koreanFontPath = "/System/Library/Fonts/AppleSDGothicNeo.ttc";
 
 // Build overlay chain for images
+// For each subtitle, we show all its images with calculated layout positions
 let filterComplex = "";
 let currentOutput = "0:v";
+let overlayIndex = 0;
 
-imageSegments.forEach((seg, i) => {
-  const inputIndex = filepathToInputIndex.get(seg.filepath)!;
-  const outputLabel = `v${i}`;
-  // Overlay centered: x=(W-w)/2, y=(H-h)/2
-  // Enable only during the segment time
-  filterComplex += `[${currentOutput}][${inputIndex}:v]overlay=x=(W-w)/2:y=(H-h)/2:enable='between(t,${seg.startTime},${seg.endTime})'[${outputLabel}];`;
-  currentOutput = outputLabel;
-});
+for (const subtitle of subtitleSegments) {
+  const layout = calculateImageLayout(subtitle.images);
+
+  for (const img of layout) {
+    const inputIndex = filepathToInputIndex.get(img.filepath)!;
+    const outputLabel = `v${overlayIndex}`;
+
+    // Scale the image to the calculated size, then overlay at the calculated position
+    // Use scale2ref to scale relative to the input, or just scale directly
+    const scaleW = Math.round(img.scaledWidth);
+    const scaleH = Math.round(img.scaledHeight);
+    const posX = Math.round(img.x);
+    const posY = Math.round(img.y);
+
+    // Create a scaled version of the image and overlay it
+    filterComplex += `[${inputIndex}:v]scale=${scaleW}:${scaleH}[scaled${overlayIndex}];`;
+    filterComplex += `[${currentOutput}][scaled${overlayIndex}]overlay=x=${posX}:y=${posY}:enable='between(t,${subtitle.startTime},${subtitle.endTime})'[${outputLabel}];`;
+
+    currentOutput = outputLabel;
+    overlayIndex++;
+  }
+}
 
 // Add drawtext filters for subtitles (with wrapping and Korean font)
 const fontSize = 24;

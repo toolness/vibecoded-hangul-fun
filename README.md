@@ -32,9 +32,7 @@ communicate with Notion.
 The content can also be exported to
 [Anki](https://apps.ankiweb.net/) as a deck.
 
-## Quick start
-
-### Prerequisites
+## Prerequisites
 
 You will need NodeJS 22 or above.
 
@@ -46,7 +44,7 @@ The integration only needs read-only permission, unless you want
 to update the DB's information to reflect your Anki cards, in
 which case you'll also need update permission.
 
-#### Words data source
+### Words data source
 
 You will also need to create a Notion data source called "Words"
 with the following schema:
@@ -85,7 +83,7 @@ with the following schema:
 
 [minimal pair]: https://en.wikipedia.org/wiki/Minimal_pair
 
-#### Sentences data source
+### Sentences data source
 
 Also make a data source called "Sentences" with this schema:
 
@@ -101,7 +99,7 @@ Also make a data source called "Sentences" with this schema:
   include this sentence in the app at all. This is essentially
   a way to "soft delete" a row.
 
-#### Sentence markup
+### Sentence markup
 
 The markup field can contain the following:
 
@@ -123,7 +121,7 @@ The markup field can contain the following:
 
 [Cloze]: https://docs.ankiweb.net/editing.html#cloze-deletion
 
-### Environment variables
+## Environment variables
 
 Now create an `.env` file with the following variables defined:
 
@@ -132,7 +130,7 @@ NOTION_API_KEY=<Your Notion API key>
 NOTION_DS_ID=<Your Notion data source id>
 ```
 
-### Downloading the database
+## Downloading the database
 
 To download the database, run:
 
@@ -142,7 +140,17 @@ npm run download
 
 This will put the database JSON in `src/database.json`.
 
-### Importing into Anki
+## Running the server
+
+You can start the web app server with:
+
+```
+npm run dev
+```
+
+Then visit the URL shown in the console.
+
+## Importing into Anki
 
 To import the downloaded database into Anki, run `npm run anki`.
 
@@ -152,29 +160,71 @@ that you can import into Anki.
 
 See [`anki.ts`](./anki.ts) for more details.
 
-### Updating the "Last incorrect" field in the database
+## Updating the "Last incorrect" field in the database
 
 If you have a "Last incorrect" field in your database, you can update
 it to reflect the state of your Anki deck by running `npm run upload`.
 
-### Type checking
+## Type checking
 
 If you make changes to the codebase, be sure to run `npm run typecheck`
 to ensure there are no type errors.
 
-### Tests
+## Tests
 
 You can run tests via `npm run test`.
 
 You can run the tests interactively, re-running them whenever you change
 files, with `npm run test:watch`.
 
-### Code formatting
+## Code formatting
 
 Run `npm run prettier` after changing code/before committing
 to ensure that code is formatted consistently.
 
-### Credits
+## Creating slideshows
+
+Using LLMs, it's possible to create custom content at your comprehension
+level (or slightly above it, which is sometimes called "Comprehensible Input")
+and have it narrated via a text-to-speech service like [ElevenLabs][]. However,
+a challenge is that it's not always easy to tell what's being spoken; nor
+does it leverage the fact that you've already learned to associate particular
+images with the words in the story (i.e., the images in your flash cards).
+
+This repository also contains a bit of tooling that makes it possible to
+make a slideshow of the content which contains both subtitles and your
+pictures for all the words in the subtitle.
+
+The general process is as follows:
+
+1. Run [`generate-story-prompt.txt`](generate-story-prompt.txt) through
+   an LLM like Claude Code to generate the story. The output of the LLM
+   should now be in a text file; we'll assume it's in
+   `stories/my-cool-story.txt`.
+
+2. Run `node parse-story.ts stories/my-cool-story.txt`. This will generate
+   some new files; one of them, `stories/my-cool-story.plain.txt` will be
+   a plain-text story that you can give to a TTS system like ElevenLabs.
+   Do this and put the output MP3 file in `stories/my-cool-story.mp3`.
+
+3. Install `whisper-cpp` via e.g. `brew install whisper-cpp`, download
+   the large model from [Hugging Face][], put it in `models/ggml-large-v3.bin`,
+   and use the following command:
+
+   ```
+   whisper-cli --language ko --model models/ggml-large-v3.bin --output-json --output-file stories/my-cool-story.whisper my-cool-story.mp3
+   ```
+
+   Alternatively, you can use ElevenLabs' speech-to-text and put its JSON
+   output at `stories/my-cool-story.elevenlabs.json`.
+
+4. Run `node generate-slideshow.ts stories/my-cool-story.mp3`. This will
+   create `stories/my-cool-story.mp4`, which is ready for viewing/listening.
+
+[Hugging Face]: https://huggingface.co/ggerganov/whisper.cpp/tree/main
+[ElevenLabs]: https://elevenlabs.io/
+
+## Credits
 
 - [Speaker_Icon.svg](src/assets/Speaker_Icon.svg) was taken from
   [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Speaker_Icon.svg)

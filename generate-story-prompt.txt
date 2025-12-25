@@ -1,0 +1,39 @@
+In `vocabulary.md`, you will also find a list of (bolded) Korean words in
+various forms. Usually the verbs will be in their dictionary form, but
+sometimes they'll be in an adjectival or nominalized form, etc.
+
+Make a simple story using these words. You'll find some example sentences
+at the end of `vocabulary.md` and can use these as a guide to the
+kinds of grammar you should use (these stories will be read by people
+learning Korean, so don't get too advanced).
+
+You can manipulate any of the words in the vocabulary list grammatically,
+which means that you can conjugate them, nominalize them, and so on.
+
+Here's some examples:
+
+* if the word "좋습니다" is in the vocabulary list, you can use any
+  form of "좋다".
+* if the word "아름다운" is in the vocabulary list, you can use any
+  form of "아름답다".
+* if "조금" is in the vocabulary list, you can use its abbreviated
+  form, "좀".
+* if "웃다" and "주다" are in the vocabulary list, you can combine
+  them to form a compound verb like "웃어주었습니다".
+
+As you construct each sentence, put the word(s) from the vocabulary
+list in parentheses after they're mentioned in the sentence. For
+example, assuming that "연못", "웃다", and "주다" are in the vocabulary
+list, you might generate the following sentence:
+
+연못도 (연못) 그에게 웃어주었습니다 (웃다, 주다).
+
+Please keep to this format as much as possible, and use the exact
+word as it appears in the vocabulary list: your output will
+later be parsed to map the words in a sentence back to their entries
+in the vocabulary list.
+
+Give the story a short slug-like title and write it to the
+`stories` subdirectory (creating it if it doesn't already exist),
+giving it a `.txt` file ending. An example might be
+`stories/friend-and-trip.txt`.

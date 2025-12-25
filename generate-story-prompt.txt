@@ -33,4 +33,7 @@ word as it appears in the vocabulary list: your output will
 later be parsed to map the words in a sentence back to their entries
 in the vocabulary list.
 
-Output the generated story to `story.txt`.
+Give the story a short slug-like title and write it to the
+`stories` subdirectory (creating it if it doesn't already exist),
+giving it a `.txt` file ending. An example might be
+`stories/friend-and-trip.txt`.

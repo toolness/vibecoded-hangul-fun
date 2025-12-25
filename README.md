@@ -212,7 +212,7 @@ The general process is as follows:
    and use the following command:
 
    ```
-   whisper-cli --language ko --model models/ggml-large-v3.bin --output-json --output-file stories/my-cool-story.whisper my-cool-story.mp3
+   whisper-cli --language ko --model models/ggml-large-v3.bin --output-json --output-file stories/my-cool-story.whisper stories/my-cool-story.mp3
    ```
 
    Alternatively, you can use ElevenLabs' speech-to-text and put its JSON

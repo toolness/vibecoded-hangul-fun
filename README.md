@@ -197,10 +197,17 @@ pictures for all the words in the subtitle.
 
 The general process is as follows:
 
-1. Run [`generate-story-prompt.txt`](generate-story-prompt.txt) through
-   an LLM like Claude Code to generate the story. The output of the LLM
+1. Run [`prompts/generate-story-prompt.txt`](prompts/generate-story-prompt.txt)
+   through an LLM like Claude Code to generate the story. The output of the LLM
    should now be in a text file; we'll assume it's in
    `stories/my-cool-story.txt`.
+
+   Alternatively, you might already have a story that you want to make
+   a slideshow of. If that's the case, copy the story to
+   `stories/my-cool-story.plain.txt` and run
+   [`prompts/reverse-annotate-story-prompt.txt`](prompts/reverse-annotate-story-prompt.txt)
+   through an LLM like Claude Code. The output of the LLM should now be in
+   a text file called `stories/my-cool-story.txt`.
 
 2. Run `node parse-story.ts stories/my-cool-story.txt`. This will generate
    some new files; one of them, `stories/my-cool-story.plain.txt` will be

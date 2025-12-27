@@ -1,4 +1,4 @@
-In `vocabulary.md`, you will also find a list of (bolded) Korean words in
+In `vocabulary.md`, you will find a list of (bolded) Korean words in
 various forms. Usually the verbs will be in their dictionary form, but
 sometimes they'll be in an adjectival or nominalized form, etc.
 

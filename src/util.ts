@@ -130,9 +130,16 @@ export function verifyExists<T>(item: T | undefined): T {
   return item;
 }
 
-export function convertWordsToUnderscores(text: string): string {
+export function convertWordsToCharacters(
+  text: string,
+  replacementCharacter: string,
+) {
   return text
     .split("")
-    .map((char) => (char !== " " ? "_" : char))
+    .map((char) => (char !== " " ? replacementCharacter : char))
     .join("");
+}
+
+export function convertWordsToUnderscores(text: string): string {
+  return convertWordsToCharacters(text, "_");
 }

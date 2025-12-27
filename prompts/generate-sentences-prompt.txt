@@ -1,0 +1,15 @@
+In `vocabulary.md`, you will find a list of (bolded) Korean words in
+various forms. Usually the verbs will be in their dictionary form, but
+sometimes they'll be in an adjectival or nominalized form, etc.
+
+I want you to use this vocabulary list to construct 10 simple sentences.
+Each sentence should be a `AiGeneratedFillInTheBlankSentence`, as
+defined in `src/dynamic-cards/aiGeneratedFillInTheBlank.ts`, and your
+output should be a JSON array of `AiGeneratedFillInTheBlankSentence`
+objects.
+
+Each sentence can use the kinds of grammatical features outlined in
+the example sentences at the end of `vocabulary.md`.
+
+Output the final JSON to `src/assets/ai-generated-sentences.json`.
+If the file already exists, add the new sentences to its array.

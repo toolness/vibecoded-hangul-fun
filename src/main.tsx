@@ -15,6 +15,7 @@ import {
   TellingTimeAudioOnlyDynamicCard,
   TellingTimeDynamicCard,
 } from "./dynamic-cards/tellingTime.ts";
+import { AiGeneratedFillInTheBlankDynamicCard } from "./dynamic-cards/aiGeneratedFillInTheBlank.ts";
 
 const DATABASE_JSON_URL = getAssetUrl(DB_JSON_ASSET);
 
@@ -44,6 +45,7 @@ function createInitialRows(database: Database): {
     SinoKoreanNumberDynamicCard,
     TellingTimeDynamicCard,
     TellingTimeAudioOnlyDynamicCard,
+    AiGeneratedFillInTheBlankDynamicCard,
   ]);
 
   for (const word of database.words) {

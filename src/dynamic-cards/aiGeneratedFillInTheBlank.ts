@@ -19,6 +19,14 @@ export type AiGeneratedFillInTheBlankSentence = {
   sentence: string;
 
   /**
+   * A slug for the sentence. This will be used for saving
+   * audio of the sentence to a file, etc.  It should be
+   * pure ASCII, and as such it should contain a rough
+   * English translation of the sentence
+   */
+  slug: string;
+
+  /**
    * Mappings from words in the sentence (including any
    * attached particles) to their canonical forms in our
    * vocabulary.

@@ -48,10 +48,81 @@ const sentences: AiGeneratedFillInTheBlankSentence[] = await (
   await fetch(new URL(`../assets/ai-generated-sentences.json`, import.meta.url))
 ).json();
 
-function getRandomSentenceCard({
-  dbHelper,
-  difficulty,
-}: DynamicCardCreateOptions): DynamicCard | undefined {
+function getSentenceCard(
+  sentence: AiGeneratedFillInTheBlankSentence,
+  mainWordHangul: string,
+  { dbHelper, difficulty }: DynamicCardCreateOptions,
+): DynamicCard | undefined {
+  let mainPicture: WordPicture | undefined;
+  const extraWords: WordDatabaseRow[] = [];
+
+  const fillInTheBlankItems: FillInTheBlankItem[] = [];
+  const sentenceParts = sentence.sentence.split(mainWordHangul);
+  if (sentenceParts.length !== 2) {
+    // For now only support situations where the word appears once in the sentence, i.e.
+    // the sentence is split into two by the word.
+    return;
+  }
+  const addFillInTheBlankContent = (content: string) => {
+    if (content !== "") {
+      if (difficulty === "hard") {
+        // Mask non-fill-in-the-blank words, forcing user to use their ears.
+        content = convertWordsToCharacters(content, "?");
+      }
+      fillInTheBlankItems.push({ type: "content", value: content });
+    }
+  };
+  addFillInTheBlankContent(sentenceParts[0]);
+  fillInTheBlankItems.push({
+    type: "fill-in",
+    blankValue: convertWordsToUnderscores(mainWordHangul),
+    answer: mainWordHangul,
+  });
+  addFillInTheBlankContent(sentenceParts[1]);
+
+  for (const [wordHangul, words] of Object.entries(
+    sentence.vocabularyMappings,
+  )) {
+    for (const word of words) {
+      if (difficulty === "hard") {
+        // Don't show any pictures on hard mode.
+        continue;
+      }
+      if (wordHangul === mainWordHangul && difficulty !== "easy") {
+        // Only show a picture of the main word on easy mode, otherwise
+        // the user should listen for it + infer meaning from other words.
+        continue;
+      }
+      const entry = dbHelper.wordHangulMap.get(word);
+      if (entry && entry.picture) {
+        if (wordHangul === mainWordHangul && !mainPicture) {
+          mainPicture = entry.picture;
+        } else {
+          extraWords.push(entry);
+        }
+      }
+    }
+  }
+
+  return {
+    name: mainWordHangul,
+    isTranslation: true,
+    hangul: mainWordHangul,
+    fullHangul: sentence.sentence,
+    fillInTheBlankItems,
+    autoPlayAudio: true,
+    notes: sentence.sentence,
+    picture: mainPicture ?? {
+      type: "emojis",
+      emojis: "👂",
+    },
+    extraWords,
+  };
+}
+
+function getRandomSentenceCard(
+  args: DynamicCardCreateOptions,
+): DynamicCard | undefined {
   if (sentences.length === 0) {
     return;
   }
@@ -65,71 +136,10 @@ function getRandomSentenceCard({
       return;
     }
     const mainWordHangul = getRandomItem(wordsHangul);
-    let mainPicture: WordPicture | undefined;
-    const extraWords: WordDatabaseRow[] = [];
-
-    const fillInTheBlankItems: FillInTheBlankItem[] = [];
-    const sentenceParts = sentence.sentence.split(mainWordHangul);
-    if (sentenceParts.length !== 2) {
-      // For now only support situations where the word appears once in the sentence, i.e.
-      // the sentence is split into two by the word.
-      continue;
+    const card = getSentenceCard(sentence, mainWordHangul, args);
+    if (card) {
+      return card;
     }
-    const addFillInTheBlankContent = (content: string) => {
-      if (content !== "") {
-        if (difficulty === "hard") {
-          // Mask non-fill-in-the-blank words, forcing user to use their ears.
-          content = convertWordsToCharacters(content, "?");
-        }
-        fillInTheBlankItems.push({ type: "content", value: content });
-      }
-    };
-    addFillInTheBlankContent(sentenceParts[0]);
-    fillInTheBlankItems.push({
-      type: "fill-in",
-      blankValue: convertWordsToUnderscores(mainWordHangul),
-      answer: mainWordHangul,
-    });
-    addFillInTheBlankContent(sentenceParts[1]);
-
-    for (const [wordHangul, words] of Object.entries(
-      sentence.vocabularyMappings,
-    )) {
-      for (const word of words) {
-        if (difficulty === "hard") {
-          // Don't show any pictures on hard mode.
-          continue;
-        }
-        if (wordHangul === mainWordHangul && difficulty !== "easy") {
-          // Only show a picture of the main word on easy mode, otherwise
-          // the user should listen for it + infer meaning from other words.
-          continue;
-        }
-        const entry = dbHelper.wordHangulMap.get(word);
-        if (entry && entry.picture) {
-          if (wordHangul === mainWordHangul && !mainPicture) {
-            mainPicture = entry.picture;
-          } else {
-            extraWords.push(entry);
-          }
-        }
-      }
-    }
-
-    return {
-      name: mainWordHangul,
-      isTranslation: true,
-      hangul: mainWordHangul,
-      fullHangul: sentence.sentence,
-      fillInTheBlankItems,
-      autoPlayAudio: true,
-      notes: sentence.sentence,
-      picture: mainPicture ?? {
-        type: "emojis",
-        emojis: "👂",
-      },
-      extraWords,
-    };
   }
 }
 

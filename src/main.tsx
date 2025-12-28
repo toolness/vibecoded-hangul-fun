@@ -15,7 +15,7 @@ import {
   TellingTimeAudioOnlyDynamicCard,
   TellingTimeDynamicCard,
 } from "./dynamic-cards/tellingTime.ts";
-import { AiGeneratedFillInTheBlankDynamicCard } from "./dynamic-cards/aiGeneratedFillInTheBlank.ts";
+import { createAiGeneratedFillInTheBlankDynamicCardFactory } from "./dynamic-cards/aiGeneratedFillInTheBlank.ts";
 
 const DATABASE_JSON_URL = getAssetUrl(DB_JSON_ASSET);
 
@@ -33,11 +33,11 @@ window.history.replaceState(
   `${window.location.origin}${window.location.pathname}`,
 );
 
-function createInitialRows(database: Database): {
+async function createInitialRows(database: Database): Promise<{
   cards: AppCard[];
   dbHelper: DatabaseHelper;
   dynamicCardManager: DynamicCardManager;
-} {
+}> {
   const result: AppCard[] = [];
   const dbHelper = new DatabaseHelper(database);
   const dynamicCardManager = new DynamicCardManager([
@@ -45,7 +45,7 @@ function createInitialRows(database: Database): {
     SinoKoreanNumberDynamicCard,
     TellingTimeDynamicCard,
     TellingTimeAudioOnlyDynamicCard,
-    AiGeneratedFillInTheBlankDynamicCard,
+    await createAiGeneratedFillInTheBlankDynamicCardFactory(),
   ]);
 
   for (const word of database.words) {
@@ -124,7 +124,7 @@ const {
   cards: initialRows,
   dbHelper,
   dynamicCardManager,
-} = createInitialRows(databaseJson);
+} = await createInitialRows(databaseJson);
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

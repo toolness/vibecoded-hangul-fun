@@ -143,3 +143,11 @@ export function convertWordsToCharacters(
 export function convertWordsToUnderscores(text: string): string {
   return convertWordsToCharacters(text, "_");
 }
+
+export function shuffleInPlace<T>(array: T[]) {
+  // Fisher-Yates shuffle (via GitHub Copilot)
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}

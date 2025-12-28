@@ -9,7 +9,7 @@ import { EMPTY_QUESTION } from "../quizStateReducer";
 import {
   convertWordsToCharacters,
   convertWordsToUnderscores,
-  getRandomItem,
+  shuffleInPlace,
 } from "../util";
 
 export type AiGeneratedFillInTheBlankSentence = {
@@ -41,18 +41,10 @@ export type AiGeneratedFillInTheBlankSentence = {
   vocabularyMappings: Record<string, string[]>;
 };
 
-// Note that Vite will parse this, it shouldn't get
-// too complicated!  For more details see:
-// https://vite.dev/guide/assets
-const sentences: AiGeneratedFillInTheBlankSentence[] = await (
-  await fetch(new URL(`../assets/ai-generated-sentences.json`, import.meta.url))
-).json();
-
 function getSentenceCard(
-  sentence: AiGeneratedFillInTheBlankSentence,
-  mainWordHangul: string,
+  { sentence, mainWordHangul }: SentenceWithMainWord,
   { dbHelper, difficulty }: DynamicCardCreateOptions,
-): DynamicCard | undefined {
+): DynamicCard {
   let mainPicture: WordPicture | undefined;
   const extraWords: WordDatabaseRow[] = [];
 
@@ -61,7 +53,10 @@ function getSentenceCard(
   if (sentenceParts.length !== 2) {
     // For now only support situations where the word appears once in the sentence, i.e.
     // the sentence is split into two by the word.
-    return;
+    // [tag:word-occurs-once-per-sentence]
+    throw new Error(
+      `Assertion failure, word "${mainWordHangul}" can only appear once in sentence "${sentence.sentence}"`,
+    );
   }
   const addFillInTheBlankContent = (content: string) => {
     if (content !== "") {
@@ -120,32 +115,67 @@ function getSentenceCard(
   };
 }
 
-function getRandomSentenceCard(
-  args: DynamicCardCreateOptions,
-): DynamicCard | undefined {
-  if (sentences.length === 0) {
-    return;
-  }
-
-  const MAX_ATTEMPTS = 10;
-
-  for (let i = 0; i < MAX_ATTEMPTS; i++) {
-    const sentence = getRandomItem(sentences);
-    const wordsHangul = Object.keys(sentence.vocabularyMappings);
-    if (wordsHangul.length === 0) {
-      return;
-    }
-    const mainWordHangul = getRandomItem(wordsHangul);
-    const card = getSentenceCard(sentence, mainWordHangul, args);
-    if (card) {
-      return card;
-    }
-  }
-}
-
-export const AiGeneratedFillInTheBlankDynamicCard: DynamicCardFactory = {
-  category: "Special: AI-generated sentences",
-  create(args) {
-    return getRandomSentenceCard(args) ?? EMPTY_QUESTION;
-  },
+type SentenceWithMainWord = {
+  sentence: AiGeneratedFillInTheBlankSentence;
+  mainWordHangul: string;
 };
+
+/**
+ * This "factory factory" (ugh) is a hack to get around the
+ * fact that our dynamic card factory system currently only supports
+ * one card per deck. Ordinarily this isn't a problem because the
+ * dynamic cards are expected to have infinite variety, but that's not
+ * actually the case for these AI-generated cards, where we have a
+ * a fairly limited set of cards and we don't want to repeat things.
+ *
+ * So, the outer factory keeps track of what cards are left to render,
+ * while the inner one actually creates the next card.
+ *
+ * In some sense the outer factory is like a "deck" and the inner one
+ * pulls the next card from it (and reshuffles it if there are none left).
+ * The downside here is that there's not really a way for the
+ * user to force a reshuffle of the whole deck, aside from reloading
+ * the web page.
+ */
+export async function createAiGeneratedFillInTheBlankDynamicCardFactory(): Promise<DynamicCardFactory> {
+  // Note that Vite will parse this, it shouldn't get
+  // too complicated!  For more details see:
+  // https://vite.dev/guide/assets
+  const sentences: AiGeneratedFillInTheBlankSentence[] = await (
+    await fetch(
+      new URL(`../assets/ai-generated-sentences.json`, import.meta.url),
+    )
+  ).json();
+
+  const createRemaining = (): SentenceWithMainWord[] => {
+    const remaining: SentenceWithMainWord[] = [];
+    for (const sentence of sentences) {
+      for (const mainWordHangul of Object.keys(sentence.vocabularyMappings)) {
+        const sentenceParts = sentence.sentence.split(mainWordHangul);
+        if (sentenceParts.length !== 2) {
+          // [ref:word-occurs-once-per-sentence]
+          continue;
+        }
+        remaining.push({ sentence, mainWordHangul });
+      }
+    }
+    shuffleInPlace(remaining);
+    return remaining;
+  };
+
+  let remaining = createRemaining();
+
+  return {
+    category: "Special: AI-generated sentences",
+    create(args) {
+      if (remaining.length === 0) {
+        remaining = createRemaining();
+      }
+      const sentenceWithMainWord = remaining.pop();
+      if (!sentenceWithMainWord) {
+        return EMPTY_QUESTION;
+      }
+      return getSentenceCard(sentenceWithMainWord, args);
+    },
+  };
+}

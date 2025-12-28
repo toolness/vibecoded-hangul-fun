@@ -2,7 +2,7 @@ import { hasPictures, type AppCard } from "./AppCard";
 import { DatabaseHelper } from "./database-helper";
 import { makeEmptyDatabase } from "./database-spec";
 import { DynamicCardManager } from "./DynamicCard";
-import { sortByOrderingAndName } from "./util";
+import { shuffleInPlace, sortByOrderingAndName } from "./util";
 
 export type Mode =
   | "translate"
@@ -108,14 +108,6 @@ function filterQuestionsForMode(
           question.minimalPairs &&
           question.audio,
       );
-  }
-}
-
-function shuffleInPlace<T>(array: T[]) {
-  // Fisher-Yates shuffle (via GitHub Copilot)
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
   }
 }
 

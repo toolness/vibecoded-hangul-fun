@@ -1,6 +1,5 @@
 import type { AppCard } from "../AppCard";
 import { Pronouncer } from "./Pronouncer";
-import { getAssetUrl } from "../assets";
 import type { Vocalizer } from "../speech";
 
 interface NotesSectionProps {
@@ -25,9 +24,7 @@ export default function NotesSection({
         <div className={`example-sentence${notes ? " with-notes" : ""}`}>
           {exampleSentence.text}
           <Pronouncer
-            audioUrl={
-              exampleSentence.audio && getAssetUrl(exampleSentence.audio).href
-            }
+            audio={exampleSentence}
             hangul={exampleSentence.text}
             vocalizer={vocalizer || null}
           />

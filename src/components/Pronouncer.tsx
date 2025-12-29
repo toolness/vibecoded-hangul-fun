@@ -1,14 +1,21 @@
 import { useCallback, useEffect, useRef } from "react";
 import SpeakerIcon from "../assets/Speaker_Icon.svg";
 import type { Vocalizer } from "../speech";
+import type { AppCard } from "../AppCard";
+import { getAssetUrl } from "../assets";
+
+type ObjectWithAudio = Pick<AppCard, "audio" | "audioUrl">;
 
 export function Pronouncer(props: {
-  audioUrl: string | undefined;
+  audio: ObjectWithAudio | undefined;
   hangul: string;
   vocalizer: Vocalizer | null;
   autoPlay?: boolean;
 }) {
-  const { audioUrl, hangul, vocalizer, autoPlay } = props;
+  const { audio, hangul, vocalizer, autoPlay } = props;
+  const audioUrl = audio?.audio
+    ? getAssetUrl(audio.audio).href
+    : audio?.audioUrl;
   const audioRef = useRef<HTMLAudioElement>(null);
   const showSpeakerIcon = Boolean(vocalizer || audioUrl);
   const playAudio = useCallback(() => {

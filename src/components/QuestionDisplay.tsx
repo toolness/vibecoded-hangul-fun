@@ -1,7 +1,6 @@
 import type { AppCard } from "../AppCard";
 import type { Mode } from "../quizStateReducer";
 import { type Vocalizer } from "../speech";
-import { getAssetUrl } from "../assets";
 import { Pronouncer } from "./Pronouncer";
 import { FillInTheBlank } from "./FillInTheBlank";
 import { AppCardPictures } from "./AppCardPictures";
@@ -79,11 +78,7 @@ function QuestionDisplay({
         </span>
       )}
       <Pronouncer
-        audioUrl={
-          currentQuestion.audio
-            ? getAssetUrl(currentQuestion.audio).href
-            : undefined
-        }
+        audio={currentQuestion}
         hangul={currentQuestion.fullHangul ?? currentQuestion.hangul}
         autoPlay={
           currentQuestion.autoPlayAudio ?? AUTO_PLAY_AUDIO_MODES.has(mode)

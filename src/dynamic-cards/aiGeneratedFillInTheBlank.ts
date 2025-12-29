@@ -49,6 +49,15 @@ export type AiGeneratedFillInTheBlankSentence = {
   vocabularyMappings: Record<string, string[]>;
 };
 
+function getSentenceAudioUrl(
+  sentence: AiGeneratedFillInTheBlankSentence,
+): string | undefined {
+  const { VITE_AWS_BUCKET, VITE_AWS_BUCKET_REGION } = import.meta.env;
+  if (VITE_AWS_BUCKET && VITE_AWS_BUCKET_REGION) {
+    return `https://${VITE_AWS_BUCKET}.s3.${VITE_AWS_BUCKET_REGION}.amazonaws.com/ai-generated-sentences/${sentence.slug}.mp3`;
+  }
+}
+
 function getSentenceCard(
   { sentence, mainWordHangul }: SentenceWithMainWord,
   { dbHelper, difficulty }: DynamicCardCreateOptions,
@@ -114,6 +123,7 @@ function getSentenceCard(
     fullHangul: sentence.sentence,
     fillInTheBlankItems,
     autoPlayAudio: true,
+    audioUrl: getSentenceAudioUrl(sentence),
     notes: sentence.sentence,
     picture: mainPicture ?? {
       type: "emojis",

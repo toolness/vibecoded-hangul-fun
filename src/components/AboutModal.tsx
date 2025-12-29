@@ -7,6 +7,7 @@ import {
   resetApp,
   type CacheProgress,
 } from "../mediaCache";
+import { formatBytes } from "../util";
 import Modal from "./Modal";
 
 interface AboutModalProps {
@@ -46,6 +47,7 @@ function AboutModal({ onClose, previousFocus }: AboutModalProps) {
   const [cacheStatus, setCacheStatus] = useState<{
     cachedCount: number;
     totalCount: number;
+    cachedBytes: number;
   } | null>(null);
   const [progress, setProgress] = useState<CacheProgress | null>(null);
 
@@ -91,7 +93,7 @@ function AboutModal({ onClose, previousFocus }: AboutModalProps) {
         {cacheStatus && (
           <p className="cache-status">
             {cacheStatus.cachedCount} / {cacheStatus.totalCount} media files
-            cached
+            cached ({formatBytes(cacheStatus.cachedBytes)})
           </p>
         )}
 

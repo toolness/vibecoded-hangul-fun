@@ -1,5 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { findMostRecentModificationTime, mergeEntries } from "./util";
+import {
+  findMostRecentModificationTime,
+  formatBytes,
+  mergeEntries,
+} from "./util";
 
 describe("findMostRecentModificationTime", () => {
   it("returns undefined for empty array", () => {
@@ -164,5 +168,25 @@ describe("mergeEntries", () => {
     );
     expect(result).toHaveLength(1);
     expect(result).toContainEqual({ id: "1", name: "one", value: 1 });
+  });
+});
+
+describe("formatBytes", () => {
+  it("formats bytes", () => {
+    expect(formatBytes(500)).toBe("500 B");
+  });
+
+  it("formats kilobytes", () => {
+    expect(formatBytes(1024)).toBe("1.0 KB");
+    expect(formatBytes(1536)).toBe("1.5 KB");
+  });
+
+  it("formats megabytes", () => {
+    expect(formatBytes(1024 * 1024)).toBe("1.0 MB");
+    expect(formatBytes(85 * 1024 * 1024)).toBe("85.0 MB");
+  });
+
+  it("formats gigabytes", () => {
+    expect(formatBytes(1024 * 1024 * 1024)).toBe("1.0 GB");
   });
 });

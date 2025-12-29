@@ -126,19 +126,25 @@ export async function cacheAllMedia(
 export async function getCacheStatus(): Promise<{
   cachedCount: number;
   totalCount: number;
+  cachedBytes: number;
 }> {
   const urls = await getAllMediaUrls();
   const cache = await caches.open(CACHE_NAME);
 
   let cachedCount = 0;
+  let cachedBytes = 0;
   for (const url of urls) {
     const response = await cache.match(url);
     if (response) {
       cachedCount++;
+      const contentLength = response.headers.get("Content-Length");
+      if (contentLength) {
+        cachedBytes += parseInt(contentLength, 10);
+      }
     }
   }
 
-  return { cachedCount, totalCount: urls.length };
+  return { cachedCount, totalCount: urls.length, cachedBytes };
 }
 
 /**

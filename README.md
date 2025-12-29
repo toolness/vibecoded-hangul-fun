@@ -231,6 +231,32 @@ The general process is as follows:
 [Hugging Face]: https://huggingface.co/ggerganov/whisper.cpp/tree/main
 [ElevenLabs]: https://elevenlabs.io/
 
+## AI-generated sentences
+
+For listening practice, there's a prompt in `prompts/generate-sentences-prompt.txt`
+that will generate sentences using the vocabulary words. These will show up
+under a `Special: AI-generated sentences` category in the app.
+
+By default they will use the device's text-to-speech system, but you can make them
+use ElevenLabs-generated audio instead. You'll need to both set up an ElevenLabs
+account and an AWS S3 bucket to upload the generated audio into.
+
+Add the following environment variables to your `.env` file:
+
+- `AWS_ACCESS_KEY` - AWS access key with read/write access to the S3 bucket.
+- `AWS_SECRET_ACCESS_KEY` - AWS secret access key.
+- `VITE_AWS_BUCKET` - S3 bucket name, e.g. `my-hangul-stuff`. It should be
+  publicly readable and serve CORS headers. It's prefixed with `VITE_` to
+  ensure that the front-end can read it too, as it will need it to generate
+  URLs.
+- `VITE_AWS_BUCKET_REGION` - The region of the S3 bucket, e.g. `us-east-1`.
+- `ELEVENLABS_API_KEY` - Your ElevenLabs API key, with access to speech-to-text
+  functionality.
+
+Once you've set all those things up, you can run
+`node generate-ai-sentence-audio.ts` to generate any audio that hasn't yet
+been generated and upload it to S3.
+
 ## Credits
 
 - [Speaker_Icon.svg](src/assets/Speaker_Icon.svg) was taken from

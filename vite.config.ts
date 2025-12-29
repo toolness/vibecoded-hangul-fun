@@ -26,6 +26,11 @@ export default defineConfig({
             options: {
               cacheName: "media-offline-cache",
               rangeRequests: true,
+              matchOptions: {
+                // Ignore Vary header when matching - GitHub Pages adds
+                // Vary: Accept-Encoding which can cause cache misses
+                ignoreVary: true,
+              },
             },
           },
           {
@@ -34,6 +39,9 @@ export default defineConfig({
             handler: "CacheFirst",
             options: {
               cacheName: "media-offline-cache",
+              matchOptions: {
+                ignoreVary: true,
+              },
             },
           },
           {
@@ -43,6 +51,9 @@ export default defineConfig({
             options: {
               cacheName: "media-offline-cache",
               rangeRequests: true,
+              matchOptions: {
+                ignoreVary: true,
+              },
             },
           },
         ],

@@ -138,6 +138,18 @@ type SentenceWithMainWord = {
   mainWordHangul: string;
 };
 
+async function loadAiGeneratedSentences(): Promise<
+  AiGeneratedFillInTheBlankSentence[]
+> {
+  const response = await fetch(
+    // Note that Vite will parse this, it shouldn't get
+    // too complicated!  For more details see:
+    // https://vite.dev/guide/assets
+    new URL(`../assets/ai-generated-sentences.json`, import.meta.url),
+  );
+  return await response.json();
+}
+
 /**
  * This "factory factory" (ugh) is a hack to get around the
  * fact that our dynamic card factory system currently only supports
@@ -156,14 +168,7 @@ type SentenceWithMainWord = {
  * the web page.
  */
 export async function createAiGeneratedFillInTheBlankDynamicCardFactory(): Promise<DynamicCardFactory> {
-  // Note that Vite will parse this, it shouldn't get
-  // too complicated!  For more details see:
-  // https://vite.dev/guide/assets
-  const sentences: AiGeneratedFillInTheBlankSentence[] = await (
-    await fetch(
-      new URL(`../assets/ai-generated-sentences.json`, import.meta.url),
-    )
-  ).json();
+  const sentences = await loadAiGeneratedSentences();
 
   const createRemaining = (): SentenceWithMainWord[] => {
     const remaining: SentenceWithMainWord[] = [];

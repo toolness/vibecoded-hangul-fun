@@ -5,6 +5,10 @@ import type {
   DynamicCardCreateOptions,
   DynamicCardFactory,
 } from "../DynamicCard";
+import {
+  getAiGeneratedSentenceAudioUrl,
+  loadAiGeneratedSentences,
+} from "../mediaCache";
 import { EMPTY_QUESTION } from "../quizStateReducer";
 import {
   convertWordsToCharacters,
@@ -48,15 +52,6 @@ export type AiGeneratedFillInTheBlankSentence = {
    */
   vocabularyMappings: Record<string, string[]>;
 };
-
-function getSentenceAudioUrl(
-  sentence: AiGeneratedFillInTheBlankSentence,
-): string | undefined {
-  const { VITE_AWS_BUCKET, VITE_AWS_BUCKET_REGION } = import.meta.env;
-  if (VITE_AWS_BUCKET && VITE_AWS_BUCKET_REGION) {
-    return `https://${VITE_AWS_BUCKET}.s3.${VITE_AWS_BUCKET_REGION}.amazonaws.com/ai-generated-sentences/${sentence.slug}.mp3`;
-  }
-}
 
 function getSentenceCard(
   { sentence, mainWordHangul }: SentenceWithMainWord,
@@ -123,7 +118,7 @@ function getSentenceCard(
     fullHangul: sentence.sentence,
     fillInTheBlankItems,
     autoPlayAudio: true,
-    audioUrl: getSentenceAudioUrl(sentence),
+    audioUrl: getAiGeneratedSentenceAudioUrl(sentence),
     notes: sentence.sentence,
     picture: mainPicture ?? {
       type: "emojis",
@@ -137,18 +132,6 @@ type SentenceWithMainWord = {
   sentence: AiGeneratedFillInTheBlankSentence;
   mainWordHangul: string;
 };
-
-async function loadAiGeneratedSentences(): Promise<
-  AiGeneratedFillInTheBlankSentence[]
-> {
-  const response = await fetch(
-    // Note that Vite will parse this, it shouldn't get
-    // too complicated!  For more details see:
-    // https://vite.dev/guide/assets
-    new URL(`../assets/ai-generated-sentences.json`, import.meta.url),
-  );
-  return await response.json();
-}
 
 /**
  * This "factory factory" (ugh) is a hack to get around the

@@ -11,3 +11,104 @@
   font-size: 1rem;
   color: #333;
 }
+
+.about-modal .offline-section {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
+}
+
+.about-modal .offline-section h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  color: #333;
+}
+
+.about-modal .modal-body .cache-status {
+  font-size: 0.875rem;
+  color: #666;
+  margin-bottom: 1.25rem;
+}
+
+.about-modal .offline-buttons {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.about-modal .download-button,
+.about-modal .clear-button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.about-modal .download-button {
+  background-color: #4a90d9;
+  color: white;
+}
+
+.about-modal .download-button:hover {
+  background-color: #357abd;
+}
+
+.about-modal .clear-button {
+  background-color: #f0f0f0;
+  color: #666;
+}
+
+.about-modal .clear-button:hover {
+  background-color: #e0e0e0;
+}
+
+.about-modal .download-progress {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.about-modal .download-progress progress {
+  width: 100%;
+  height: 8px;
+}
+
+.about-modal .download-progress span {
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.about-modal .troubleshooting-section {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
+}
+
+.about-modal .troubleshooting-section h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  color: #333;
+}
+
+.about-modal .modal-body .troubleshooting-text {
+  font-size: 0.875rem;
+  color: #666;
+  margin-bottom: 1.25rem;
+}
+
+.about-modal .reset-button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  background-color: #dc3545;
+  color: white;
+}
+
+.about-modal .reset-button:hover {
+  background-color: #c82333;
+}

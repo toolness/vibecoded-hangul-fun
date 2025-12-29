@@ -46,8 +46,20 @@ jobs:
           NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
           NOTION_DS_ID: ${{ secrets.NOTION_DS_ID }}
 
+      - name: Generate AI audio
+        run: node --experimental-strip-types generate-ai-sentence-audio.ts
+        env:
+          VITE_AWS_BUCKET: ${{ vars.VITE_AWS_BUCKET }}
+          VITE_AWS_BUCKET_REGION: ${{ vars.VITE_AWS_BUCKET_REGION }}
+          AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+
       - name: Build
         run: npm run build
+        env:
+          VITE_AWS_BUCKET: ${{ vars.VITE_AWS_BUCKET }}
+          VITE_AWS_BUCKET_REGION: ${{ vars.VITE_AWS_BUCKET_REGION }}
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

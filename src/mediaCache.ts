@@ -102,7 +102,17 @@ export async function cacheAllMedia(
           // Check if already cached
           const existing = await cache.match(url);
           if (!existing) {
-            await cache.add(url);
+            // Use fetch + put instead of cache.add() to avoid issues with
+            // range requests returning 206 status (which cache.add rejects).
+            // Setting Range header explicitly requests the full file.
+            const response = await fetch(url, {
+              headers: { Range: "bytes=0-" },
+            });
+            if (response.ok || response.status === 206) {
+              await cache.put(url, response);
+            } else {
+              console.warn(`Failed to fetch ${url}: ${response.status}`);
+            }
           }
           cached++;
           onProgress?.({ cached, total: urls.length, inProgress: true });

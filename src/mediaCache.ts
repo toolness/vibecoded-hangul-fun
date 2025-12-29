@@ -1,4 +1,5 @@
 import type { AiGeneratedFillInTheBlankSentence } from "./dynamic-cards/aiGeneratedFillInTheBlank";
+import { verifyExists } from "./util";
 
 const CACHE_NAME = "media-offline-cache";
 
@@ -17,23 +18,47 @@ function getDatabaseAssetUrls(): string[] {
 }
 
 /**
+ * If AWS S3 storage of AI-generated sentences is enabled, returns the
+ * base URL that they're stored in, not including the trailing slash.
+ */
+function getAiGeneratedSentencesBaseUrl(): string | undefined {
+  const { VITE_AWS_BUCKET, VITE_AWS_BUCKET_REGION } = import.meta.env;
+  if (VITE_AWS_BUCKET && VITE_AWS_BUCKET_REGION) {
+    return `https://${VITE_AWS_BUCKET}.s3.${VITE_AWS_BUCKET_REGION}.amazonaws.com/ai-generated-sentences`;
+  }
+}
+
+export function getAiGeneratedSentenceAudioUrl(
+  sentence: AiGeneratedFillInTheBlankSentence,
+): string | undefined {
+  const baseUrl = getAiGeneratedSentencesBaseUrl();
+  if (baseUrl) {
+    return `${baseUrl}/${sentence.slug}.mp3`;
+  }
+}
+
+export async function loadAiGeneratedSentences(): Promise<
+  AiGeneratedFillInTheBlankSentence[]
+> {
+  const response = await fetch(
+    // Note that Vite will parse this, it shouldn't get
+    // too complicated!  For more details see:
+    // https://vite.dev/guide/assets
+    new URL(`assets/ai-generated-sentences.json`, import.meta.url),
+  );
+  return await response.json();
+}
+
+/**
  * Get all S3 audio URLs for AI-generated sentences.
  */
 async function getS3AudioUrls(): Promise<string[]> {
-  const { VITE_AWS_BUCKET, VITE_AWS_BUCKET_REGION } = import.meta.env;
-  if (!VITE_AWS_BUCKET || !VITE_AWS_BUCKET_REGION) {
+  const baseUrl = getAiGeneratedSentencesBaseUrl();
+  if (!baseUrl) {
     return [];
   }
-
-  const response = await fetch(
-    new URL("./assets/ai-generated-sentences.json", import.meta.url),
-  );
-  const sentences: AiGeneratedFillInTheBlankSentence[] = await response.json();
-
-  return sentences.map(
-    (s) =>
-      `https://${VITE_AWS_BUCKET}.s3.${VITE_AWS_BUCKET_REGION}.amazonaws.com/ai-generated-sentences/${s.slug}.mp3`,
-  );
+  const sentences = await loadAiGeneratedSentences();
+  return sentences.map((s) => verifyExists(getAiGeneratedSentenceAudioUrl(s)));
 }
 
 /**

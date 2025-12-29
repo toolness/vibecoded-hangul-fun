@@ -1,6 +1,7 @@
 [
   {
     "sentence": "고양이가 소파에서 자요.",
+    "slug": "cat-sleeps-on-sofa",
     "vocabularyMappings": {
       "고양이가": ["고양이"],
       "소파에서": ["소파"],
@@ -9,6 +10,7 @@
   },
   {
     "sentence": "할아버지가 책을 읽어요.",
+    "slug": "grandfather-reads-book",
     "vocabularyMappings": {
       "할아버지가": ["할아버지"],
       "책을": ["책"],
@@ -17,6 +19,7 @@
   },
   {
     "sentence": "오늘 날씨가 맑아요.",
+    "slug": "today-weather-is-clear",
     "vocabularyMappings": {
       "오늘": ["오늘"],
       "날씨가": ["날씨"],
@@ -25,6 +28,7 @@
   },
   {
     "sentence": "어머니가 시장에서 과일을 사요.",
+    "slug": "mother-buys-fruit-at-market",
     "vocabularyMappings": {
       "어머니가": ["어머니"],
       "시장에서": ["시장"],
@@ -34,6 +38,7 @@
   },
   {
     "sentence": "강아지가 공원에서 뛰어요.",
+    "slug": "puppy-runs-at-park",
     "vocabularyMappings": {
       "강아지가": ["강아지"],
       "공원에서": ["공원"],
@@ -42,6 +47,7 @@
   },
   {
     "sentence": "아이가 우유를 마셔요.",
+    "slug": "child-drinks-milk",
     "vocabularyMappings": {
       "아이가": ["아이"],
       "우유를": ["우유"],
@@ -50,6 +56,7 @@
   },
   {
     "sentence": "친구와 같이 커피를 마셔요.",
+    "slug": "drink-coffee-with-friend",
     "vocabularyMappings": {
       "친구와": ["친구"],
       "같이": ["같이"],
@@ -59,6 +66,7 @@
   },
   {
     "sentence": "학생이 도서관에서 공부해요.",
+    "slug": "student-studies-at-library",
     "vocabularyMappings": {
       "학생이": ["학생"],
       "도서관에서": ["도서관"],
@@ -67,6 +75,7 @@
   },
   {
     "sentence": "할머니가 김치를 만들어요.",
+    "slug": "grandmother-makes-kimchi",
     "vocabularyMappings": {
       "할머니가": ["할머니"],
       "김치를": ["김치"],
@@ -75,6 +84,7 @@
   },
   {
     "sentence": "아침에 빵을 먹어요.",
+    "slug": "eat-bread-in-morning",
     "vocabularyMappings": {
       "아침에": ["아침"],
       "빵을": ["빵"],
@@ -83,6 +93,7 @@
   },
   {
     "sentence": "아빠가 자동차를 타요.",
+    "slug": "dad-rides-car",
     "vocabularyMappings": {
       "아빠가": ["아빠"],
       "자동차를": ["자동차"],
@@ -91,6 +102,7 @@
   },
   {
     "sentence": "새가 하늘에서 날아요.",
+    "slug": "bird-flies-in-sky",
     "vocabularyMappings": {
       "새가": ["새"],
       "하늘에서": ["하늘"],
@@ -99,6 +111,7 @@
   },
   {
     "sentence": "엄마가 음식을 만들어요.",
+    "slug": "mom-makes-food",
     "vocabularyMappings": {
       "엄마가": ["엄마"],
       "음식을": ["음식"],
@@ -107,6 +120,7 @@
   },
   {
     "sentence": "선생님이 학생을 가르쳐요.",
+    "slug": "teacher-teaches-student",
     "vocabularyMappings": {
       "선생님이": ["선생님"],
       "학생을": ["학생"],
@@ -115,6 +129,7 @@
   },
   {
     "sentence": "비가 내려요.",
+    "slug": "rain-falls",
     "vocabularyMappings": {
       "비가": ["비"],
       "내려요": ["내리다"]
@@ -122,6 +137,7 @@
   },
   {
     "sentence": "꽃이 예뻐요.",
+    "slug": "flower-is-pretty",
     "vocabularyMappings": {
       "꽃이": ["꽃"],
       "예뻐요": ["예쁘다"]
@@ -129,6 +145,7 @@
   },
   {
     "sentence": "의사가 병원에서 일해요.",
+    "slug": "doctor-works-at-hospital",
     "vocabularyMappings": {
       "의사가": ["의사"],
       "병원에서": ["병원"],
@@ -137,6 +154,7 @@
   },
   {
     "sentence": "가수가 노래를 불러요.",
+    "slug": "singer-sings-song",
     "vocabularyMappings": {
       "가수가": ["가수"],
       "노래를": ["노래"],
@@ -145,6 +163,7 @@
   },
   {
     "sentence": "아이가 학교에서 놀아요.",
+    "slug": "child-plays-at-school",
     "vocabularyMappings": {
       "아이가": ["아이"],
       "학교에서": ["학교"],
@@ -153,6 +172,7 @@
   },
   {
     "sentence": "남자가 신문을 읽어요.",
+    "slug": "man-reads-newspaper",
     "vocabularyMappings": {
       "남자가": ["남자"],
       "신문을": ["신문"],
@@ -161,6 +181,7 @@
   },
   {
     "sentence": "여자가 창문을 열어요.",
+    "slug": "woman-opens-window",
     "vocabularyMappings": {
       "여자가": ["여자"],
       "창문을": ["창문"],
@@ -169,6 +190,7 @@
   },
   {
     "sentence": "개가 밖에서 뛰어요.",
+    "slug": "dog-runs-outside",
     "vocabularyMappings": {
       "개가": ["개"],
       "밖에서": ["밖"],
@@ -177,6 +199,7 @@
   },
   {
     "sentence": "딸이 그림을 그려요.",
+    "slug": "daughter-draws-picture",
     "vocabularyMappings": {
       "딸이": ["딸"],
       "그림을": ["그림"],
@@ -185,6 +208,7 @@
   },
   {
     "sentence": "아들이 노래를 들어요.",
+    "slug": "son-listens-to-song",
     "vocabularyMappings": {
       "아들이": ["아들"],
       "노래를": ["노래"],
@@ -193,6 +217,7 @@
   },
   {
     "sentence": "소녀가 의자에 앉아요.",
+    "slug": "girl-sits-on-chair",
     "vocabularyMappings": {
       "소녀가": ["소녀"],
       "의자에": ["의자"],
@@ -201,6 +226,7 @@
   },
   {
     "sentence": "소년이 공을 차요.",
+    "slug": "boy-kicks-ball",
     "vocabularyMappings": {
       "소년이": ["소년"],
       "공을": ["공"],
@@ -209,6 +235,7 @@
   },
   {
     "sentence": "가족이 저녁을 먹어요.",
+    "slug": "family-eats-dinner",
     "vocabularyMappings": {
       "가족이": ["가족"],
       "저녁을": ["저녁"],
@@ -217,6 +244,7 @@
   },
   {
     "sentence": "물이 차가워요.",
+    "slug": "water-is-cold",
     "vocabularyMappings": {
       "물이": ["물"],
       "차가워요": ["차갑다"]
@@ -224,6 +252,7 @@
   },
   {
     "sentence": "친구가 영화를 봐요.",
+    "slug": "friend-watches-movie",
     "vocabularyMappings": {
       "친구가": ["친구"],
       "영화를": ["영화"],
@@ -232,6 +261,7 @@
   },
   {
     "sentence": "경찰이 도둑을 찾아요.",
+    "slug": "police-searches-for-thief",
     "vocabularyMappings": {
       "경찰이": ["경찰"],
       "도둑을": ["도둑"],
@@ -240,6 +270,7 @@
   },
   {
     "sentence": "개구리가 연못에서 수영해요.",
+    "slug": "frog-swims-in-pond",
     "vocabularyMappings": {
       "개구리가": ["개구리"],
       "연못에서": ["연못"],
@@ -248,6 +279,7 @@
   },
   {
     "sentence": "곰이 숲에서 걸어요.",
+    "slug": "bear-walks-in-forest",
     "vocabularyMappings": {
       "곰이": ["곰"],
       "숲에서": ["숲"],
@@ -256,6 +288,7 @@
   },
   {
     "sentence": "펭귄이 춤춰요.",
+    "slug": "penguin-dances",
     "vocabularyMappings": {
       "펭귄이": ["펭귄"],
       "춤춰요": ["춤추다"]
@@ -263,6 +296,7 @@
   },
   {
     "sentence": "여우가 빨리 달려요.",
+    "slug": "fox-runs-fast",
     "vocabularyMappings": {
       "여우가": ["여우"],
       "빨리": ["빨리"],
@@ -271,6 +305,7 @@
   },
   {
     "sentence": "호랑이가 무서워요.",
+    "slug": "tiger-is-scary",
     "vocabularyMappings": {
       "호랑이가": ["호랑이"],
       "무서워요": ["무섭다"]
@@ -278,6 +313,7 @@
   },
   {
     "sentence": "물고기가 바다에서 수영해요.",
+    "slug": "fish-swims-in-sea",
     "vocabularyMappings": {
       "물고기가": ["물고기"],
       "바다에서": ["바다"],
@@ -286,6 +322,7 @@
   },
   {
     "sentence": "돼지가 배가 고파요.",
+    "slug": "pig-is-hungry",
     "vocabularyMappings": {
       "돼지가": ["돼지"],
       "배가": ["배"],
@@ -294,6 +331,7 @@
   },
   {
     "sentence": "고래가 바다에 있어요.",
+    "slug": "whale-is-in-sea",
     "vocabularyMappings": {
       "고래가": ["고래"],
       "바다에": ["바다"],
@@ -302,6 +340,7 @@
   },
   {
     "sentence": "쥐가 작아요.",
+    "slug": "mouse-is-small",
     "vocabularyMappings": {
       "쥐가": ["쥐"],
       "작아요": ["작다"]
@@ -309,6 +348,7 @@
   },
   {
     "sentence": "소가 느려요.",
+    "slug": "cow-is-slow",
     "vocabularyMappings": {
       "소가": ["소"],
       "느려요": ["느리다"]
@@ -316,6 +356,7 @@
   },
   {
     "sentence": "요리사가 국수를 볶아요.",
+    "slug": "chef-fries-noodles",
     "vocabularyMappings": {
       "요리사가": ["요리사"],
       "국수를": ["국수"],
@@ -324,6 +365,7 @@
   },
   {
     "sentence": "아기가 웃어요.",
+    "slug": "baby-smiles",
     "vocabularyMappings": {
       "아기가": ["아기"],
       "웃어요": ["웃다"]
@@ -331,6 +373,7 @@
   },
   {
     "sentence": "작가가 서점에 가요.",
+    "slug": "writer-goes-to-bookstore",
     "vocabularyMappings": {
       "작가가": ["작가"],
       "서점에": ["서점"],
@@ -339,6 +382,7 @@
   },
   {
     "sentence": "배우가 극장에서 연습해요.",
+    "slug": "actor-practices-at-theater",
     "vocabularyMappings": {
       "배우가": ["배우"],
       "극장에서": ["극장"],
@@ -347,6 +391,7 @@
   },
   {
     "sentence": "기자가 사진을 찍어요.",
+    "slug": "journalist-takes-photo",
     "vocabularyMappings": {
       "기자가": ["기자"],
       "사진을": ["사진"],
@@ -355,6 +400,7 @@
   },
   {
     "sentence": "교수가 말해요.",
+    "slug": "professor-speaks",
     "vocabularyMappings": {
       "교수가": ["교수"],
       "말해요": ["말하다"]
@@ -362,6 +408,7 @@
   },
   {
     "sentence": "연구원이 질문해요.",
+    "slug": "researcher-asks-question",
     "vocabularyMappings": {
       "연구원이": ["연구원"],
       "질문해요": ["질문"]
@@ -369,6 +416,7 @@
   },
   {
     "sentence": "손이 깨끗해요.",
+    "slug": "hands-are-clean",
     "vocabularyMappings": {
       "손이": ["손"],
       "깨끗해요": ["깨끗하다"]
@@ -376,6 +424,7 @@
   },
   {
     "sentence": "방이 어두워요.",
+    "slug": "room-is-dark",
     "vocabularyMappings": {
       "방이": ["방"],
       "어두워요": ["어둡다"]
@@ -383,6 +432,7 @@
   },
   {
     "sentence": "달이 밝아요.",
+    "slug": "moon-is-bright",
     "vocabularyMappings": {
       "달이": ["달"],
       "밝아요": ["밝다"]
@@ -390,6 +440,7 @@
   },
   {
     "sentence": "밤에 별이 빛나요.",
+    "slug": "stars-shine-at-night",
     "vocabularyMappings": {
       "밤에": ["밤"],
       "별이": ["별"],
@@ -398,6 +449,7 @@
   },
   {
     "sentence": "바람이 불어요.",
+    "slug": "wind-blows",
     "vocabularyMappings": {
       "바람이": ["바람"],
       "불어요": ["불다"]
@@ -405,6 +457,7 @@
   },
   {
     "sentence": "구름이 지나가요.",
+    "slug": "clouds-pass-by",
     "vocabularyMappings": {
       "구름이": ["구름"],
       "지나가요": ["지나다"]
@@ -412,6 +465,7 @@
   },
   {
     "sentence": "코끼리가 커요.",
+    "slug": "elephant-is-big",
     "vocabularyMappings": {
       "코끼리가": ["코끼리"],
       "커요": ["크다"]
@@ -419,6 +473,7 @@
   },
   {
     "sentence": "여름에 수영해요.",
+    "slug": "swim-in-summer",
     "vocabularyMappings": {
       "여름에": ["여름"],
       "수영해요": ["수영"]
@@ -426,6 +481,7 @@
   },
   {
     "sentence": "봄이 따뜻해요.",
+    "slug": "spring-is-warm",
     "vocabularyMappings": {
       "봄이": ["봄"],
       "따뜻해요": ["따뜻하다"]
@@ -433,6 +489,7 @@
   },
   {
     "sentence": "가을이 선선해요.",
+    "slug": "autumn-is-cool",
     "vocabularyMappings": {
       "가을이": ["가을"],
       "선선해요": ["선선하다"]
@@ -440,6 +497,7 @@
   },
   {
     "sentence": "라면이 맛있어요.",
+    "slug": "ramen-is-delicious",
     "vocabularyMappings": {
       "라면이": ["라면"],
       "맛있어요": ["맛있다"]
@@ -447,6 +505,7 @@
   },
   {
     "sentence": "비빔밥이 매워요.",
+    "slug": "bibimbap-is-spicy",
     "vocabularyMappings": {
       "비빔밥이": ["비빔밥"],
       "매워요": ["맵다"]
@@ -454,6 +513,7 @@
   },
   {
     "sentence": "어제 박물관을 방문했어요.",
+    "slug": "visited-museum-yesterday",
     "vocabularyMappings": {
       "어제": ["어제"],
       "박물관을": ["박물관"],

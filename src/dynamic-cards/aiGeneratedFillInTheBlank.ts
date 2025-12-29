@@ -19,6 +19,14 @@ export type AiGeneratedFillInTheBlankSentence = {
   sentence: string;
 
   /**
+   * A slug for the sentence. This will be used for saving
+   * audio of the sentence to a file, etc.  It should be
+   * pure ASCII, and as such it should contain a rough
+   * English translation of the sentence
+   */
+  slug: string;
+
+  /**
    * Mappings from words in the sentence (including any
    * attached particles) to their canonical forms in our
    * vocabulary.
@@ -40,6 +48,15 @@ export type AiGeneratedFillInTheBlankSentence = {
    */
   vocabularyMappings: Record<string, string[]>;
 };
+
+function getSentenceAudioUrl(
+  sentence: AiGeneratedFillInTheBlankSentence,
+): string | undefined {
+  const { VITE_AWS_BUCKET, VITE_AWS_BUCKET_REGION } = import.meta.env;
+  if (VITE_AWS_BUCKET && VITE_AWS_BUCKET_REGION) {
+    return `https://${VITE_AWS_BUCKET}.s3.${VITE_AWS_BUCKET_REGION}.amazonaws.com/ai-generated-sentences/${sentence.slug}.mp3`;
+  }
+}
 
 function getSentenceCard(
   { sentence, mainWordHangul }: SentenceWithMainWord,
@@ -106,6 +123,7 @@ function getSentenceCard(
     fullHangul: sentence.sentence,
     fillInTheBlankItems,
     autoPlayAudio: true,
+    audioUrl: getSentenceAudioUrl(sentence),
     notes: sentence.sentence,
     picture: mainPicture ?? {
       type: "emojis",

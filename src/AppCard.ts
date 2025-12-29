@@ -14,6 +14,13 @@ export type AppCard = WordDatabaseRow & {
   notionId: string | undefined;
 
   /**
+   * The absolute URL to a remote audio file. This will
+   * be used if `audio` (which is a local filename) isn't
+   * defined.
+   */
+  audioUrl?: string;
+
+  /**
    * The full hangul that should be pronounced by
    * the text-to-speech system, if no audio is available.
    *

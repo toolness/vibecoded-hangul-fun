@@ -19,18 +19,30 @@ export default defineConfig({
         // Runtime caching for media files - uses the same cache as our manual download feature
         runtimeCaching: [
           {
-            urlPattern: /\.(?:mp3|webp|jpg|png)$/,
+            // Audio files need RangeRequestsPlugin because browsers make range
+            // requests for audio, and workbox needs to slice cached responses.
+            urlPattern: /\.mp3$/,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "media-offline-cache",
+              rangeRequests: true,
+            },
+          },
+          {
+            // Images don't need range request handling
+            urlPattern: /\.(?:webp|jpg|png)$/,
             handler: "CacheFirst",
             options: {
               cacheName: "media-offline-cache",
             },
           },
           {
-            // S3-hosted audio files
+            // S3-hosted audio files - also need range request handling
             urlPattern: /^https:\/\/.*\.s3\..*\.amazonaws\.com\/.*\.mp3$/,
             handler: "CacheFirst",
             options: {
               cacheName: "media-offline-cache",
+              rangeRequests: true,
             },
           },
         ],

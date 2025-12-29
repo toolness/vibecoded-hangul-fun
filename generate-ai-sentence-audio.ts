@@ -108,8 +108,8 @@ async function main() {
 
   const AWS_ACCESS_KEY = ensureEnvironmentVar("AWS_ACCESS_KEY");
   const AWS_SECRET_ACCESS_KEY = ensureEnvironmentVar("AWS_SECRET_ACCESS_KEY");
-  const AWS_BUCKET = ensureEnvironmentVar("AWS_BUCKET");
-  const AWS_BUCKET_REGION = ensureEnvironmentVar("AWS_BUCKET_REGION");
+  const AWS_BUCKET = ensureEnvironmentVar("VITE_AWS_BUCKET");
+  const AWS_BUCKET_REGION = ensureEnvironmentVar("VITE_AWS_BUCKET_REGION");
 
   const elevenlabs = new ElevenLabsClient({
     apiKey: ensureEnvironmentVar("ELEVENLABS_API_KEY"),

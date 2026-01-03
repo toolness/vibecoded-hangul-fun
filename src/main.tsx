@@ -16,6 +16,7 @@ import {
   TellingTimeDynamicCard,
 } from "./dynamic-cards/tellingTime.ts";
 import { createAiGeneratedFillInTheBlankDynamicCardFactory } from "./dynamic-cards/aiGeneratedFillInTheBlank.ts";
+import { createAiGeneratedFullSentenceDynamicCardFactory } from "./dynamic-cards/aiGeneratedFullSentence.ts";
 
 const DATABASE_JSON_URL = getAssetUrl(DB_JSON_ASSET);
 
@@ -46,6 +47,7 @@ async function createInitialRows(database: Database): Promise<{
     TellingTimeDynamicCard,
     TellingTimeAudioOnlyDynamicCard,
     await createAiGeneratedFillInTheBlankDynamicCardFactory(),
+    await createAiGeneratedFullSentenceDynamicCardFactory(),
   ]);
 
   for (const word of database.words) {

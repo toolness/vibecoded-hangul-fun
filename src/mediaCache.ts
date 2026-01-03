@@ -37,7 +37,7 @@ export function getAiGeneratedSentenceAudioUrl(
   }
 }
 
-export async function loadAiGeneratedSentences(): Promise<
+async function unmemoizedLoadAiGeneratedSentences(): Promise<
   AiGeneratedFillInTheBlankSentence[]
 > {
   const response = await fetch(
@@ -47,6 +47,19 @@ export async function loadAiGeneratedSentences(): Promise<
     new URL(`assets/ai-generated-sentences.json`, import.meta.url),
   );
   return await response.json();
+}
+
+let aiGeneratedSentencesPromise:
+  | Promise<AiGeneratedFillInTheBlankSentence[]>
+  | undefined;
+
+export async function loadAiGeneratedSentences(): Promise<
+  AiGeneratedFillInTheBlankSentence[]
+> {
+  if (!aiGeneratedSentencesPromise) {
+    aiGeneratedSentencesPromise = unmemoizedLoadAiGeneratedSentences();
+  }
+  return aiGeneratedSentencesPromise;
 }
 
 /**

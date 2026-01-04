@@ -52,14 +52,12 @@ function getModePrompt(card: AppCard, mode: Mode): string {
 function App({
   initialMode,
   initialRows,
-  initialOrdering,
   initialQuestionId,
   dbHelper,
   dynamicCardManager,
 }: {
   initialMode: Mode;
   initialRows: AppCard[];
-  initialOrdering?: Ordering;
   initialQuestionId?: string;
   dbHelper: DatabaseHelper;
   dynamicCardManager: DynamicCardManager;
@@ -72,7 +70,6 @@ function App({
       initialRows,
       {
         mode: initialMode,
-        ordering: initialOrdering ?? "created-by",
         category: undefined,
         maxQuestions: undefined,
         difficulty: "medium",

@@ -134,7 +134,6 @@ createRoot(document.getElementById("root")!).render(
       initialMode={initialMode}
       initialRows={initialRows}
       initialQuestionId={initialId}
-      initialOrdering="last-incorrect"
       dbHelper={dbHelper}
       dynamicCardManager={dynamicCardManager}
     />

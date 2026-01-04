@@ -85,6 +85,63 @@ export function getRecentlyIncorrectCardsSync(
   }
 }
 
+export interface GetNeverShownCardsOptions {
+  noteTypes: string[];
+  db: Database;
+}
+
+/**
+ * Retrieves cards that have never been shown to the user (no review history).
+ *
+ * @param options.noteTypes - Array of note type names to filter by (exact match)
+ * @param options.db - The Anki SQLite database connection
+ * @returns Array of card IDs (first field of each note)
+ */
+export function getNeverShownCardsSync(
+  options: GetNeverShownCardsOptions,
+): string[] {
+  const { noteTypes, db } = options;
+
+  if (noteTypes.length === 0) {
+    return [];
+  }
+
+  try {
+    // Fetch all note types and filter in JavaScript to avoid unicase collation issue
+    const allNoteTypes = db.prepare("SELECT id, name FROM notetypes").all() as {
+      id: number;
+      name: string;
+    }[];
+
+    const matchingIds = allNoteTypes
+      .filter((nt) => noteTypes.includes(nt.name))
+      .map((nt) => nt.id);
+
+    if (matchingIds.length === 0) {
+      return [];
+    }
+
+    // Query for cards that have no entries in revlog (never reviewed)
+    const placeholders = matchingIds.map(() => "?").join(", ");
+    const query = `
+      SELECT n.flds
+      FROM notes n
+      JOIN cards c ON c.nid = n.id
+      WHERE n.mid IN (${placeholders})
+        AND NOT EXISTS (SELECT 1 FROM revlog r WHERE r.cid = c.id)
+      GROUP BY n.id
+    `;
+
+    const rows = db.prepare(query).all(...matchingIds) as {
+      flds: string;
+    }[];
+
+    return rows.map((row) => row.flds.split("\x1F")[0]);
+  } finally {
+    db.close();
+  }
+}
+
 export function getRootAnkiDir(): string {
   // https://docs.ankiweb.net/files.html
   // Implemented by GitHub Copilot.

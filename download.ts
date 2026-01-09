@@ -679,7 +679,9 @@ async function downloadFile(
   console.log(`Downloading ${filename}...`);
   const response = await fetch(url);
   if (!response.ok) {
-    throw new Error(`Failed to download file: ${response.statusText}`);
+    throw new Error(
+      `Failed to download file at ${url}: ${response.statusText}`,
+    );
   }
   const buffer = await response.arrayBuffer();
   writeFileSync(filepath, Buffer.from(buffer));

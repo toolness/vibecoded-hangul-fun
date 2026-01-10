@@ -51,6 +51,10 @@ dotenv.config();
 
 const CACHE_DIR = ".cache";
 
+// ANSI escape codes for colored terminal output
+const RED = "\x1b[31m";
+const RESET = "\x1b[0m";
+
 /**
  * Ideally we'd reuse this from the Notion SDK
  * but its auto-generated types make this
@@ -855,7 +859,48 @@ const run = async () => {
   writeFileSync(markdownPath, markdownContent);
 
   console.log(`Wrote ${markdownPath}.`);
+
+  // Check for duplicates and display warnings
+  displayDuplicateWarnings(words, sentences);
 };
+
+function displayDuplicateWarnings(
+  words: WordDatabaseRow[],
+  sentences: SentenceDatabaseRow[],
+): void {
+  // Check for duplicate words (by hangul)
+  const wordsByHangul = new Map<string, WordDatabaseRow[]>();
+  for (const word of words) {
+    const existing = wordsByHangul.get(word.hangul) ?? [];
+    existing.push(word);
+    wordsByHangul.set(word.hangul, existing);
+  }
+
+  for (const [hangul, duplicates] of wordsByHangul) {
+    if (duplicates.length > 1) {
+      const names = duplicates.map((w) => w.name).join(", ");
+      console.log(
+        `${RED}WARNING: Duplicate word hangul "${hangul}" found in entries: ${names}${RESET}`,
+      );
+    }
+  }
+
+  // Check for duplicate sentences (by text)
+  const sentencesByText = new Map<string, SentenceDatabaseRow[]>();
+  for (const sentence of sentences) {
+    const existing = sentencesByText.get(sentence.text) ?? [];
+    existing.push(sentence);
+    sentencesByText.set(sentence.text, existing);
+  }
+
+  for (const [text, duplicates] of sentencesByText) {
+    if (duplicates.length > 1) {
+      console.log(
+        `${RED}WARNING: Duplicate sentence "${text}" found ${duplicates.length} times${RESET}`,
+      );
+    }
+  }
+}
 
 async function makeHash(value: string): Promise<string> {
   const xxhash = await loadXxhash();
@@ -907,7 +952,7 @@ async function getDownloadInfo(
       filename = `${baseName}-${hash}.${extension}`;
     } else {
       console.warn(
-        `WARNING: Unable to determine file extension for ${fullLabel}.`,
+        `${RED}WARNING: Unable to determine file extension for ${fullLabel}.${RESET}`,
       );
     }
   } else if (file.type === "external" && file.external) {
@@ -931,12 +976,12 @@ async function getDownloadInfo(
       filename = `${baseName}-${hash}.${extension}`;
     } else {
       console.log(
-        `WARNING: Unable to determine file extension for URL, skipping download: ${url}`,
+        `${RED}WARNING: Unable to determine file extension for URL, skipping download: ${url}${RESET}`,
       );
     }
   } else {
     console.log(
-      `WARNING: Unsupported file type, skipping download: ${file.type}`,
+      `${RED}WARNING: Unsupported file type, skipping download: ${file.type}${RESET}`,
     );
   }
 

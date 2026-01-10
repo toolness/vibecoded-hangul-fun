@@ -8,6 +8,7 @@ import type { Database } from "./database-spec.ts";
 import type { AppCard, FillInTheBlankItem } from "./AppCard.ts";
 import { convertWordsToUnderscores } from "./util.ts";
 import { DatabaseHelper } from "./database-helper.ts";
+import { getQuizableItemGroups } from "./sentence-utils.ts";
 import { RestaurantOrderingDynamicCard } from "./dynamic-cards/restaurantOrdering.ts";
 import { SinoKoreanNumberDynamicCard } from "./dynamic-cards/sinoKoreanNumber.ts";
 import { DynamicCardManager } from "./DynamicCard.ts";
@@ -61,25 +62,24 @@ async function createInitialRows(database: Database): Promise<{
     if (!sentence.markupItems) {
       continue;
     }
-    let itemId = 0;
-    for (const item of sentence.markupItems) {
-      if ((!item.wordId && !item.forceQuiz) || item.doNotQuiz) {
-        continue;
-      }
-      const word = item.wordId
-        ? dbHelper.wordIdMap.get(item.wordId)
+    const groups = getQuizableItemGroups(sentence.markupItems);
+    let groupIndex = 0;
+    for (const group of groups) {
+      const blankIndices = new Set(group.indices);
+      const word = group.wordId
+        ? dbHelper.wordIdMap.get(group.wordId)
         : undefined;
       const fillInTheBlankItems: FillInTheBlankItem[] =
-        sentence.markupItems.map((otherItem) => {
-          if (otherItem === item) {
-            const blankValue = convertWordsToUnderscores(otherItem.text);
+        sentence.markupItems.map((markupItem, index) => {
+          if (blankIndices.has(index)) {
+            const blankValue = convertWordsToUnderscores(markupItem.text);
             return {
               type: "fill-in",
               blankValue,
-              answer: otherItem.text,
+              answer: markupItem.text,
             };
           } else {
-            return { type: "content", value: otherItem.text };
+            return { type: "content", value: markupItem.text };
           }
         });
       const name = fillInTheBlankItems
@@ -91,13 +91,13 @@ async function createInitialRows(database: Database): Promise<{
         })
         .join("");
       result.push({
-        id: `${sentence.id}_${itemId}`,
+        id: `${sentence.id}_g${groupIndex}`,
         notionId: sentence.id,
         createdTime: sentence.createdTime,
         lastModifiedTime: sentence.lastModifiedTime,
         name,
         picture: word?.picture,
-        hangul: item.text,
+        hangul: group.text,
         fullHangul: sentence.text,
         fillInTheBlankItems: fillInTheBlankItems,
         isTranslation: true,
@@ -109,7 +109,7 @@ async function createInitialRows(database: Database): Promise<{
           .getSentenceWords(sentence)
           .filter((extraWord) => extraWord !== word),
       });
-      itemId += 1;
+      groupIndex += 1;
     }
   }
 

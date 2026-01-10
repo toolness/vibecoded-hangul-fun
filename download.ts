@@ -29,6 +29,7 @@ import { ASSETS_DIR, DB_JSON_ASSET, getAssetFilePath } from "./src/assets.ts";
 import { parseArgs, type ParseArgsOptionsConfig } from "util";
 import loadXxhash from "xxhash-wasm";
 import { createHash } from "crypto";
+import chalk from "chalk";
 
 const CLI_ARGS = {
   /** Always download files, overwriting existing ones? */
@@ -50,10 +51,6 @@ const CLI_ARGS = {
 dotenv.config();
 
 const CACHE_DIR = ".cache";
-
-// ANSI escape codes for colored terminal output
-const RED = "\x1b[31m";
-const RESET = "\x1b[0m";
 
 /**
  * Ideally we'd reuse this from the Notion SDK
@@ -880,7 +877,9 @@ function displayDuplicateWarnings(
     if (duplicates.length > 1) {
       const names = duplicates.map((w) => w.name).join(", ");
       console.log(
-        `${RED}WARNING: Duplicate word hangul "${hangul}" found in entries: ${names}${RESET}`,
+        chalk.red(
+          `WARNING: Duplicate word hangul "${hangul}" found in entries: ${names}`,
+        ),
       );
     }
   }
@@ -896,7 +895,9 @@ function displayDuplicateWarnings(
   for (const [text, duplicates] of sentencesByText) {
     if (duplicates.length > 1) {
       console.log(
-        `${RED}WARNING: Duplicate sentence "${text}" found ${duplicates.length} times${RESET}`,
+        chalk.red(
+          `WARNING: Duplicate sentence "${text}" found ${duplicates.length} times`,
+        ),
       );
     }
   }
@@ -952,7 +953,9 @@ async function getDownloadInfo(
       filename = `${baseName}-${hash}.${extension}`;
     } else {
       console.warn(
-        `${RED}WARNING: Unable to determine file extension for ${fullLabel}.${RESET}`,
+        chalk.red(
+          `WARNING: Unable to determine file extension for ${fullLabel}.`,
+        ),
       );
     }
   } else if (file.type === "external" && file.external) {
@@ -976,12 +979,16 @@ async function getDownloadInfo(
       filename = `${baseName}-${hash}.${extension}`;
     } else {
       console.log(
-        `${RED}WARNING: Unable to determine file extension for URL, skipping download: ${url}${RESET}`,
+        chalk.red(
+          `WARNING: Unable to determine file extension for URL, skipping download: ${url}`,
+        ),
       );
     }
   } else {
     console.log(
-      `${RED}WARNING: Unsupported file type, skipping download: ${file.type}${RESET}`,
+      chalk.red(
+        `WARNING: Unsupported file type, skipping download: ${file.type}`,
+      ),
     );
   }
 

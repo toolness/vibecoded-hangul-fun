@@ -38,34 +38,62 @@ const CLI_ARGS = {
     type: "string",
     default: `Atul's Picture Words`,
   },
+  /**
+   * The Anki note type containing Hangul sentences ultimately derived from
+   * the Notion DB.
+   */
+  sentenceNoteType: {
+    type: "string",
+    default: `Atul's Cloze Sentences`,
+  },
 } satisfies ParseArgsOptionsConfig;
 
 async function main() {
   const {
-    values: { ankiUser, wordNoteType },
+    values: { ankiUser, wordNoteType, sentenceNoteType },
   } = parseArgs({
     options: CLI_ARGS,
   });
   const config = getHangulNotionDbConfig(process.env);
   const client = new Client({ auth: config.apiKey });
   const dbPath = path.join(getRootAnkiDir(), ankiUser, "collection.anki2");
-  const db = new Database(dbPath, { readonly: true });
-  const rows = getRecentlyIncorrectCardsSync({
+
+  // Query for recently incorrect word cards
+  const wordDb = new Database(dbPath, { readonly: true });
+  const wordRows = getRecentlyIncorrectCardsSync({
     noteTypes: [wordNoteType],
     maxAgeInDays: MAX_AGE_IN_DAYS,
-    db,
+    db: wordDb,
   });
-  const rowDateMap: Map<string, string> = new Map();
-  for (const row of rows) {
+  const wordDateMap: Map<string, string> = new Map();
+  for (const row of wordRows) {
     const dateString = new Date(row.lastIncorrectTimestamp)
       .toISOString()
       .slice(0, 10);
-    rowDateMap.set(row.id, dateString);
+    wordDateMap.set(row.id, dateString);
   }
+
+  // Query for recently incorrect sentence cards
+  const sentenceDb = new Database(dbPath, { readonly: true });
+  const sentenceRows = getRecentlyIncorrectCardsSync({
+    noteTypes: [sentenceNoteType],
+    maxAgeInDays: MAX_AGE_IN_DAYS,
+    db: sentenceDb,
+  });
+  const sentenceDateMap: Map<string, string> = new Map();
+  for (const row of sentenceRows) {
+    const dateString = new Date(row.lastIncorrectTimestamp)
+      .toISOString()
+      .slice(0, 10);
+    sentenceDateMap.set(row.id, dateString);
+  }
+
   const jsonDatabase = getJsonDatabase();
   const uploadQueue = new Queue({ concurrency: 5, autostart: false });
+
+  // Queue word updates
   for (const word of jsonDatabase.words) {
-    const date = rowDateMap.get(word.id);
+    const date = wordDateMap.get(word.id);
     if (date && word.lastIncorrect !== date) {
       uploadQueue.push(async () => {
         const response = await client.pages.update({
@@ -80,6 +108,28 @@ async function main() {
         });
         console.log(
           `Updated word ${response.id} with last incorrect date ${date}.`,
+        );
+      });
+    }
+  }
+
+  // Queue sentence updates
+  for (const sentence of jsonDatabase.sentences) {
+    const date = sentenceDateMap.get(sentence.id);
+    if (date && sentence.lastIncorrect !== date) {
+      uploadQueue.push(async () => {
+        const response = await client.pages.update({
+          page_id: sentence.id,
+          properties: {
+            "Last incorrect": {
+              date: {
+                start: date,
+              },
+            },
+          },
+        });
+        console.log(
+          `Updated sentence ${response.id} with last incorrect date ${date}.`,
         );
       });
     }

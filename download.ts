@@ -235,6 +235,7 @@ async function downloadSentences(args: {
       let sentenceText = "";
       let notes = "";
       let audio: string | undefined;
+      let lastIncorrect: string | undefined;
 
       // Try to extract from Name property (could be title or rich_text)
       if (properties.Name) {
@@ -338,6 +339,16 @@ async function downloadSentences(args: {
         notes = properties.Notes.rich_text.map((t) => t.plain_text).join("");
       }
 
+      // Extract Last incorrect date (optional)
+      if (
+        properties["Last incorrect"] &&
+        properties["Last incorrect"].type === "date" &&
+        properties["Last incorrect"].date &&
+        properties["Last incorrect"].date.start
+      ) {
+        lastIncorrect = properties["Last incorrect"].date.start;
+      }
+
       if (!("created_time" in page) || !("last_edited_time" in page)) {
         throw new Error(
           `Page ${page.id} does not have a created time or last edited time`,
@@ -353,6 +364,7 @@ async function downloadSentences(args: {
         markupItems: markupItems.length > 0 ? markupItems : undefined,
         wordIds: wordIds.length > 0 ? wordIds : undefined,
         notes,
+        lastIncorrect,
       });
     }
   }

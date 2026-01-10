@@ -3,7 +3,7 @@
  * used to convert Notion's raw API responses into the DB
  * schema, this version number should be incremented!
  */
-export const DATABASE_SCHEMA_VERSION = 3 as const;
+export const DATABASE_SCHEMA_VERSION = 4 as const;
 
 export function makeEmptyDatabase(): Database {
   return { words: [], sentences: [], __schemaVersion: DATABASE_SCHEMA_VERSION };
@@ -153,6 +153,12 @@ export interface SentenceDatabaseRow extends BaseSentence {
    * Pronunciation notes. It may be an empty string.
    */
   notes?: string;
+
+  /**
+   * Date string (YYYY-MM-DD) indicating when the user last
+   * got this sentence wrong in Anki. Used for spaced repetition tracking.
+   */
+  lastIncorrect?: string;
 }
 
 export interface SentenceMarkupItem {

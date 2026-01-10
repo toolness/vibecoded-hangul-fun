@@ -104,6 +104,7 @@ async function createInitialRows(database: Database): Promise<{
         audio: sentence.audio,
         category: "Sentence",
         notes: sentence.notes,
+        lastIncorrect: sentence.lastIncorrect,
         extraWords: dbHelper
           .getSentenceWords(sentence)
           .filter((extraWord) => extraWord !== word),

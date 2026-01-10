@@ -1,6 +1,7 @@
 import { type Database } from "./src/database-spec.ts";
 import { DB_JSON_ASSET, getAssetFilePath } from "./src/assets.ts";
 import { DatabaseHelper } from "./src/database-helper.ts";
+import { getQuizableItemGroups } from "./src/sentence-utils.ts";
 
 import { copyFileSync, existsSync, readFileSync, writeFileSync } from "fs";
 import { stringify } from "csv-stringify/sync";
@@ -243,17 +244,27 @@ const run = async () => {
       break;
     }
     sentenceRowCount += 1;
-    let clozeId = 0;
     const pictures: string[] = [];
     for (const word of dbHelper.getSentenceWords(row)) {
       if (word.picture && word.picture.type === "local-image") {
         pictures.push(copyAsset(word.picture.filename));
       }
     }
-    const clozeParts: string[] = row.markupItems.map((item) => {
-      if ((item.wordId && !item.doNotQuiz) || item.forceQuiz) {
-        clozeId += 1;
-        return `{{c${clozeId}::${item.text}}}`;
+    // Build a map from item index to cloze ID
+    // Items with the same text get the same cloze ID
+    const groups = getQuizableItemGroups(row.markupItems);
+    const indexToClozeId = new Map<number, number>();
+    let clozeId = 0;
+    for (const group of groups) {
+      clozeId += 1;
+      for (const index of group.indices) {
+        indexToClozeId.set(index, clozeId);
+      }
+    }
+    const clozeParts: string[] = row.markupItems.map((item, index) => {
+      const itemClozeId = indexToClozeId.get(index);
+      if (itemClozeId !== undefined) {
+        return `{{c${itemClozeId}::${item.text}}}`;
       } else {
         return item.text;
       }

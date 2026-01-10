@@ -95,6 +95,8 @@ Also make a data source called "Sentences" with this schema:
 - `Audio` - An optional audio file recording the pronounciation
   of the sentence.
 - `Notes` - Text, contains optional pronunciation notes.
+- `Last incorrect` - Date, an optional field containing the date
+  when you didn't recall an Anki card corresponding to the sentence.
 - `Disabled` - Checkbox, a boolean indicating whether to
   include this sentence in the app at all. This is essentially
   a way to "soft delete" a row.

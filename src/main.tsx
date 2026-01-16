@@ -16,7 +16,10 @@ import {
   TellingTimeAudioOnlyDynamicCard,
   TellingTimeDynamicCard,
 } from "./dynamic-cards/tellingTime.ts";
-import { TellingDateDynamicCard } from "./dynamic-cards/tellingDate.ts";
+import {
+  TellingDateAudioOnlyDynamicCard,
+  TellingDateDynamicCard,
+} from "./dynamic-cards/tellingDate.ts";
 import { createAiGeneratedFillInTheBlankDynamicCardFactory } from "./dynamic-cards/aiGeneratedFillInTheBlank.ts";
 import { createAiGeneratedFullSentenceDynamicCardFactory } from "./dynamic-cards/aiGeneratedFullSentence.ts";
 
@@ -49,6 +52,7 @@ async function createInitialRows(database: Database): Promise<{
     TellingTimeDynamicCard,
     TellingTimeAudioOnlyDynamicCard,
     TellingDateDynamicCard,
+    TellingDateAudioOnlyDynamicCard,
     await createAiGeneratedFillInTheBlankDynamicCardFactory(),
     await createAiGeneratedFullSentenceDynamicCardFactory(),
   ]);

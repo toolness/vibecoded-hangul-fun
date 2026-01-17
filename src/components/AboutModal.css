@@ -30,6 +30,11 @@
   margin-bottom: 1.25rem;
 }
 
+.about-modal .modal-body .cache-status.loading {
+  font-style: italic;
+  color: #999;
+}
+
 .about-modal .offline-buttons {
   display: flex;
   gap: 0.5rem;

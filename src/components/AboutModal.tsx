@@ -63,8 +63,9 @@ function AboutModal({ onClose, previousFocus }: AboutModalProps) {
   const handleDownload = async () => {
     setProgress({ cached: 0, total: 0, inProgress: true });
     await cacheAllMedia(setProgress);
-    await refreshCacheStatus();
     setProgress(null);
+    setCacheStatus(null);
+    await refreshCacheStatus();
   };
 
   const handleClear = async () => {
@@ -90,7 +91,9 @@ function AboutModal({ onClose, previousFocus }: AboutModalProps) {
 
       <div className="offline-section">
         <h3>Offline Mode</h3>
-        {cacheStatus && (
+        {cacheStatus === null ? (
+          <p className="cache-status loading">Loading cache status...</p>
+        ) : (
           <p className="cache-status">
             {cacheStatus.cachedCount} / {cacheStatus.totalCount} media files
             cached ({formatBytes(cacheStatus.cachedBytes)})
@@ -106,7 +109,7 @@ function AboutModal({ onClose, previousFocus }: AboutModalProps) {
           </div>
         ) : (
           <div className="offline-buttons">
-            {!isFullyCached && (
+            {cacheStatus && !isFullyCached && (
               <button onClick={handleDownload} className="download-button">
                 Download for Offline
               </button>
